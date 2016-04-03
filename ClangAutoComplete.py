@@ -1,9 +1,10 @@
-"""Summary
+"""ClangAutoComplete plugin for Sublime Text 3.
+
+Provides completion suggestions for C/C++ languages based on clang output
+
+Attributes:
+    PKG_NAME (string): Name of the package
 """
-#
-# Provides completion suggestions for C/C++ languages
-# based on clang output
-#
 
 import sublime
 import sublime_plugin
@@ -90,6 +91,12 @@ class Settings:
                     self.std_flag))
 
     def is_valid(self):
+        """Check settings validity. If any of the settings is None the settings
+        are not valid.
+
+        Returns:
+            bool: validity of settings
+        """
         if self.subl_settings is None:
             return False
         if self.verbose is None:
@@ -292,6 +299,25 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             tuple[0] = tuple[1].ljust(longest_len) + " - " + tuple[0]
         return completions
 
+    def valid_selector_in_focus(self, body, pos):
+        """Check if the cursor focuses valid selector
+
+        Args:
+            body (string): body in focus
+            pos (int): position of the cursor
+
+        Returns:
+            bool: selector is valid
+        """
+        if self.settings.complete_all:
+            return True
+
+        selector_is_valid = False
+        for selector in self.settings.selectors:
+            if selector in body[pos-len(selector):pos]:
+                selector_is_valid = True
+        return selector_is_valid
+
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code
 
@@ -313,16 +339,16 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         pos = view.sel()[0].begin()
         body = view.substr(sublime.Region(0, view.size()))
 
+        # Verify that character under the cursor is one allowed selector
+        if (not self.valid_selector_in_focus(body, pos)):
+            return None
+
+        line_pos = body[:pos].count('\n') + 1
+        char_pos = pos-body.rfind("\n", 0, len(body[:pos]))
+
         # Create temporary file name that reflects what user is currently
         # typing
         self.write_body_to_temp_file(body, view.encoding())
-
-        # Verify that character under the cursor is one allowed selector
-        if self.settings.complete_all == False:
-            if any(e in body[pos-len(e):pos] for e in self.settings.selectors) == False:
-                return []
-        line_pos = body[:pos].count('\n') + 1
-        char_pos = pos-body.rfind("\n", 0, len(body[:pos]))
 
         # Find language used (C vs C++) based first on
         # sublime's syntax settings (supporting "C" and "C++").

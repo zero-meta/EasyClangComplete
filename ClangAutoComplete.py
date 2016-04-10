@@ -408,20 +408,6 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         row = body[:pos].count('\n') + 1
         col = pos-body.rfind("\n", 0, len(body[:pos]))
 
-        # Create temporary file name that reflects what user is currently
-        # typing
-        # self.write_body_to_temp_file(body, view.encoding())
-
-        # Find language used (C vs C++) based first on
-        # sublime's syntax settings (supporting "C" and "C++").
-        # If we do not recognize the current settings, try to
-        # decide based on file extension.
-        # syntax_flags = self.guess_syntax_flags(view)
-
-        # # Build clang command
-        # clang_cmd = self.construct_clang_command(
-        #     row, col, syntax_flags, clang_include_dirs)
-
         current_file_name = view.file_name()
         files = [(current_file_name, body)]
 
@@ -445,11 +431,16 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             contents = ''
             place_holders = 1
             for chunk in c.string:
+                hint += chunk.spelling
+                print (chunk.spelling)
                 if chunk.isKindTypedText():
                     trigger = chunk.spelling
-                hint += chunk.spelling
                 if chunk.isKindResultType():
                     hint += ' '
+                    continue
+                if chunk.isKindOptional():
+                    continue
+                if chunk.isKindInformative():
                     continue
                 if chunk.isKindPlaceHolder():
                     contents += ('${' + str(place_holders) + ':' +
@@ -458,9 +449,6 @@ class ClangAutoComplete(sublime_plugin.EventListener):
                 else:
                     contents += chunk.spelling
             completions.append([trigger + "\t" + hint, contents])
-
-        # # Execute clang command, exit 0 to suppress error from check_output()
-        # raw_clang_output = self.run_clang_subprocess(clang_cmd)
 
         end = time.time()
         print("time to show: ", end - start)

@@ -155,7 +155,7 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         syntax_regex (regex): Regex to detect syntax
     """
     settings = None
-    completers = {}
+    translation_units = {}
 
     completion_regex = re.compile("COMPLETION: ([^ ]+) : ([^\\n]+)")
     file_ext = re.compile("[^\.]+\.([^\\n]+)")
@@ -211,37 +211,6 @@ class ClangAutoComplete(sublime_plugin.EventListener):
 
         return clang_include_dirs
 
-    def guess_syntax_flags(self, view):
-        """Guess the syntax (C or C++) and return flags. The code tries to guess
-        by the syntax variable from sublime. If this fails it tries to guess by
-        extension of an active file.
-
-        Args:
-            view (sublime.View): current view
-
-        Returns:
-            string: flags for current language
-        """
-        syntax_flags = None
-        c_flags = ""
-        cpp_flags = self.settings.std_flag + " -x c++"
-        if view.settings().get('syntax') is not None:
-            syntax = re.findall(
-                self.syntax_regex, view.settings().get('syntax'))
-            if len(syntax) > 0:
-                if syntax[0] == "C++":
-                    syntax_flags = cpp_flags
-                elif syntax[0] == "C":
-                    syntax_flags = c_flags
-        if syntax_flags is None and \
-                view.file_name() is not None:
-            file_ext = re.findall(self.file_ext, view.file_name())
-            if len(file_ext) > 0 and file_ext[0] == "cpp":
-                syntax_flags = cpp_flags
-        if syntax_flags is None:
-            syntax_flags = c_flags
-        return syntax_flags
-
     def write_body_to_temp_file(self, body, enc):
         """We use a temp file to store the file that will be used with clang.
         This function creates this file.
@@ -255,77 +224,6 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         with open(self.settings.tmp_file_path, "w", encoding=enc) as tmp_file:
             tmp_file.write(body)
 
-    def construct_clang_command(
-            self, row, col, syntax_flags, include_dirs):
-        """Construct the clang command
-
-        Args:
-            row (int): cursor line position
-            col (int): cursor char position in line
-            syntax_flags (string): current syntax flags
-            include_dirs (string[]): a list of include directories
-
-        Returns:
-            string: clang command
-        """
-        # Build clang command
-        clang_bin = self.settings.clang_binary
-        clang_flags = "-cc1 " + syntax_flags + " -fsyntax-only"
-        clang_target = "-code-completion-at " + self.settings.tmp_file_path + \
-            ":"+str(row)+":"+str(col) + \
-            " "+self.settings.tmp_file_path
-        clang_includes = " -I ."
-        for dir in self.settings.include_dirs:
-            clang_includes += " -I " + dir
-
-        # Execute clang command, exit 0 to suppress error from
-        # check_output()
-        clang_cmd = clang_bin + " " + clang_flags + \
-            " " + clang_target + clang_includes
-        if (self.settings.verbose):
-            print(PKG_NAME + ": clang command: \n\t{}".format(clang_cmd))
-        return clang_cmd
-
-    def run_clang_subprocess(self, clang_cmd):
-        """Run a subprocess for generating clang completions
-
-        Args:
-            clang_cmd (string): clang command
-
-        Returns:
-            string: Raw command output
-        """
-        try:
-            output = subprocess.check_output(clang_cmd, shell=True)
-            print(output)
-            output_text = ''.join(map(chr, output))
-        except subprocess.CalledProcessError as e:
-            output_text = e.output.decode("utf-8")
-        return output_text
-
-    def parse_clang_output(self, raw_clang_output):
-        """Parse clang command output
-
-        Args:
-            raw_clang_output (string): output of the clang command
-
-        Returns:
-            string[]: completions
-        """
-        output_lines = raw_clang_output.splitlines()
-        completions = []
-        longest_len = 0
-        for line in output_lines:
-            tmp_res = re.findall(self.completion_regex, line)
-            if len(tmp_res) <= 0:
-                continue
-            if len(tmp_res[0][0]) > longest_len:
-                longest_len = len(tmp_res[0][0])
-            completions.append([tmp_res[0][1], tmp_res[0][0]])
-
-        for tuple in completions:
-            tuple[0] = tuple[1].ljust(longest_len) + " - " + tuple[0]
-        return completions
 
     def valid_selector_in_focus(self, body, pos):
         """Check if the cursor focuses valid selector
@@ -352,7 +250,7 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             self.settings = Settings()
 
         if (self.settings.verbose):
-            print(PKG_NAME, ": loading file name: ", view.file_name())
+            print(PKG_NAME + ": loading file name: ", view.file_name())
 
         body = view.substr(sublime.Region(0, view.size()))
         files = [(view.file_name(), body)]
@@ -363,12 +261,15 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         for include in clang_include_dirs:
             clang_includes.append("-I" + include)
 
-        self.completers[view.id()] = TranslationUnit.from_source(
+        try:
+            self.translation_units[view.id()] = TranslationUnit.from_source(
             view.file_name(),
             [self.settings.std_flag] + clang_includes,
             unsaved_files=files,
-            options=TranslationUnit.PARSE_PRECOMPILED_PREAMBLE |
-            TranslationUnit.PARSE_CACHE_COMPLETION_RESULTS)
+            options=TranslationUnit.PARSE_CACHE_COMPLETION_RESULTS)
+        except Exception as e:
+            print(PKG_NAME, e)
+
 
     def on_post_save_async(self, view):
         print("saved id: ", view.id())
@@ -412,8 +313,12 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         files = [(current_file_name, body)]
 
         # execute clang code completion
+        if not view.id() in self.translation_units:
+            self.init_completer(view)
+
         start = time.time()
-        cr = self.completers[view.id()].codeComplete(
+
+        cr = self.translation_units[view.id()].codeComplete(
             current_file_name,
             row, col,
             unsaved_files=files)
@@ -432,7 +337,6 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             place_holders = 1
             for chunk in c.string:
                 hint += chunk.spelling
-                print (chunk.spelling)
                 if chunk.isKindTypedText():
                     trigger = chunk.spelling
                 if chunk.isKindResultType():
@@ -450,10 +354,4 @@ class ClangAutoComplete(sublime_plugin.EventListener):
                     contents += chunk.spelling
             completions.append([trigger + "\t" + hint, contents])
 
-        end = time.time()
-        print("time to show: ", end - start)
-
-        # Process clang output, find COMPLETION lines and return them with a
-        # little formating
-        # completions = self.parse_clang_output(raw_clang_output)
         return (completions, sublime.INHIBIT_WORD_COMPLETIONS)

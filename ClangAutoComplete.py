@@ -15,34 +15,21 @@ import codecs
 import re
 import tempfile
 import time
+import importlib
+import sys
 import os.path as path
 
 PKG_NAME = "ClangAutoComplete"
 
-# try system clang python bindings
-try:
-    from clang.cindex import TranslationUnit
-# use customized clang python bindings
-except:
-    from clangHelper.tools.libclang_version import get_libclang_version
-    if get_libclang_version() == '32':
-        from clangHelper.clang.cindex32 import TranslationUnit
-    if get_libclang_version() == '33':
-        from clangHelper.clang.cindex33 import TranslationUnit
-    if get_libclang_version() == '34':
-        from clangHelper.clang.cindex34 import TranslationUnit
-    if get_libclang_version() == '35':
-        from clangHelper.clang.cindex35 import TranslationUnit
-    if get_libclang_version() == '36':
-        from clangHelper.clang.cindex36 import TranslationUnit
-    elif get_libclang_version() == '37':
-        from clangHelper.clang.cindex37 import TranslationUnit
-    if get_libclang_version() == '38':
-        from clangHelper.clang.cindex38 import TranslationUnit
-    # else:
-    #     raise 'couldn\'t load any clang python bindings, plugin is disabled!'
-
-print("loaded clang version: ", get_libclang_version())
+cindex_dict = {
+    '3.2': "ClangAutoComplete.clang.cindex32",
+    '3.3': "ClangAutoComplete.clang.cindex33",
+    '3.4': "ClangAutoComplete.clang.cindex34",
+    '3.5': "ClangAutoComplete.clang.cindex35",
+    '3.6': "ClangAutoComplete.clang.cindex36",
+    '3.7': "ClangAutoComplete.clang.cindex37",
+    '3.8': "ClangAutoComplete.clang.cindex38",
+}
 
 
 class Settings:
@@ -72,6 +59,7 @@ class Settings:
     include_dirs = None
     clang_binary = None
     std_flag = None
+    tu = None
 
     def __init__(self):
         """Initialize the class.
@@ -79,6 +67,18 @@ class Settings:
         self.load_settings()
         if (self.verbose):
             print(PKG_NAME + ": settings loaded")
+
+    def load_correct_clang_version(self, clang_binary):
+        version_regex = re.compile("\d.\d")
+        found = version_regex.search(clang_binary)
+        version_str = found.group()
+
+        print("found a cindex for clang v: " + version_str)
+        if (version_str in cindex_dict):
+            cindex = importlib.import_module(cindex_dict[version_str])
+            self.tu = cindex.TranslationUnit
+        else:
+            return None
 
     def on_settings_changed(self):
         """When user changes settings, trigger this.
@@ -105,6 +105,8 @@ class Settings:
 
         self.subl_settings.clear_on_change(PKG_NAME)
         self.subl_settings.add_on_change(PKG_NAME, self.on_settings_changed)
+
+        self.load_correct_clang_version(self.clang_binary)
 
         if self.tmp_file_path is None:
             self.tmp_file_path = path.join(
@@ -177,6 +179,7 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         project_path = ""
         project_name = ""
         file_parent_folder = ""
+        file_current_folder = ""
 
         # initialize new include_dirs
         clang_include_dirs = self.settings.include_dirs
@@ -188,6 +191,7 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         if ('project_base_name' in variables):
             project_name = variables['project_base_name']
         if ('file' in variables):
+            file_current_folder = path.dirname(variables['file'])
             file_parent_folder = path.join(
                 path.dirname(variables['file']), "..")
 
@@ -206,6 +210,7 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             include_dir = os.path.abspath(include_dir)
             clang_include_dirs[i] = include_dir
 
+        clang_include_dirs.append(file_current_folder)
         if (self.settings.include_parent_folder):
             clang_include_dirs.append(file_parent_folder)
 
@@ -223,7 +228,6 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             enc = self.settings.default_encoding
         with open(self.settings.tmp_file_path, "w", encoding=enc) as tmp_file:
             tmp_file.write(body)
-
 
     def valid_selector_in_focus(self, body, pos):
         """Check if the cursor focuses valid selector
@@ -262,14 +266,13 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             clang_includes.append("-I" + include)
 
         try:
-            self.translation_units[view.id()] = TranslationUnit.from_source(
-            view.file_name(),
-            [self.settings.std_flag] + clang_includes,
-            unsaved_files=files,
-            options=TranslationUnit.PARSE_CACHE_COMPLETION_RESULTS)
+            self.translation_units[view.id()] = self.settings.tu.from_source(
+                view.file_name(),
+                [self.settings.std_flag] + clang_includes,
+                unsaved_files=files,
+                options=self.settings.tu.PARSE_CACHE_COMPLETION_RESULTS)
         except Exception as e:
             print(PKG_NAME, e)
-
 
     def on_post_save_async(self, view):
         print("saved id: ", view.id())
@@ -318,11 +321,11 @@ class ClangAutoComplete(sublime_plugin.EventListener):
 
         start = time.time()
 
-        cr = self.translation_units[view.id()].codeComplete(
+        complete_results = self.translation_units[view.id()].codeComplete(
             current_file_name,
             row, col,
             unsaved_files=files)
-        if cr is None or len(cr.results) == 0:
+        if complete_results is None or len(complete_results.results) == 0:
             print("no completions")
             return None
         end = time.time()
@@ -331,7 +334,7 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         start = time.time()
         # build code completions
         completions = []
-        for c in cr.results:
+        for c in complete_results.results:
             hint = ''
             contents = ''
             place_holders = 1

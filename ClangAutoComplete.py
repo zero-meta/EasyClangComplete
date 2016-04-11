@@ -59,7 +59,7 @@ class Settings:
     include_dirs = None
     clang_binary = None
     std_flag = None
-    tu = None
+    translation_unit_module = None
 
     def __init__(self):
         """Initialize the class.
@@ -69,6 +69,9 @@ class Settings:
             print(PKG_NAME + ": settings loaded")
 
     def load_correct_clang_version(self, clang_binary):
+        if not clang_binary:
+            print ("clang binary not defined")
+            return
         version_regex = re.compile("\d.\d")
         found = version_regex.search(clang_binary)
         version_str = found.group()
@@ -76,7 +79,7 @@ class Settings:
         print("found a cindex for clang v: " + version_str)
         if (version_str in cindex_dict):
             cindex = importlib.import_module(cindex_dict[version_str])
-            self.tu = cindex.TranslationUnit
+            self.translation_unit_module = cindex.TranslationUnit
         else:
             return None
 
@@ -151,16 +154,13 @@ class ClangAutoComplete(sublime_plugin.EventListener):
     """Class that handles clang based auto completion
 
     Attributes:
-        completion_regex (regex): regex to search for completions
-        file_ext (regex): regex to find file extension
         settings (Settings): Custom handler for settings
         syntax_regex (regex): Regex to detect syntax
     """
     settings = None
     translation_units = {}
+    valid_extensions = [".c", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
 
-    completion_regex = re.compile("COMPLETION: ([^ ]+) : ([^\\n]+)")
-    file_ext = re.compile("[^\.]+\.([^\\n]+)")
     syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
     def __init__(self):
@@ -229,6 +229,20 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         with open(self.settings.tmp_file_path, "w", encoding=enc) as tmp_file:
             tmp_file.write(body)
 
+    def has_valid_extension(self, view):
+        if (not view):
+            return False
+        (filname, ext) = os.path.splitext(view.file_name())
+        if (ext in self.valid_extensions):
+            if (self.settings.verbose):
+                print(PKG_NAME + ": extension ", ext, "is valid.")
+                print(PKG_NAME + ": compiling in background.")
+            return True
+        if (self.settings.verbose):
+                print(PKG_NAME + ": extension ", ext, "is not valid.")
+                print(PKG_NAME + ": not compiling.")
+        return False
+
     def valid_selector_in_focus(self, body, pos):
         """Check if the cursor focuses valid selector
 
@@ -266,21 +280,24 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             clang_includes.append("-I" + include)
 
         try:
-            self.translation_units[view.id()] = self.settings.tu.from_source(
+            tu = self.settings.translation_unit_module
+            self.translation_units[view.id()] = tu.from_source(
                 view.file_name(),
                 [self.settings.std_flag] + clang_includes,
                 unsaved_files=files,
-                options=self.settings.tu.PARSE_CACHE_COMPLETION_RESULTS)
+                options=tu.PARSE_CACHE_COMPLETION_RESULTS)
         except Exception as e:
-            print(PKG_NAME, e)
+            print(PKG_NAME+":", e)
+        if (self.settings.verbose):
+            print(PKG_NAME + ": compilation done.")
 
     def on_post_save_async(self, view):
-        print("saved id: ", view.id())
-        self.init_completer(view)
+        if self.has_valid_extension(view):
+            self.init_completer(view)
 
-    def on_load_async(self, view):
-        print("loaded id: ", view.id())
-        self.init_completer(view)
+    def on_activated_async(self, view):
+        if self.has_valid_extension(view):
+            self.init_completer(view)
 
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code

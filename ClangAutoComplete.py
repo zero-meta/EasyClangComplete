@@ -70,7 +70,7 @@ class Settings:
 
     def load_correct_clang_version(self, clang_binary):
         if not clang_binary:
-            print ("clang binary not defined")
+            print("clang binary not defined")
             return
         version_regex = re.compile("\d.\d")
         found = version_regex.search(clang_binary)
@@ -230,7 +230,7 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             tmp_file.write(body)
 
     def has_valid_extension(self, view):
-        if (not view):
+        if (not view or not view.file_name()):
             return False
         (filname, ext) = os.path.splitext(view.file_name())
         if (ext in self.valid_extensions):
@@ -239,8 +239,8 @@ class ClangAutoComplete(sublime_plugin.EventListener):
                 print(PKG_NAME + ": compiling in background.")
             return True
         if (self.settings.verbose):
-                print(PKG_NAME + ": extension ", ext, "is not valid.")
-                print(PKG_NAME + ": not compiling.")
+            print(PKG_NAME + ": extension ", ext, "is not valid.")
+            print(PKG_NAME + ": not compiling.")
         return False
 
     def valid_selector_in_focus(self, body, pos):
@@ -297,6 +297,9 @@ class ClangAutoComplete(sublime_plugin.EventListener):
 
     def on_activated_async(self, view):
         if self.has_valid_extension(view):
+            if view.id() in self.translation_units:
+                print("view already has a completer")
+                return
             self.init_completer(view)
 
     def on_query_completions(self, view, prefix, locations):

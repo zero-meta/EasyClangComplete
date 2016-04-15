@@ -11,7 +11,7 @@
 	"default_encoding" : "UTF-8",
 	/*
 	 * If set to "true", auto-complete is always on, it will provide suggestions for any key press,
-	 * regardless what triggers are configured in "selectors".
+	 * regardless what triggers are configured in "triggers".
 	 * It will slow down sublime, essentially re-compiling the file for every key press.
 	 */
 	"autocomplete_all" : false,
@@ -19,7 +19,7 @@
 	 * if autocomplete_all is set to false,
 	 * What triggers auto-completion process (should be same as sublime's own settings 
 	 */
-	"selectors" : [ ".", "->", "::"],
+	"triggers" : [ ".", "->", "::"],
 
 	/*
 	 * if verbose is set to false, the plugin will output nothing.

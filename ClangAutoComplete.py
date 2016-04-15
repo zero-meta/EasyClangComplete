@@ -42,7 +42,7 @@ class Settings:
         default_encoding (string): default encoding if view has none defined
         include_dirs (string[]): array of directories with headers
         include_parent_folder (bool): if true, parent will be added to 'include_dirs'
-        selectors (string[]): selectors that trigger autocompletion
+        triggers (string[]): triggers that trigger autocompletion
         std_flag (string): flag of the c++ std library, e.g. -std=c++11
         subl_settings (sublime.settings): link to sublime text settings dict
         tmp_file_path (string): name of a temp file
@@ -55,7 +55,7 @@ class Settings:
     include_parent_folder = None
     complete_all = None
     default_encoding = None
-    selectors = None
+    triggers = None
     include_dirs = None
     clang_binary = None
     std_flag = None
@@ -101,7 +101,7 @@ class Settings:
             "include_parent_folder")
         self.tmp_file_path = self.subl_settings.get("tmp_file_path")
         self.default_encoding = self.subl_settings.get("default_encoding")
-        self.selectors = self.subl_settings.get("selectors")
+        self.triggers = self.subl_settings.get("triggers")
         self.include_dirs = self.subl_settings.get("include_dirs")
         self.clang_binary = self.subl_settings.get("clang_binary")
         self.std_flag = self.subl_settings.get("std_flag")
@@ -138,7 +138,7 @@ class Settings:
             return False
         if self.default_encoding is None:
             return False
-        if self.selectors is None:
+        if self.triggers is None:
             return False
         if self.include_dirs is None:
             return False
@@ -245,30 +245,40 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             print(PKG_NAME + ": not compiling.")
         return False
 
-    def valid_selector_in_focus(self, point, view):
-        """Check if the cursor focuses valid selector
+    def needs_autocompletion(self, point, view):
+        """Check if the cursor focuses valid trigger
 
         Args:
             body (string): body in focus
             pos (int): position of the cursor
 
         Returns:
-            bool: selector is valid
+            bool: trigger is valid
         """
         if self.settings.complete_all:
             return True
 
-        current_char = view.substr(point - 1);
+        trigger_length = 1
+
+        current_char = view.substr(point - trigger_length);
         print("current char = '{}'".format(current_char))
 
         if (current_char == '>'):
-            if (view.substr(point - 2) != '-'):
+            trigger_length = 2;
+            if (view.substr(point - trigger_length) != '-'):
                 return False
         if (current_char == ':'):
-            if (view.substr(point - 2) != ':'):
+            trigger_length = 2;
+            if (view.substr(point - trigger_length) != ':'):
                 return False
-        for selector in self.settings.selectors:
-            if current_char in selector:
+
+        word_on_the_left = view.substr(view.word(point - trigger_length));
+        if (word_on_the_left.isdigit()):
+            # don't autocomplete digits
+            return False
+
+        for trigger in self.settings.triggers:
+            if current_char in trigger:
                 return True
         return False
 
@@ -355,8 +365,8 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         if not self.has_valid_extension(view):
             return None
 
-        # Verify that character under the cursor is one allowed selector
-        if (not self.valid_selector_in_focus(locations[0], view)):
+        # Verify that character under the cursor is one allowed trigger
+        if (not self.needs_autocompletion(locations[0], view)):
             # send empty completion and forbid to show other things
             completions = []
             return (completions, sublime.INHIBIT_WORD_COMPLETIONS)

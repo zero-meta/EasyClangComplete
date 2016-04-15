@@ -19,6 +19,8 @@ import importlib
 import sys
 import os.path as path
 
+from threading import Thread
+
 PKG_NAME = "ClangAutoComplete"
 
 cindex_dict = {
@@ -162,6 +164,7 @@ class ClangAutoComplete(sublime_plugin.EventListener):
     valid_extensions = [".c", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
 
     async_finished_flag = False
+    completions = []
 
     syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
@@ -260,19 +263,19 @@ class ClangAutoComplete(sublime_plugin.EventListener):
 
         trigger_length = 1
 
-        current_char = view.substr(point - trigger_length);
+        current_char = view.substr(point - trigger_length)
         print("current char = '{}'".format(current_char))
 
         if (current_char == '>'):
-            trigger_length = 2;
+            trigger_length = 2
             if (view.substr(point - trigger_length) != '-'):
                 return False
         if (current_char == ':'):
-            trigger_length = 2;
+            trigger_length = 2
             if (view.substr(point - trigger_length) != ':'):
                 return False
 
-        word_on_the_left = view.substr(view.word(point - trigger_length));
+        word_on_the_left = view.substr(view.word(point - trigger_length))
         if (word_on_the_left.isdigit()):
             # don't autocomplete digits
             return False
@@ -348,6 +351,43 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             completions.append([trigger + "\t" + hint, contents])
         return completions
 
+    def complete(self, view, cursor_pos):
+        # init settings if they were not initialized yet
+        if (self.settings is None) or (self.settings.is_valid() is False):
+            self.settings = Settings()
+
+        # init needed variables from settings
+        clang_include_dirs = self.populate_include_dirs()
+
+        (row, col) = view.rowcol(cursor_pos)
+        row += 1
+        col += 1
+
+        current_file_name = view.file_name()
+        file_contents = view.substr(sublime.Region(0, view.size()))
+        files = [(current_file_name, file_contents)]
+
+        # compile if there is not tranlation unit for this view yet
+        if not view.id() in self.translation_units:
+            self.init_completer(view)
+
+        # execute clang code completion
+        complete_results = self.translation_units[view.id()].codeComplete(
+            current_file_name,
+            row, col,
+            unsaved_files=files)
+        if complete_results is None or len(complete_results.results) == 0:
+            print("no completions")
+            return None
+
+        self.completions = self.process_completions(complete_results)
+        self.async_finished_flag = True
+        view.run_command('hide_auto_complete')
+        view.run_command('auto_complete', {
+                'disable_auto_insert': True,
+                'api_completions_only': True,
+                'next_competion_if_showing': True,})
+
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code
 
@@ -365,44 +405,24 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         if not self.has_valid_extension(view):
             return None
 
+        if self.async_finished_flag:
+            self.async_finished_flag = False
+            return (self.completions, sublime.INHIBIT_WORD_COMPLETIONS)
+
+        cursor_pos = locations[0];
+
         # Verify that character under the cursor is one allowed trigger
         if (not self.needs_autocompletion(locations[0], view)):
             # send empty completion and forbid to show other things
+            print("no need to complete")
             completions = []
             return (completions, sublime.INHIBIT_WORD_COMPLETIONS)
 
-        # init settings if they were not initialized yet
-        if (self.settings is None) or (self.settings.is_valid() is False):
-            self.settings = Settings()
+        print("starting async auto_complete at {}", cursor_pos)
+        completion_thread = Thread(
+            target=self.complete, args=[view, cursor_pos])
+        completion_thread.deamon = True
+        completion_thread.start()
 
-        # init needed variables from settings
-        clang_include_dirs = self.populate_include_dirs()
-
-        (row, col) = view.rowcol(locations[0])
-        row += 1
-        col += 1
-
-        current_file_name = view.file_name()
-        file_contents = view.substr(sublime.Region(0, view.size()))
-        files = [(current_file_name, file_contents)]
-
-        # compile if there is not tranlation unit for this view yet
-        if not view.id() in self.translation_units:
-            self.init_completer(view)
-
-        # execute clang code completion
-        start = time.time()
-
-        complete_results = self.translation_units[view.id()].codeComplete(
-            current_file_name,
-            row, col,
-            unsaved_files=files)
-        if complete_results is None or len(complete_results.results) == 0:
-            print("no completions")
-            return None
-        end = time.time()
-        print("time to call clang: ", end - start)
-
-        completions = self.process_completions(complete_results)
-
+        completions = []
         return (completions, sublime.INHIBIT_WORD_COMPLETIONS)

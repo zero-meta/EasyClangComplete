@@ -19,7 +19,7 @@
 	 * if autocomplete_all is set to false,
 	 * What triggers auto-completion process (should be same as sublime's own settings 
 	 */
-	"selectors" : [ ">","."],
+	"selectors" : [ ".", "->", "::"],
 
 	/*
 	 * if verbose is set to false, the plugin will output nothing.

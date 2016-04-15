@@ -161,6 +161,8 @@ class ClangAutoComplete(sublime_plugin.EventListener):
     translation_units = {}
     valid_extensions = [".c", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
 
+    async_finished_flag = False
+
     syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
     def __init__(self):
@@ -243,7 +245,7 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             print(PKG_NAME + ": not compiling.")
         return False
 
-    def valid_selector_in_focus(self, body, pos):
+    def valid_selector_in_focus(self, point, view):
         """Check if the cursor focuses valid selector
 
         Args:
@@ -256,11 +258,19 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         if self.settings.complete_all:
             return True
 
-        selector_is_valid = False
+        current_char = view.substr(point - 1);
+        print("current char = '{}'".format(current_char))
+
+        if (current_char == '>'):
+            if (view.substr(point - 2) != '-'):
+                return False
+        if (current_char == ':'):
+            if (view.substr(point - 2) != ':'):
+                return False
         for selector in self.settings.selectors:
-            if selector in body[pos-len(selector):pos]:
-                selector_is_valid = True
-        return selector_is_valid
+            if current_char in selector:
+                return True
+        return False
 
     def init_completer(self, view):
         # init settings if they were not initialized still
@@ -302,57 +312,7 @@ class ClangAutoComplete(sublime_plugin.EventListener):
                 return
             self.init_completer(view)
 
-    def on_query_completions(self, view, prefix, locations):
-        """Function that is called when user queries completions in the code
-
-        Args:
-            view (sublime.View): current view
-            prefix (TYPE): Description
-            locations (TYPE): Description
-
-        Returns:
-            sublime.Completions: completions with a flag
-        """
-
-        # init settings if they were not initialized still
-        if (self.settings is None) or (self.settings.is_valid() is False):
-            self.settings = Settings()
-
-        # init needed variables from settings
-        clang_include_dirs = self.populate_include_dirs()
-
-        # Find exact Line:Column position of cursor for clang
-        pos = view.sel()[0].begin()
-        body = view.substr(sublime.Region(0, view.size()))
-
-        # Verify that character under the cursor is one allowed selector
-        if (not self.valid_selector_in_focus(body, pos)):
-            return None
-
-        row = body[:pos].count('\n') + 1
-        col = pos-body.rfind("\n", 0, len(body[:pos]))
-
-        current_file_name = view.file_name()
-        files = [(current_file_name, body)]
-
-        # execute clang code completion
-        if not view.id() in self.translation_units:
-            self.init_completer(view)
-
-        start = time.time()
-
-        complete_results = self.translation_units[view.id()].codeComplete(
-            current_file_name,
-            row, col,
-            unsaved_files=files)
-        if complete_results is None or len(complete_results.results) == 0:
-            print("no completions")
-            return None
-        end = time.time()
-        print("time to call clang: ", end - start)
-
-        start = time.time()
-        # build code completions
+    def process_completions(self, complete_results):
         completions = []
         for c in complete_results.results:
             hint = ''
@@ -376,5 +336,63 @@ class ClangAutoComplete(sublime_plugin.EventListener):
                 else:
                     contents += chunk.spelling
             completions.append([trigger + "\t" + hint, contents])
+        return completions
+
+    def on_query_completions(self, view, prefix, locations):
+        """Function that is called when user queries completions in the code
+
+        Args:
+            view (sublime.View): current view
+            prefix (TYPE): Description
+            locations (TYPE): Description
+
+        Returns:
+            sublime.Completions: completions with a flag
+        """
+        if (view.is_scratch()):
+            return None
+
+        if not self.has_valid_extension(view):
+            return None
+
+        # Verify that character under the cursor is one allowed selector
+        if (not self.valid_selector_in_focus(locations[0], view)):
+            # send empty completion and forbid to show other things
+            completions = []
+            return (completions, sublime.INHIBIT_WORD_COMPLETIONS)
+
+        # init settings if they were not initialized yet
+        if (self.settings is None) or (self.settings.is_valid() is False):
+            self.settings = Settings()
+
+        # init needed variables from settings
+        clang_include_dirs = self.populate_include_dirs()
+
+        (row, col) = view.rowcol(locations[0])
+        row += 1
+        col += 1
+
+        current_file_name = view.file_name()
+        file_contents = view.substr(sublime.Region(0, view.size()))
+        files = [(current_file_name, file_contents)]
+
+        # compile if there is not tranlation unit for this view yet
+        if not view.id() in self.translation_units:
+            self.init_completer(view)
+
+        # execute clang code completion
+        start = time.time()
+
+        complete_results = self.translation_units[view.id()].codeComplete(
+            current_file_name,
+            row, col,
+            unsaved_files=files)
+        if complete_results is None or len(complete_results.results) == 0:
+            print("no completions")
+            return None
+        end = time.time()
+        print("time to call clang: ", end - start)
+
+        completions = self.process_completions(complete_results)
 
         return (completions, sublime.INHIBIT_WORD_COMPLETIONS)

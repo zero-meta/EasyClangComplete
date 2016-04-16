@@ -3,6 +3,7 @@
 Provides completion suggestions for C/C++ languages based on clang output
 
 Attributes:
+    cindex_dict (dict): names for cindex files with keys being clang versions
     PKG_NAME (string): Name of the package
 """
 
@@ -21,16 +22,16 @@ import os.path as path
 
 from threading import Thread
 
-PKG_NAME = "ClangAutoComplete"
+PKG_NAME = path.splitext(path.basename(__file__))[0]
 
 cindex_dict = {
-    '3.2': "ClangAutoComplete.clang.cindex32",
-    '3.3': "ClangAutoComplete.clang.cindex33",
-    '3.4': "ClangAutoComplete.clang.cindex34",
-    '3.5': "ClangAutoComplete.clang.cindex35",
-    '3.6': "ClangAutoComplete.clang.cindex36",
-    '3.7': "ClangAutoComplete.clang.cindex37",
-    '3.8': "ClangAutoComplete.clang.cindex38",
+    '3.2': PKG_NAME + ".clang.cindex32",
+    '3.3': PKG_NAME + ".clang.cindex33",
+    '3.4': PKG_NAME + ".clang.cindex34",
+    '3.5': PKG_NAME + ".clang.cindex35",
+    '3.6': PKG_NAME + ".clang.cindex36",
+    '3.7': PKG_NAME + ".clang.cindex37",
+    '3.8': PKG_NAME + ".clang.cindex38",
 }
 
 
@@ -44,10 +45,12 @@ class Settings:
         default_encoding (string): default encoding if view has none defined
         include_dirs (string[]): array of directories with headers
         include_parent_folder (bool): if true, parent will be added to 'include_dirs'
-        triggers (string[]): triggers that trigger autocompletion
         std_flag (string): flag of the c++ std library, e.g. -std=c++11
         subl_settings (sublime.settings): link to sublime text settings dict
         tmp_file_path (string): name of a temp file
+        translation_unit_module (cindex.translation_unit): translation unit that 
+                                                          handles autocompletion
+        triggers (string[]): triggers that trigger autocompletion
         verbose (bool): verbose flag
     """
 
@@ -71,19 +74,25 @@ class Settings:
             print(PKG_NAME + ": settings loaded")
 
     def load_correct_clang_version(self, clang_binary):
+        """Summary
+
+        Args:
+            clang_binary (str): name of the clang binary to use
+
+        """
         if not clang_binary:
-            print("clang binary not defined")
+            if (self.verbose):
+                print(PKG_NAME + ": clang binary not defined")
             return
         version_regex = re.compile("\d.\d")
         found = version_regex.search(clang_binary)
         version_str = found.group()
 
-        print("found a cindex for clang v: " + version_str)
+        if (self.verbose):
+            print(PKG_NAME + ": found a cindex for clang v: " + version_str)
         if (version_str in cindex_dict):
             cindex = importlib.import_module(cindex_dict[version_str])
             self.translation_unit_module = cindex.TranslationUnit
-        else:
-            return None
 
     def on_settings_changed(self):
         """When user changes settings, trigger this.
@@ -156,14 +165,20 @@ class ClangAutoComplete(sublime_plugin.EventListener):
     """Class that handles clang based auto completion
 
     Attributes:
+        async_completions_ready (bool): flag that shows if there are 
+            completions available from an autocomplete async call
+        completions (list): list of completions
         settings (Settings): Custom handler for settings
         syntax_regex (regex): Regex to detect syntax
+        translation_units (dict): dict of translation_units
+        valid_extensions (list): list of valid extentions for autocompletion
     """
     settings = None
     translation_units = {}
+    # TODO: this should be probably in settings
     valid_extensions = [".c", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
 
-    async_finished_flag = False
+    async_completions_ready = False
     completions = []
 
     syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
@@ -177,7 +192,7 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         """populate the include dirs based on the project
 
         Returns:
-            string[]: directories where clang searches for header files
+            str[]: directories where clang searches for header files
         """
         # initialize these to nothing in case they are not present in the
         # variables
@@ -221,20 +236,15 @@ class ClangAutoComplete(sublime_plugin.EventListener):
 
         return clang_include_dirs
 
-    def write_body_to_temp_file(self, body, enc):
-        """We use a temp file to store the file that will be used with clang.
-        This function creates this file.
+    def has_valid_extension(self, view):
+        """Test if the current file has a valid extension
 
         Args:
-            body (string): text from current view to provide context to clang
-            enc (string): encoding
-        """
-        if enc == "Undefined":
-            enc = self.settings.default_encoding
-        with open(self.settings.tmp_file_path, "w", encoding=enc) as tmp_file:
-            tmp_file.write(body)
+            view (sublime.View): current view
 
-    def has_valid_extension(self, view):
+        Returns:
+            bool: extension is valid
+        """
         if (not view or not view.file_name()):
             return False
         (filname, ext) = os.path.splitext(view.file_name())
@@ -249,11 +259,11 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         return False
 
     def needs_autocompletion(self, point, view):
-        """Check if the cursor focuses valid trigger
+        """Check if the cursor focuses a valid trigger
 
         Args:
-            body (string): body in focus
-            pos (int): position of the cursor
+            point (int): position of the cursor in the file as defined by subl
+            view (sublime.View): current view
 
         Returns:
             bool: trigger is valid
@@ -286,6 +296,14 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         return False
 
     def init_completer(self, view):
+        """Initialize the completer
+
+        Args:
+            view (TYPE): Description
+
+        Returns:
+            TYPE: Description
+        """
         # init settings if they were not initialized still
         if (self.settings is None) or (self.settings.is_valid() is False):
             self.settings = Settings()
@@ -315,10 +333,23 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             print(PKG_NAME + ": compilation done.")
 
     def on_post_save_async(self, view):
+        """After file is saved, create a tranlsation unit for it
+
+        Args:
+            view (sublime.View): current view
+
+        """
         if self.has_valid_extension(view):
             self.init_completer(view)
 
     def on_activated_async(self, view):
+        """When view becomes active, create a translation unit for it if it 
+        doesn't already have one
+
+        Args:
+            view (sublime.View): current view
+
+        """
         if self.has_valid_extension(view):
             if view.id() in self.translation_units:
                 print("view already has a completer")
@@ -326,6 +357,14 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             self.init_completer(view)
 
     def process_completions(self, complete_results):
+        """Create snippet-like structures from a list of completions
+
+        Args:
+            complete_results (list): raw completions list
+
+        Returns:
+            list: updated completions
+        """
         completions = []
         for c in complete_results.results:
             hint = ''
@@ -351,7 +390,30 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             completions.append([trigger + "\t" + hint, contents])
         return completions
 
+    def reload_completions(self, view):
+        """Ask sublime to reload the completions. Needed to update the active 
+        completion list when async autocompletion task has finished.
+
+        Args:
+            view (sublime.View): current_view
+
+        """
+        view.run_command('hide_auto_complete')
+        view.run_command('auto_complete', {
+            'disable_auto_insert': True,
+            'api_completions_only': True,
+            'next_competion_if_showing': True, })
+
     def complete(self, view, cursor_pos):
+        """This function is called asynchronously to create a list of
+        autocompletions. Using the current translation unit it queries libclang
+        about the possible completions.
+
+        Args:
+            view (sublime.View): current view
+            cursor_pos (int): sublime provided poistion of the cursor
+
+        """
         # init settings if they were not initialized yet
         if (self.settings is None) or (self.settings.is_valid() is False):
             self.settings = Settings()
@@ -381,12 +443,8 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             return None
 
         self.completions = self.process_completions(complete_results)
-        self.async_finished_flag = True
-        view.run_command('hide_auto_complete')
-        view.run_command('auto_complete', {
-                'disable_auto_insert': True,
-                'api_completions_only': True,
-                'next_competion_if_showing': True,})
+        self.async_completions_ready = True
+        self.reload_completions(view)
 
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code
@@ -394,7 +452,8 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
             prefix (TYPE): Description
-            locations (TYPE): Description
+            locations (list[int]): positions of the cursor. 
+                                   Only locations[0] is considered here.
 
         Returns:
             sublime.Completions: completions with a flag
@@ -405,11 +464,9 @@ class ClangAutoComplete(sublime_plugin.EventListener):
         if not self.has_valid_extension(view):
             return None
 
-        if self.async_finished_flag:
-            self.async_finished_flag = False
+        if self.async_completions_ready:
+            self.async_completions_ready = False
             return (self.completions, sublime.INHIBIT_WORD_COMPLETIONS)
-
-        cursor_pos = locations[0];
 
         # Verify that character under the cursor is one allowed trigger
         if (not self.needs_autocompletion(locations[0], view)):
@@ -418,11 +475,15 @@ class ClangAutoComplete(sublime_plugin.EventListener):
             completions = []
             return (completions, sublime.INHIBIT_WORD_COMPLETIONS)
 
-        print("starting async auto_complete at {}", cursor_pos)
+        if (self.settings.verbose):
+            print("{}: starting async auto_complete at pos: {}".format(
+                PKG_NAME, locations[0]))
+        # create a daemon thread to update the completions
         completion_thread = Thread(
-            target=self.complete, args=[view, cursor_pos])
+            target=self.complete, args=[view, locations[0]])
         completion_thread.deamon = True
         completion_thread.start()
 
+        # remove all completions for now
         completions = []
         return (completions, sublime.INHIBIT_WORD_COMPLETIONS)

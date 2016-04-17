@@ -55,7 +55,7 @@ Just as the original package by @pl-ca, I decided to adopt the most strict licen
 
 > DO WHAT THE F*CK YOU WANT TO PUBLIC LICENSE
 > Version 2, December 2004
-> Copyright (C) 2016 Igor Bogoslavskyi [igor.bogoslavskyi@gmail.com]
+> Copyright (C) 2016 Igor Bogoslavskyi
 
 >Everyone is permitted to copy and distribute verbatim or modified copies of this license document, and changing it is allowed as long as the name is changed.
 

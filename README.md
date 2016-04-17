@@ -1,14 +1,16 @@
 # EasyClangComplete #
 
-Sublime Text 3 plugin that offers auto-completion for C/C++
+Sublime Text 3 plugin that offers auto-completion for C++
 
 ![Example](autocomplete_show_off.gif)
 
-This plugin aims to provide easy-to-use, minimal setup helpful autocompletions for c++ for Sublime Text 3. It is built in asynchronous way, so that you will not have to wait even when completions take slightly longer to load.
+This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++ for Sublime Text 3. It is built to function in an asynchronous way, so that you will not have to wait even when completions take slightly longer to load.
 
 The plugin uses `libclang` with its python bindings to provide clang-based autocompletions.
 
 This plugin is intended be easy to use. You should just add the folders your project uses to `include_dirs` list in the settings and everything should just work. If you experience problems - create an issue. I will try to respond as soon as possible.
+
+If you are an experienced python developer and find something in my code a no-go - DO tell me. Python is not my main language and I am always willing to learn.
 
 ## Installation ##
 Clone this repository into the folder where the packages of your Sublime Text 3 live. Then follow the OS-specific setup below:

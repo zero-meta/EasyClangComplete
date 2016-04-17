@@ -70,7 +70,7 @@ class Settings:
         """Initialize the class.
         """
         self.load_settings()
-        if (not self.is_valid()):
+        if (not self.translation_unit_module):
             print(PKG_NAME + ": Error encountered while loading settings.")
             print(PKG_NAME + ": NO AUTOCOMPLETION WILL BE AVAILABLE.")
             return
@@ -119,6 +119,7 @@ class Settings:
     def load_settings(self):
         """Load settings from sublime dictionary to internal variables
         """
+        self.translation_unit_module = None
         self.subl_settings = sublime.load_settings(
             PKG_NAME + ".sublime-settings")
         self.verbose = self.subl_settings.get("verbose")
@@ -154,6 +155,8 @@ class Settings:
         Returns:
             bool: validity of settings
         """
+        if self.translation_unit_module is None:
+            return False
         if self.subl_settings is None:
             return False
         if self.verbose is None:
@@ -264,11 +267,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if (ext in self.valid_extensions):
             if (self.settings.verbose):
                 print(PKG_NAME + ": extension ", ext, "is valid.")
-                print(PKG_NAME + ": compiling in background.")
             return True
         if (self.settings.verbose):
             print(PKG_NAME + ": extension ", ext, "is not valid.")
-            print(PKG_NAME + ": not compiling.")
         return False
 
     def needs_autocompletion(self, point, view):
@@ -287,7 +288,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
         trigger_length = 1
 
         current_char = view.substr(point - trigger_length)
-        print("current char = '{}'".format(current_char))
 
         if (current_char == '>'):
             trigger_length = 2
@@ -471,7 +471,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Returns:
             sublime.Completions: completions with a flag
         """
-        if (view.is_scratch()):
+        if view.is_scratch():
             return None
 
         if not self.has_valid_extension(view):
@@ -484,11 +484,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # Verify that character under the cursor is one allowed trigger
         if (not self.needs_autocompletion(locations[0], view)):
             # send empty completion and forbid to show other things
-            print("no need to complete")
             completions = []
             return (completions, sublime.INHIBIT_WORD_COMPLETIONS)
 
-        if (self.settings.verbose):
+        if self.settings.verbose:
             print("{}: starting async auto_complete at pos: {}".format(
                 PKG_NAME, locations[0]))
         # create a daemon thread to update the completions

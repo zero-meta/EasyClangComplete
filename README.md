@@ -15,14 +15,14 @@ If you are an experienced python developer and find something in my code a no-go
 ## Installation ##
 Clone this repository into the folder where the packages of your Sublime Text 3 live. Then follow the OS-specific setup below:
 
-### Ubuntu ###
+##### Ubuntu #####
 I have tested it on Ubuntu 14.04 and here the setup should be as simple as:
 ```bash
 sudo apt-get install clang
 ```
 You can also use a specific version of clang, e.g. `clang-3.6`. Inthis case don't forget to set the correct binary name in the settings.
 
-### Windows ###
+##### Windows #####
 I am not fluent with Windows, so help needed. If you are willing to help, either install the package and report errors or educate me of a simple way to install clang there.
 
 ## Settings ##

@@ -35,8 +35,8 @@ I will only cover most important settings here.
 - `std_flag`:
     + sets the standard flag that will be used for compilation. Defaults to `std=c++11`
 - `triggers`:
-    + have you ever been annoyed by typing `3 > 2` only to find yourself waiting for completions after `>`. What about writing `case CONST:`? If you know what I am talking about you will understand how important this is.
-    + defaults are `".", "::", "->"`. The autocompletions will not trigger on `>` or `:`. They will also not trigger while typing a number like `3.14`.
+    + have you ever been annoyed by typing `3 > 2` only to find yourself waiting for completions after `>`? What about writing `case CONST:`? If you know what I am talking about you will understand how important this is.
+    + defaults are `".", "::", "->"`. The autocompletion does not trigger on `>` or `:`. It also ignores float numbers like `3.14`.
 
 Please see the default settings file in the repo for more settings descriptions. Every setting in [settings file](EasyClangComplete.sublime-settings) should have an understandable comment. Should they not be clear - create an issue.
 

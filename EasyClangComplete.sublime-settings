@@ -1,0 +1,31 @@
+{
+	 // Where should clang search for headers 
+	 // These will be appended to build with `-I` flag each
+	"include_dirs" : [
+						"/usr/include",
+						"$project_base_path/src",
+						"/workspace/$project_name/src",
+						],
+
+	// set the standard library flag. 
+	"std_flag" : "-std=c++11",
+	
+	// triggers for auto-completion
+	"triggers" : [ ".", "->", "::"],
+
+	// make plugin verbose
+	"verbose" : false,
+
+	// add folder with current file with `-I` flag
+	"include_file_folder" : false,
+	// add parent folder of the current file's one with `-I` flag
+	"include_file_parent_folder" : false,
+
+	// pick the clang binary used by the plugin. This is used to determine the
+	// version of the plugin and pick correct libclang bindings.
+	"clang_binary" : "clang++",
+
+	// ignore triggers and try to complete after each character 
+	// WARNING: can be very slow
+	"autocomplete_all" : false,
+}

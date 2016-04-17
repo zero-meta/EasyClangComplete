@@ -12,20 +12,20 @@
                 "children":
                 [
                     {
-                        "caption": "ClangAutoComplete",
+                        "caption": "EasyClangComplete",
                         "children":
                         [
                             {
                                 "command": "open_file", "args":
                                 {
-                                    "file": "${packages}/ClangAutoComplete/ClangAutoComplete.sublime-settings"
+                                    "file": "${packages}/EasyClangComplete/EasyClangComplete.sublime-settings"
                                 },
                                 "caption": "Settings - Default"
                             },
                             {
                                 "command": "open_file", "args":
                                 {
-                                    "file": "${packages}/User/ClangAutoComplete.sublime-settings"
+                                    "file": "${packages}/User/EasyClangComplete.sublime-settings"
                                 },
                                 "caption": "Settings - User"
                             }

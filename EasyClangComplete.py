@@ -1,4 +1,4 @@
-"""ClangAutoComplete plugin for Sublime Text 3.
+"""EasyClangComplete plugin for Sublime Text 3.
 
 Provides completion suggestions for C/C++ languages based on clang output
 
@@ -70,8 +70,12 @@ class Settings:
         """Initialize the class.
         """
         self.load_settings()
+        if (not self.is_valid()):
+            print(PKG_NAME + ": Error encountered while loading settings.")
+            print(PKG_NAME + ": NO AUTOCOMPLETION WILL BE AVAILABLE.")
+            return
         if (self.verbose):
-            print(PKG_NAME + ": settings loaded")
+            print(PKG_NAME + ": settings successfully loaded")
 
     def load_correct_clang_version(self, clang_binary):
         """Summary
@@ -84,8 +88,19 @@ class Settings:
             if (self.verbose):
                 print(PKG_NAME + ": clang binary not defined")
             return
+        check_version_cmd = clang_binary + " --version"
+        try:
+            output = subprocess.check_output(check_version_cmd, shell=True)
+            output_text = ''.join(map(chr, output))
+        except subprocess.CalledProcessError as e:
+            print(PKG_NAME + ": {}".format(e))
+            self.clang_binary = None
+            print(PKG_NAME + ": ERROR: make sure '{}' is in PATH."
+                  .format(clang_binary))
+            return
+
         version_regex = re.compile("\d.\d")
-        found = version_regex.search(clang_binary)
+        found = version_regex.search(output_text)
         version_str = found.group()
 
         if (self.verbose):
@@ -160,7 +175,7 @@ class Settings:
         return True
 
 
-class ClangAutoComplete(sublime_plugin.EventListener):
+class EasyClangComplete(sublime_plugin.EventListener):
 
     """Class that handles clang based auto completion
 
@@ -180,8 +195,6 @@ class ClangAutoComplete(sublime_plugin.EventListener):
 
     async_completions_ready = False
     completions = []
-
-    syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
     def __init__(self):
         """Initialize the settings in the class

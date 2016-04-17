@@ -1,63 +1,66 @@
-#ClangAutoComplete
-=================
+# EasyClangComplete #
 
-Sublime Text 3 plugin that offers auto-completion of C/C++ structure members or class attributes and methods.
+Sublime Text 3 plugin that offers auto-completion for C/C++
 
 ![Example](autocomplete_show_off.gif)
 
-##Installation
+This plugin aims to provide easy-to-use, minimal setup helpful autocompletions for c++ for Sublime Text 3. It is built in asynchronous way, so that you will not have to wait even when completions take slightly longer to load.
 
-1. Install "clang". Note that some people reported issue with clang 3.5.2 when compiled from Cygwin. If you are facing issues on Windows, try to download directly from the official [clang website](http://llvm.org/releases/download.html).
-2. Install from Package Control, or clone this repository and put it in your Sublime's packages directory to install from git.
-3. Edit the settings to your needs (in menu `Preferences/Package Settings/ClaugAutoComplete/Settings`). On linux, it looks like clang is having trouble finding standard header files. Here are what I had to include in the plugin settings to make it work on my system.
+The plugin uses `libclang` with its python bindings to provide clang-based autocompletions.
 
- ```C
-"include_dirs" : [
-              "/usr/include/c++/4.4.7/",                      /* Where you find iostream, vector, etc. */
-              "/usr/lib/clang/3.4.2/include",                 /* stdbool, etc */
-              "/usr/include/c++/4.4.4/x86_64-redhat-linux/",  /* bits folder */
-              "/usr/include",
- ```
+This plugin is intended be easy to use. You should just add the folders your project uses to `include_dirs` list in the settings and everything should just work. If you experience problems - create an issue. I will try to respond as soon as possible.
 
- If you can't find the equivalent path try to search your system to find those key files and add the paths, i.e.
+## Installation ##
+Clone this repository into the folder where the packages of your Sublime Text 3 live. Then follow the OS-specific setup below:
 
- ```bash
-sudo find / -name "iostream"
-sudo find / -name "stdbool.h"
-sudo find / -name "c++config.h"
- ```
+### Ubuntu ###
+I have tested it on Ubuntu 14.04 and here the setup should be as simple as:
+```
+sudo apt-get install clang
+```
 
-4. Make sure Sublime's own auto-complete settings are properly configured, I've had trouble with mine.
-Here is my C.sublime-settings as an example
+### Windows ###
+I am not fluent with Windows, so help needed. If you are willing to help, either install the package and report errors or educate me of a simple way to install clang there.
 
+## Settings ##
+I will only cover most important settings here.
 
-        {
-                "auto_complete": true,
-                "auto_complete_selector": "source - comment",
-                "auto_complete_triggers":
-                [
-                        {
-                                "characters": "."
-                        },
-                        {
-                                "characters": ">"
-                        },
-                        {
-                                "characters": ":"
-                        },
-                ],
-                "extensions":
-                [
-                        "c",
-                        "h"
-                ]
-        }
+- `include_dirs`:
+    + stores the locations where `clang` should be looking for external headers, e.g. `boost`, `Ros`, `Eigen`, `OpenCV`, etc.
+    + you can use placeholders like `$project_base_name` or `$project_base_path` to make includes more convenient.
+    + it is absolutely ok to include a folder that does not exist. `clang` knows how to deal with it and it will neither break anything nor make things slower.
+    + See [my own settings](https://github.com/niosus/config-sublime/blob/master/Packages%2FUser%2FEasyClangComplete.sublime-settings#L4) as an example if you wish.
+- `std_flag`:
+    + sets the standard flag that will be used for compilation. Defaults to `std=c++11`
+- `triggers`:
+    + have you ever been annoyed by typing `3 > 2` only to find yourself waiting for completions after `>`. What about writing `case CONST:`? If you know what I am talking about you will understand how important this is.
+    + defaults are `".", "::", "->"`. The autocompletions will not trigger on `>` or `:`. They will also not trigger while typing a number like `3.14`.
+
+Please see the default settings file in the repo for more settings descriptions. Every setting in [settings file](EasyClangComplete.sublime-settings) should have an understandable comment. Should they not be clear - create an issue.
 
 
-##Settings
+## Credits ##
+The whole work seen here was originally a fork of another repository: https://github.com/pl-ca/ClangAutoComplete
 
- - include_dirs: List of directories where relevant header files are located
- - autocomplete_all: Trigger auto-completion on every keypress (will slow down sublime)
- - selectors: List of characters that will trigger auto-completion ( if "autocomplete_all" is set to "false" )
- - clang_binary: Location of clang binary (if it is not in the path)
+However, with time this plugin has grown quite different from its origin and this is why you see it as a separate package now. Anyway, I encourage you to check out what @pl-ca has to offer and come back if you still like this plugin more.
+
+The trick with multiple `clang.cindex` files is inspired by this repo: https://github.com/griebd/clangHelper Thanks for inspiration!
+
+## Licence ##
+![licence](http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-1.png)
+
+Just as the original package by @pl-ca, I decided to adopt the most strict licence we have found:
+
+> DO WHAT THE F*CK YOU WANT TO PUBLIC LICENSE
+> Version 2, December 2004
+> Copyright (C) 2016 Igor Bogoslavskyi [igor.bogoslavskyi@gmail.com]
+
+>Everyone is permitted to copy and distribute verbatim or modified copies of this license document, and changing it is allowed as long as the name is changed.
+
+>DO WHAT THE F*CK YOU WANT TO PUBLIC LICENSE TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+>0.You just DO WHAT THE F*CK YOU WANT TO.
+
+
+
 

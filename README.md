@@ -20,10 +20,16 @@ I have tested it on Ubuntu 14.04 and here the setup should be as simple as:
 ```bash
 sudo apt-get install clang
 ```
-You can also use a specific version of clang, e.g. `clang-3.6`. In this case don't forget to set the correct binary name in the settings.
+You can also use a specific version of clang, e.g. `clang-3.6`. In this case don't forget to set the correct binary name in the settings, e.g.:
+```
+"clang_binary" : "clang++-3.6"
+```
 
 ##### Windows #####
-I am not fluent with Windows, so help needed. If you are willing to help, either install the package and report errors or educate me of a simple way to install clang there.
+I am not fluent with Windows, so help needed. The plugin should work out of the box provided you have clang set up, but this needs testing and probably minor tweaks. If you are willing to help, either install the package and report errors or educate me of a simple way to install clang on Windows ^_^.
+
+##### Mac  #####
+Unfortunately I do not own a mac, but again, everything should just work. If it doesn't - please create an issue and we'll try to resolve it.
 
 ## Settings highlights ##
 I will only cover most important settings here.

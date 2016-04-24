@@ -337,7 +337,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             tu = self.settings.translation_unit_module
             self.translation_units[view.id()] = tu.from_source(
                 view.file_name(),
-                ["-x", "c++"] + [self.settings.std_flag] + clang_includes,
+                [self.settings.std_flag] + clang_includes,
                 unsaved_files=files,
                 options=tu.PARSE_PRECOMPILED_PREAMBLE |
                 tu.PARSE_CACHE_COMPLETION_RESULTS)
@@ -373,7 +373,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 self.translation_units[view.id()].reparse()
                 if self.settings.verbose:
                     print(PKG_NAME + ": reparsed translation unit")
-                return;
+                return
             # if there is none - generate a new one
             self.init_completer(view)
 
@@ -475,7 +475,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         # compile if there is not tranlation unit for this view yet
         if not view.id() in self.translation_units:
-            self.init_completer(view)
+            return None
         # execute clang code completion
         complete_results = self.translation_units[view.id()].codeComplete(
             current_file_name,

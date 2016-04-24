@@ -337,9 +337,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
             tu = self.settings.translation_unit_module
             self.translation_units[view.id()] = tu.from_source(
                 view.file_name(),
-                [self.settings.std_flag] + clang_includes,
+                ["-x", "c++"] + [self.settings.std_flag] + clang_includes,
                 unsaved_files=files,
-                options=tu.PARSE_CACHE_COMPLETION_RESULTS)
+                options=tu.PARSE_PRECOMPILED_PREAMBLE |
+                tu.PARSE_CACHE_COMPLETION_RESULTS)
         except Exception as e:
             print(PKG_NAME+":", e)
         if (self.settings.verbose):
@@ -355,9 +356,36 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         if self.has_valid_extension(view):
             if view.id() in self.translation_units:
-                print("view already has a completer")
+                if self.settings.verbose:
+                    print(PKG_NAME + ": view already has a completer")
                 return
             self.init_completer(view)
+
+    def on_post_save_async(self, view):
+        """On save we want to reparse the tu
+
+        Args:
+            view (sublime.View): current view
+
+        """
+        if self.has_valid_extension(view):
+            if view.id() in self.translation_units:
+                self.translation_units[view.id()].reparse()
+                if self.settings.verbose:
+                    print(PKG_NAME + ": reparsed translation unit")
+                return;
+            # if there is none - generate a new one
+            self.init_completer(view)
+
+        # # at some point we will show errors reported by clang
+        # if view.id() in self.translation_units:
+        #     tu = self.translation_units[view.id()]
+        #     print(len(tu.diagnostics))
+        #     for diag in tu.diagnostics:
+        #         print(diag.severity)
+        #         print(diag.location)
+        #         print(diag.spelling)
+        #         print(diag.option)
 
     def on_close(self, view):
         """Remove the translation unit when view is closed
@@ -448,7 +476,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # compile if there is not tranlation unit for this view yet
         if not view.id() in self.translation_units:
             self.init_completer(view)
-
         # execute clang code completion
         complete_results = self.translation_units[view.id()].codeComplete(
             current_file_name,

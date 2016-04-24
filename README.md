@@ -10,8 +10,6 @@ The plugin uses `libclang` with its python bindings to provide clang-based autoc
 
 This plugin is intended to be easy to use. You should just add the folders your project uses to `include_dirs` list in the settings and everything should just work. If you experience problems - create an issue. I will try to respond as soon as possible.
 
-If you are an experienced python developer and find something in my code a no-go - **DO** tell me. Python is not my main language and I am always willing to learn.
-
 ## How to install ##
 Clone this repository into the folder where the packages of your Sublime Text 3 live. Then follow the OS-specific setup below:
 
@@ -70,6 +68,8 @@ The whole work seen here was originally a fork of another repository: https://gi
 However, with time this plugin has grown quite different from its origin and this is why you see it as a separate package now. Anyway, I encourage you to check out what @pl-ca has to offer and come back if you still like this plugin more.
 
 The trick with multiple `clang.cindex` files is inspired by this repo: https://github.com/griebd/clangHelper Thanks for inspiration!
+
+If you are an experienced python developer and find that something in my code sucks completely - **DO** tell me. Python is not my main language and I am always willing to learn.
 
 ## Licence ##
 ![licence](http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-1.png)

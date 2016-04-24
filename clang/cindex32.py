@@ -3106,7 +3106,7 @@ class Config:
         elif name == 'Windows':
             file = 'libclang.dll'
         else:
-            file = 'libclang.so'
+            file = 'libclang-3.3.so.1'
 
         if Config.library_path:
             file = Config.library_path + '/' + file

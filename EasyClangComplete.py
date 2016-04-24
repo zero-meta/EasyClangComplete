@@ -345,16 +345,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if (self.settings.verbose):
             print(PKG_NAME + ": compilation done.")
 
-    def on_post_save_async(self, view):
-        """After file is saved, create a tranlsation unit for it
-
-        Args:
-            view (sublime.View): current view
-
-        """
-        if self.has_valid_extension(view):
-            self.init_completer(view)
-
     def on_activated_async(self, view):
         """When view becomes active, create a translation unit for it if it 
         doesn't already have one
@@ -368,6 +358,19 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 print("view already has a completer")
                 return
             self.init_completer(view)
+
+    def on_close(self, view):
+        """Remove the translation unit when view is closed
+
+        Args:
+            view (sublime.View): current view
+
+        """
+        if view.id() in self.translation_units:
+            if self.settings.verbose:
+                print("{}: removing translation unit for view: {}".format(
+                      PKG_NAME, view.id()))
+            del self.translation_units[view.id()]
 
     def process_completions(self, complete_results):
         """Create snippet-like structures from a list of completions

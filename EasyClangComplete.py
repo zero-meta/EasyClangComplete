@@ -252,14 +252,18 @@ class EasyClangComplete(sublime_plugin.EventListener):
             Returns:
                 list(str): parsed list of includes from the file
             """
-            parsed_includes = []
+            includes = []
             folder = path.dirname(file)
             with open(file) as f:
                 content = f.readlines()
                 for line in content:
                     if line.startswith("-I"):
-                        parsed_includes.append(path.join(folder, line[2:]))
-            return parsed_includes
+                        path_to_add = line[2:].rstrip()
+                        if path.isabs(path_to_add):
+                            includes.append(path.normpath(path_to_add))
+                        else:
+                            includes.append(path.join(folder, path_to_add))
+            return includes
 
         # initialize these to nothing in case they are not present in the
         # variables
@@ -314,7 +318,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                     print("{}: .clang_complete contains includes: {}".format(
                         PKG_NAME, parsed_includes))
                 clang_include_dirs += parsed_includes
-                
+
         # print resulting include dirs
         if self.settings.verbose:
             print("{}: clang_include_dirs: {}".format(

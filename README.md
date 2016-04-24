@@ -8,11 +8,11 @@ This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++ f
 
 The plugin uses `libclang` with its python bindings to provide clang-based autocompletions.
 
-This plugin is intended be easy to use. You should just add the folders your project uses to `include_dirs` list in the settings and everything should just work. If you experience problems - create an issue. I will try to respond as soon as possible.
+This plugin is intended to be easy to use. You should just add the folders your project uses to `include_dirs` list in the settings and everything should just work. If you experience problems - create an issue. I will try to respond as soon as possible.
 
-If you are an experienced python developer and find something in my code a no-go - DO tell me. Python is not my main language and I am always willing to learn.
+If you are an experienced python developer and find something in my code a no-go - **DO** tell me. Python is not my main language and I am always willing to learn.
 
-## Installation ##
+## How to install ##
 Clone this repository into the folder where the packages of your Sublime Text 3 live. Then follow the OS-specific setup below:
 
 ##### Ubuntu #####
@@ -20,16 +20,30 @@ I have tested it on Ubuntu 14.04 and here the setup should be as simple as:
 ```bash
 sudo apt-get install clang
 ```
-You can also use a specific version of clang, e.g. `clang-3.6`. Inthis case don't forget to set the correct binary name in the settings.
+You can also use a specific version of clang, e.g. `clang-3.6`. In this case don't forget to set the correct binary name in the settings.
 
 ##### Windows #####
 I am not fluent with Windows, so help needed. If you are willing to help, either install the package and report errors or educate me of a simple way to install clang there.
 
-## Settings ##
+## Settings highlights ##
 I will only cover most important settings here.
 
+##### Sublime Settings  #####
+Make sure that sublime will actually autocomplete your code on specific characters like `>`, `.` or `:`.
+ To have this behavior you can either modify your syntax-specific settings or add to your user preferences the following lines:
+```
+    "auto_complete_triggers":
+    [
+        {
+            "characters": ".:>",
+            "selector": "source.c++ - string - comment - constant.numeric"
+        }
+    ],
+```
+
+##### EasyClangComplete Settings  #####
 - `include_dirs`:
-    + stores the locations where `clang` should be looking for external headers, e.g. `boost`, `Ros`, `Eigen`, `OpenCV`, etc.
+    + stores the locations where `clang` should be looking for external headers, e.g. `Boost`, `Ros`, `Eigen`, `OpenCV`, etc.
     + you can use placeholders like `$project_base_name` or `$project_base_path` to make includes more convenient.
     + it is absolutely ok to include a folder that does not exist. `clang` knows how to deal with it and it will neither break anything nor make things slower.
     + See [my own settings](https://github.com/niosus/config-sublime/blob/master/Packages%2FUser%2FEasyClangComplete.sublime-settings#L4) as an example if you wish.

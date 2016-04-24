@@ -42,7 +42,6 @@ class Settings:
     Attributes:
         clang_binary (string): name of clang binary to be used
         complete_all (bool): flag to trigger autocompletion on every keystroke
-        default_encoding (string): default encoding if view has none defined
         include_dirs (string[]): array of directories with headers
         include_parent_folder (bool): if true, parent will be added to 'include_dirs'
         std_flag (string): flag of the c++ std library, e.g. -std=c++11
@@ -59,11 +58,11 @@ class Settings:
     verbose = None
     include_parent_folder = None
     complete_all = None
-    default_encoding = None
     triggers = None
     include_dirs = None
     clang_binary = None
     std_flag = None
+    search_clang_complete = None
     translation_unit_module = None
 
     def __init__(self):
@@ -78,7 +77,7 @@ class Settings:
             print(PKG_NAME + ": settings successfully loaded")
 
     def load_correct_clang_version(self, clang_binary):
-        """Summary
+        """Load correct libclang version guessed from clang binary name
 
         Args:
             clang_binary (str): name of the clang binary to use
@@ -95,7 +94,7 @@ class Settings:
         except subprocess.CalledProcessError as e:
             print(PKG_NAME + ": {}".format(e))
             self.clang_binary = None
-            print(PKG_NAME + ": ERROR: make sure '{}' is in PATH."
+            print(PKG_NAME + ":ERROR: make sure '{}' is in PATH."
                   .format(clang_binary))
             return
 
@@ -127,11 +126,12 @@ class Settings:
         self.include_parent_folder = self.subl_settings.get(
             "include_parent_folder")
         self.tmp_file_path = self.subl_settings.get("tmp_file_path")
-        self.default_encoding = self.subl_settings.get("default_encoding")
         self.triggers = self.subl_settings.get("triggers")
         self.include_dirs = self.subl_settings.get("include_dirs")
         self.clang_binary = self.subl_settings.get("clang_binary")
         self.std_flag = self.subl_settings.get("std_flag")
+        self.search_clang_complete = self.subl_settings.get(
+            "search_clang_complete_file")
 
         self.subl_settings.clear_on_change(PKG_NAME)
         self.subl_settings.add_on_change(PKG_NAME, self.on_settings_changed)
@@ -156,24 +156,34 @@ class Settings:
             bool: validity of settings
         """
         if self.translation_unit_module is None:
+            print(PKG_NAME + ":ERROR: no translation unit module")
             return False
         if self.subl_settings is None:
+            print(PKG_NAME + ":ERROR: no sublime settings found")
             return False
         if self.verbose is None:
+            print(PKG_NAME + ":ERROR: no verbose flag found")
             return False
         if self.include_parent_folder is None:
+            print(PKG_NAME + ":ERROR: no parent folder include flag found")
             return False
         if self.complete_all is None:
-            return False
-        if self.default_encoding is None:
+            print(PKG_NAME + ":ERROR: no autocomplete_all flag found")
             return False
         if self.triggers is None:
+            print(PKG_NAME + ":ERROR: no triggers setting found")
             return False
         if self.include_dirs is None:
+            print(PKG_NAME + ":ERROR: no include_dirs found")
             return False
         if self.clang_binary is None:
+            print(PKG_NAME + ":ERROR: no clang_binary setting found")
             return False
         if std_flag is None:
+            print(PKG_NAME + ":ERROR: no std_flag setting found")
+            return False
+        if search_clang_complete is None:
+            print(PKG_NAME + ":ERROR: no search_clang_complete setting found")
             return False
         return True
 
@@ -187,9 +197,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
             completions available from an autocomplete async call
         completions (list): list of completions
         settings (Settings): Custom handler for settings
-        syntax_regex (regex): Regex to detect syntax
         translation_units (dict): dict of translation_units
         valid_extensions (list): list of valid extentions for autocompletion
+
+    Deleted Attributes:
+        syntax_regex (regex): Regex to detect syntax
     """
     settings = None
     translation_units = {}
@@ -210,9 +222,48 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Returns:
             str[]: directories where clang searches for header files
         """
+
+        def search_clang_complete_file(start_folder, stop_folder):
+            """search for .clang_complete file up the tree
+
+            Args:
+                start_folder (str): path to folder where we start the search
+                stop_folder (TYPE): path to folder we should not go beyond
+
+            Returns:
+                str: path to .clang_complete file or None if not found
+            """
+            current_folder = start_folder
+            one_past_stop_folder = path.dirname(stop_folder)
+            while current_folder != one_past_stop_folder:
+                for _, _, filenames in os.walk(current_folder):
+                    for file in filenames:
+                        if file.endswith(".clang_complete"):
+                            return path.join(current_folder, file)
+                current_folder = path.dirname(current_folder)
+            return None
+
+        def parse_clang_complete_file(file):
+            """parse .clang_complete file
+
+            Args:
+                file (str): path to a file
+
+            Returns:
+                list(str): parsed list of includes from the file
+            """
+            parsed_includes = []
+            folder = path.dirname(file)
+            with open(file) as f:
+                content = f.readlines()
+                for line in content:
+                    if line.startswith("-I"):
+                        parsed_includes.append(path.join(folder, line[2:]))
+            return parsed_includes
+
         # initialize these to nothing in case they are not present in the
         # variables
-        project_path = ""
+        project_base_folder = ""
         project_name = ""
         file_parent_folder = ""
         file_current_folder = ""
@@ -223,7 +274,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # these variables should be populated by sublime text
         variables = sublime.active_window().extract_variables()
         if ('folder' in variables):
-            project_path = variables['folder']
+            project_base_folder = variables['folder']
         if ('project_base_name' in variables):
             project_name = variables['project_base_name']
         if ('file' in variables):
@@ -233,7 +284,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         if (self.settings.verbose):
             print(PKG_NAME + ": project_base_name = {}".format(project_name))
-            print(PKG_NAME + ": folder = {}".format(project_path))
+            print(PKG_NAME + ": project_base_folder = {}".format(
+                project_base_folder))
             print(PKG_NAME + ": file_parent_folder = {}".format(
                 file_parent_folder))
             print(PKG_NAME + ": std_flag = {}".format(self.settings.std_flag))
@@ -241,7 +293,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # replace project related variables to real ones
         for i, include_dir in enumerate(clang_include_dirs):
             include_dir = re.sub(
-                "(\$project_base_path)", project_path, include_dir)
+                "(\$project_base_path)", project_base_folder, include_dir)
             include_dir = re.sub("(\$project_name)", project_name, include_dir)
             include_dir = os.path.abspath(include_dir)
             clang_include_dirs[i] = include_dir
@@ -250,6 +302,23 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if (self.settings.include_parent_folder):
             clang_include_dirs.append(file_parent_folder)
 
+        # support .clang_complete file with -I<indlude> entries
+        if self.settings.search_clang_complete:
+            clang_complete_file = search_clang_complete_file(
+                file_current_folder, project_base_folder)
+            if clang_complete_file:
+                if self.settings.verbose:
+                    print("{}: found {}".format(PKG_NAME, clang_complete_file))
+                parsed_includes = parse_clang_complete_file(clang_complete_file)
+                if self.settings.verbose:
+                    print("{}: .clang_complete contains includes: {}".format(
+                        PKG_NAME, parsed_includes))
+                clang_include_dirs += parsed_includes
+                
+        # print resulting include dirs
+        if self.settings.verbose:
+            print("{}: clang_include_dirs: {}".format(
+                PKG_NAME, clang_include_dirs))
         return clang_include_dirs
 
     def has_valid_extension(self, view):
@@ -342,7 +411,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 options=tu.PARSE_PRECOMPILED_PREAMBLE |
                 tu.PARSE_CACHE_COMPLETION_RESULTS)
         except Exception as e:
-            print(PKG_NAME+":", e)
+            print(PKG_NAME + ":", e)
         if (self.settings.verbose):
             print(PKG_NAME + ": compilation done.")
 

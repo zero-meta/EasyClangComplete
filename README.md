@@ -55,8 +55,10 @@ Make sure that sublime will actually autocomplete your code on specific characte
     + See [my own settings](https://github.com/niosus/config-sublime/blob/master/Packages%2FUser%2FEasyClangComplete.sublime-settings#L4) as an example if you wish.
 - `std_flag`:
     + sets the standard flag that will be used for compilation. Defaults to `std=c++11`
+- `search_clang_complete_file`:
+    + seach for `.clang_complete` file up the tree. Project folder is the last one to search for the file.
+    + If the file is found, its contents of style `-I<some_local_path>` are appended to include flags.
 - `triggers`:
-    + have you ever been annoyed by typing `3 > 2` only to find yourself waiting for completions after `>`? What about writing `case CONST:`? If you know what I am talking about you will understand how important this is.
     + defaults are `".", "::", "->"`. The autocompletion does not trigger on `>` or `:`. It also ignores float numbers like `3.14`.
 
 Please see the default settings file in the repo for more settings descriptions. Every setting in [settings file](EasyClangComplete.sublime-settings) should have an understandable comment. Should they not be clear - create an issue.

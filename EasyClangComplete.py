@@ -236,10 +236,12 @@ class EasyClangComplete(sublime_plugin.EventListener):
             current_folder = start_folder
             one_past_stop_folder = path.dirname(stop_folder)
             while current_folder != one_past_stop_folder:
-                for _, _, filenames in os.walk(current_folder):
-                    for file in filenames:
-                        if file.endswith(".clang_complete"):
+                for entries in os.listdir(current_folder):
+                    for file in entries:
+                        if file == ".clang_complete":
                             return path.join(current_folder, file)
+                if (current_folder == "/"): 
+                    break;
                 current_folder = path.dirname(current_folder)
             return None
 

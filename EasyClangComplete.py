@@ -69,11 +69,11 @@ class Settings:
         """Initialize the class.
         """
         self.load_settings()
-        if (not self.translation_unit_module):
+        if not self.translation_unit_module:
             print(PKG_NAME + ": Error encountered while loading settings.")
             print(PKG_NAME + ": NO AUTOCOMPLETION WILL BE AVAILABLE.")
             return
-        if (self.verbose):
+        if self.verbose:
             print(PKG_NAME + ": settings successfully loaded")
 
     def load_correct_clang_version(self, clang_binary):
@@ -124,8 +124,7 @@ class Settings:
         self.verbose = self.subl_settings.get("verbose")
         self.complete_all = self.subl_settings.get("autocomplete_all")
         self.include_parent_folder = self.subl_settings.get(
-            "include_parent_folder")
-        self.tmp_file_path = self.subl_settings.get("tmp_file_path")
+            "include_file_parent_folder")
         self.triggers = self.subl_settings.get("triggers")
         self.include_dirs = self.subl_settings.get("include_dirs")
         self.clang_binary = self.subl_settings.get("clang_binary")
@@ -137,10 +136,6 @@ class Settings:
         self.subl_settings.add_on_change(PKG_NAME, self.on_settings_changed)
 
         self.load_correct_clang_version(self.clang_binary)
-
-        if self.tmp_file_path is None:
-            self.tmp_file_path = path.join(
-                tempfile.gettempdir(), "auto_complete_tmp")
 
         if (self.std_flag is None):
             self.std_flag = "-std=c++11"
@@ -179,10 +174,10 @@ class Settings:
         if self.clang_binary is None:
             print(PKG_NAME + ":ERROR: no clang_binary setting found")
             return False
-        if std_flag is None:
+        if self.std_flag is None:
             print(PKG_NAME + ":ERROR: no std_flag setting found")
             return False
-        if search_clang_complete is None:
+        if self.search_clang_complete is None:
             print(PKG_NAME + ":ERROR: no search_clang_complete setting found")
             return False
         return True
@@ -240,7 +235,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                     for file in entries:
                         if file == ".clang_complete":
                             return path.join(current_folder, file)
-                if (current_folder == "/"): 
+                if (current_folder == path.dirname(current_folder)): 
                     break;
                 current_folder = path.dirname(current_folder)
             return None
@@ -285,10 +280,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             project_name = variables['project_base_name']
         if ('file' in variables):
             file_current_folder = path.dirname(variables['file'])
-            file_parent_folder = path.join(
-                path.dirname(variables['file']), "..")
+            file_parent_folder = path.dirname(file_current_folder)
 
-        if (self.settings.verbose):
+        if self.settings.verbose:
             print(PKG_NAME + ": project_base_name = {}".format(project_name))
             print(PKG_NAME + ": project_base_folder = {}".format(
                 project_base_folder))

@@ -124,7 +124,7 @@ class Settings:
         self.verbose = self.subl_settings.get("verbose")
         self.complete_all = self.subl_settings.get("autocomplete_all")
         self.include_parent_folder = self.subl_settings.get(
-            "include_parent_folder")
+            "include_file_parent_folder")
         self.tmp_file_path = self.subl_settings.get("tmp_file_path")
         self.triggers = self.subl_settings.get("triggers")
         self.include_dirs = self.subl_settings.get("include_dirs")
@@ -179,10 +179,10 @@ class Settings:
         if self.clang_binary is None:
             print(PKG_NAME + ":ERROR: no clang_binary setting found")
             return False
-        if std_flag is None:
+        if self.std_flag is None:
             print(PKG_NAME + ":ERROR: no std_flag setting found")
             return False
-        if search_clang_complete is None:
+        if self.search_clang_complete is None:
             print(PKG_NAME + ":ERROR: no search_clang_complete setting found")
             return False
         return True
@@ -211,6 +211,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
     async_completions_ready = False
     completions = []
 
+    error_regex = re.compile("'(?P<file>.+)'.*line\s(?P<line>\d+), column\s(?P<column>\d+)")
+
     def __init__(self):
         """Initialize the settings in the class
         """
@@ -228,7 +230,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
             Args:
                 start_folder (str): path to folder where we start the search
-                stop_folder (TYPE): path to folder we should not go beyond
+                stop_folder (str): path to folder we should not go beyond
 
             Returns:
                 str: path to .clang_complete file or None if not found
@@ -432,7 +434,31 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 if self.settings.verbose:
                     print(PKG_NAME + ": view already has a completer")
                 return
+            if self.settings.verbose:
+                print(PKG_NAME + ": view has no completer")
             self.init_completer(view)
+
+    def show_errors(self, view):
+        # at some point we will show errors reported by clang
+        if view.id() in self.translation_units:
+            tu = self.translation_units[view.id()]
+            regions = []
+            for diag in tu.diagnostics:
+                m = self.error_regex.search(str(diag.location))
+                pos_dict = m.groupdict()
+                print(pos_dict)
+                if (pos_dict["file"] == view.file_name()):
+                    print("file matches this")
+                    row = int(pos_dict["line"])
+                    col = int(pos_dict["column"])
+                    point = view.text_point(row-1, col-1);
+                    point_end = view.text_point(row, 0) - 2;
+                    error_region = sublime.Region(point, point_end) 
+                    regions.append(error_region)  
+                # print(diag.location)
+                # print(diag.spelling)
+                # print(diag.option)
+        view.add_regions("clang_errors", regions, "string")     
 
     def on_post_save_async(self, view):
         """On save we want to reparse the tu
@@ -446,19 +472,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 self.translation_units[view.id()].reparse()
                 if self.settings.verbose:
                     print(PKG_NAME + ": reparsed translation unit")
+                self.show_errors(view)
                 return
             # if there is none - generate a new one
             self.init_completer(view)
-
-        # # at some point we will show errors reported by clang
-        # if view.id() in self.translation_units:
-        #     tu = self.translation_units[view.id()]
-        #     print(len(tu.diagnostics))
-        #     for diag in tu.diagnostics:
-        #         print(diag.severity)
-        #         print(diag.location)
-        #         print(diag.spelling)
-        #         print(diag.option)
 
     def on_close(self, view):
         """Remove the translation unit when view is closed

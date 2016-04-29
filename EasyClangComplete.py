@@ -38,19 +38,23 @@ cindex_dict = {
 class Settings:
 
     """class that encapsulates sublime settings
-
+    
     Attributes:
         clang_binary (string): name of clang binary to be used
         complete_all (bool): flag to trigger autocompletion on every keystroke
+        errors_on_save (TYPE): Description
         include_dirs (string[]): array of directories with headers
-        include_parent_folder (bool): if true, parent will be added to 'include_dirs'
+        include_parent_folder (bool): if true, parent is added to 'include_dirs'
+        search_clang_complete (TYPE): Description
         std_flag (string): flag of the c++ std library, e.g. -std=c++11
         subl_settings (sublime.settings): link to sublime text settings dict
-        tmp_file_path (string): name of a temp file
         translation_unit_module (cindex.translation_unit): translation unit that 
                                                           handles autocompletion
         triggers (string[]): triggers that trigger autocompletion
         verbose (bool): verbose flag
+    
+    Deleted Attributes:
+        tmp_file_path (string): name of a temp file
     """
     translation_unit_module = None
 
@@ -79,10 +83,10 @@ class Settings:
 
     def load_correct_clang_version(self, clang_binary):
         """Load correct libclang version guessed from clang binary name
-
+        
         Args:
             clang_binary (str): name of the clang binary to use
-
+        
         """
         if not clang_binary:
             if (self.verbose):
@@ -155,7 +159,7 @@ class Settings:
     def is_valid(self):
         """Check settings validity. If any of the settings is None the settings
         are not valid.
-
+        
         Returns:
             bool: validity of settings
         """
@@ -198,15 +202,18 @@ class Settings:
 class EasyClangComplete(sublime_plugin.EventListener):
 
     """Class that handles clang based auto completion
-
+    
     Attributes:
         async_completions_ready (bool): flag that shows if there are 
             completions available from an autocomplete async call
         completions (list): list of completions
+        err_msg_regex (TYPE): Description
+        err_pos_regex (TYPE): Description
+        err_regions (dict): Description
         settings (Settings): Custom handler for settings
         translation_units (dict): dict of translation_units
         valid_extensions (list): list of valid extentions for autocompletion
-
+    
     Deleted Attributes:
         syntax_regex (regex): Regex to detect syntax
     """
@@ -218,9 +225,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
     async_completions_ready = False
     completions = []
 
-    err_pos_regex = re.compile("'(?P<file>.+)'.*" # file
-                               + "line\s(?P<row>\d+), " # row
-                               + "column\s(?P<col>\d+)") #col
+    err_pos_regex = re.compile("'(?P<file>.+)'.*"  # file
+                               + "line\s(?P<row>\d+), "  # row
+                               + "column\s(?P<col>\d+)")  # col
     err_msg_regex = re.compile("b\"(?P<error>.+)\"")
     err_regions = {}
 
@@ -231,18 +238,18 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def populate_include_dirs(self):
         """populate the include dirs based on the project
-
+        
         Returns:
             str[]: directories where clang searches for header files
         """
 
         def search_clang_complete_file(start_folder, stop_folder):
             """search for .clang_complete file up the tree
-
+            
             Args:
                 start_folder (str): path to folder where we start the search
                 stop_folder (str): path to folder we should not go beyond
-
+            
             Returns:
                 str: path to .clang_complete file or None if not found
             """
@@ -252,17 +259,17 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 for file in os.listdir(current_folder):
                     if file == ".clang_complete":
                         return path.join(current_folder, file)
-                if (current_folder == path.dirname(current_folder)): 
-                    break;
+                if (current_folder == path.dirname(current_folder)):
+                    break
                 current_folder = path.dirname(current_folder)
             return None
 
         def parse_clang_complete_file(file):
             """parse .clang_complete file
-
+            
             Args:
                 file (str): path to a file
-
+            
             Returns:
                 list(str): parsed list of includes from the file
             """
@@ -326,7 +333,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
             if clang_complete_file:
                 if self.settings.verbose:
                     print("{}: found {}".format(PKG_NAME, clang_complete_file))
-                parsed_includes = parse_clang_complete_file(clang_complete_file)
+                parsed_includes = parse_clang_complete_file(
+                    clang_complete_file)
                 if self.settings.verbose:
                     print("{}: .clang_complete contains includes: {}".format(
                         PKG_NAME, parsed_includes))
@@ -340,10 +348,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def has_valid_extension(self, view):
         """Test if the current file has a valid extension
-
+        
         Args:
             view (sublime.View): current view
-
+        
         Returns:
             bool: extension is valid
         """
@@ -360,11 +368,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def needs_autocompletion(self, point, view):
         """Check if the cursor focuses a valid trigger
-
+        
         Args:
             point (int): position of the cursor in the file as defined by subl
             view (sublime.View): current view
-
+        
         Returns:
             bool: trigger is valid
         """
@@ -396,12 +404,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def init_completer(self, view):
         """Initialize the completer
-
+        
         Args:
-            view (TYPE): Description
-
-        Returns:
-            TYPE: Description
+            view (sublime.View): Description
         """
         # init settings if they were not initialized still
         if (self.settings is None) or (self.settings.is_valid() is False):
@@ -437,10 +442,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
     def on_activated_async(self, view):
         """When view becomes active, create a translation unit for it if it 
         doesn't already have one
-
+        
         Args:
             view (sublime.View): current view
-
+        
         """
         if self.has_valid_extension(view):
             if view.id() in self.translation_units:
@@ -452,6 +457,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
             self.init_completer(view)
 
     def err_regions_list(self, err_regions_dict):
+        """Make a list from error region dict
+        
+        Args:
+            err_regions_dict (dict): dict of error regions for current view
+        
+        Returns:
+            list(Region): list of regions to show on sublime view 
+        """
         region_list = []
         for errors_list in err_regions_dict.values():
             for error in errors_list:
@@ -460,18 +473,28 @@ class EasyClangComplete(sublime_plugin.EventListener):
         return region_list
 
     def show_errors(self, view, current_error_dict):
+        """Show current error regions
+        
+        Args:
+            view (sublime.View): Current view
+            current_error_dict (dict): error dict for current view
+        """
         regions = self.err_regions_list(current_error_dict)
-        print("showing errors")
-        view.add_regions("clang_errors", regions, "string")  
-        print(self.err_regions)  
+        view.add_regions("clang_errors", regions, "string")
 
     def generate_errors_dict(self, view):
+        """Generate a dictionary that stores all errors along with their
+        positions and descriptions. Needed to show these errors on the screen.
+        
+        Args:
+            view (sublime.View): current view
+        """
         # first clear old regions
         if view.id() in self.err_regions:
             del self.err_regions[view.id()]
         # create an empty region dict for view id
         self.err_regions[view.id()] = {}
-        
+
         # create new ones
         if view.id() in self.translation_units:
             tu = self.translation_units[view.id()]
@@ -487,7 +510,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 if (error_dict['file'] == view.file_name()):
                     row = int(error_dict['row'])
                     col = int(error_dict['col'])
-                    point = view.text_point(row-1, col-1);
+                    point = view.text_point(row - 1, col - 1)
                     error_dict['region'] = view.word(point)
                     if (row in self.err_regions[view.id()]):
                         self.err_regions[view.id()][row] += [error_dict]
@@ -495,20 +518,34 @@ class EasyClangComplete(sublime_plugin.EventListener):
                         self.err_regions[view.id()][row] = [error_dict]
 
     def get_correct_cursor_pos(self, view):
+        """Get current cursor position. Returns position of the first cursor if
+        multiple are present
+        
+        Args:
+            view (sublime.View): current view
+        
+        Returns:
+            (row, col): tuple of row and col for cursor position
+        """
         pos = view.sel()
-        if (len(pos) > 1):
-            # we do not mess with multiple cursors
+        if (len(pos) < 1):
+            # something is wrong
             return None
         (row, col) = view.rowcol(pos[0].a)
-        row += 1 
+        row += 1
         col += 1
         return (row, col)
 
     def on_selection_modified(self, view):
+        """Called when selection is modified
+        
+        Args:
+            view (sublime.View): current view
+        """
         if view.id() not in self.err_regions:
             return
         (row, col) = self.get_correct_cursor_pos(view)
-        current_err_region_dict = self.err_regions[view.id()];
+        current_err_region_dict = self.err_regions[view.id()]
         if (row in current_err_region_dict):
             errors_dict = current_err_region_dict[row]
             errors_html = ""
@@ -519,8 +556,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
             print("key: {} not in error regions".format(row))
 
     def on_modified_async(self, view):
+        """called in a worker thread when view is modified
+        
+        Args:
+            view (sublime.View): current view
+        """
         if view.id() not in self.err_regions:
-            print ("view id: {} has no error regions".format(view.id()))
+            print("view id: {} has no error regions".format(view.id()))
             return
         (row, col) = self.get_correct_cursor_pos(view)
         view.hide_popup()
@@ -528,14 +570,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
             print("removing row", row)
             del self.err_regions[view.id()][row]
         if self.err_regions[view.id()]:
-            self.show_errors(view, self.err_regions[view.id()]);
+            self.show_errors(view, self.err_regions[view.id()])
 
     def on_post_save_async(self, view):
-        """On save we want to reparse the tu
-
+        """On save we want to reparse the translation unit
+        
         Args:
             view (sublime.View): current view
-
+        
         """
         if self.has_valid_extension(view):
             if view.id() in self.translation_units:
@@ -545,7 +587,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 self.translation_units[view.id()].reparse()
                 if self.settings.verbose:
                     print("{}: reparsed translation unit in {} sec".format(
-                                    PKG_NAME, time.time() - start))
+                        PKG_NAME, time.time() - start))
                 if self.settings.errors_on_save:
                     self.generate_errors_dict(view)
                     self.show_errors(view, self.err_regions[view.id()])
@@ -555,10 +597,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def on_close(self, view):
         """Remove the translation unit when view is closed
-
+        
         Args:
             view (sublime.View): current view
-
+        
         """
         if view.id() in self.translation_units:
             if self.settings.verbose:
@@ -568,10 +610,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def process_completions(self, complete_results):
         """Create snippet-like structures from a list of completions
-
+        
         Args:
             complete_results (list): raw completions list
-
+        
         Returns:
             list: updated completions
         """
@@ -603,10 +645,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
     def reload_completions(self, view):
         """Ask sublime to reload the completions. Needed to update the active 
         completion list when async autocompletion task has finished.
-
+        
         Args:
             view (sublime.View): current_view
-
+        
         """
         view.run_command('hide_auto_complete')
         view.run_command('auto_complete', {
@@ -618,11 +660,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """This function is called asynchronously to create a list of
         autocompletions. Using the current translation unit it queries libclang
         about the possible completions.
-
+        
         Args:
             view (sublime.View): current view
             cursor_pos (int): sublime provided poistion of the cursor
-
+        
         """
         # init settings if they were not initialized yet
         if (self.settings is None) or (self.settings.is_valid() is False):
@@ -657,13 +699,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code
-
+        
         Args:
             view (sublime.View): current view
             prefix (TYPE): Description
             locations (list[int]): positions of the cursor. 
                                    Only locations[0] is considered here.
-
+        
         Returns:
             sublime.Completions: completions with a flag
         """

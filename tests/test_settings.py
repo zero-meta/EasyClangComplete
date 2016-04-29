@@ -2,17 +2,7 @@ import sublime
 import sys
 from unittest import TestCase
 
-version = sublime.version()
-
-
-# for testing internal function
-if version < '3000':
-    # st2
-    easy_clang_complete = sys.modules["EasyClangComplete"]
-else:
-    # st3
-    easy_clang_complete = sys.modules["EasyClangComplete.EasyClangComplete"]
-
+easy_clang_complete = sys.modules["EasyClangComplete.EasyClangComplete"]
 
 class test_settings(TestCase):
 

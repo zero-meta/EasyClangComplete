@@ -106,7 +106,12 @@ class Settings:
         if (self.verbose):
             print(PKG_NAME + ": found a cindex for clang v: " + version_str)
         if (version_str in cindex_dict):
-            cindex = importlib.import_module(cindex_dict[version_str])
+            try:
+                # should work if python bindings are installed
+                import clang.cindex
+            except Exception, e:
+                # should work for other cases
+                cindex = importlib.import_module(cindex_dict[version_str])
             self.translation_unit_module = cindex.TranslationUnit
 
     def on_settings_changed(self):

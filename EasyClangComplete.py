@@ -63,6 +63,7 @@ class Settings:
     clang_binary = None
     std_flag = None
     search_clang_complete = None
+    errors_on_save = None
     translation_unit_module = None
 
     def __init__(self):
@@ -128,6 +129,7 @@ class Settings:
         self.triggers = self.subl_settings.get("triggers")
         self.include_dirs = self.subl_settings.get("include_dirs")
         self.clang_binary = self.subl_settings.get("clang_binary")
+        self.errors_on_save = self.subl_settings.get("errors_on_save")
         self.std_flag = self.subl_settings.get("std_flag")
         self.search_clang_complete = self.subl_settings.get(
             "search_clang_complete_file")
@@ -179,6 +181,9 @@ class Settings:
             return False
         if self.search_clang_complete is None:
             print(PKG_NAME + ":ERROR: no search_clang_complete setting found")
+            return False
+        if self.errors_on_save is None:
+            print(PKG_NAME + ":ERROR: no errors_on_save setting found")
             return False
         return True
 
@@ -237,10 +242,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             current_folder = start_folder
             one_past_stop_folder = path.dirname(stop_folder)
             while current_folder != one_past_stop_folder:
-                for entries in os.listdir(current_folder):
-                    for file in entries:
-                        if file == ".clang_complete":
-                            return path.join(current_folder, file)
+                for file in os.listdir(current_folder):
+                    if file == ".clang_complete":
+                        return path.join(current_folder, file)
                 if (current_folder == path.dirname(current_folder)): 
                     break;
                 current_folder = path.dirname(current_folder)
@@ -495,7 +499,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def on_selection_modified(self, view):
         if view.id() not in self.err_regions:
-            print ("view id: {} has no error regions".format(view.id()))
             return
         (row, col) = self.get_correct_cursor_pos(view)
         current_err_region_dict = self.err_regions[view.id()];
@@ -536,8 +539,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 if self.settings.verbose:
                     print("{}: reparsed translation unit in {} sec".format(
                                     PKG_NAME, time.time() - start))
-                self.generate_errors_dict(view)
-                self.show_errors(view, self.err_regions[view.id()])
+                if self.settings.errors_on_save:
+                    self.generate_errors_dict(view)
+                    self.show_errors(view, self.err_regions[view.id()])
                 return
             # if there is none - generate a new one
             self.init_completer(view)

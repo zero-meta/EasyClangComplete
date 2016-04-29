@@ -206,7 +206,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
     async_completions_ready = False
     completions = []
 
-    error_regex = re.compile("'(?P<file>.+)'.*line\s(?P<line>\d+), column\s(?P<column>\d+)")
+    err_pos_regex = re.compile("'(?P<file>.+)'.*" # file
+                               + "line\s(?P<row>\d+), " # row
+                               + "column\s(?P<col>\d+)") #col
+    err_msg_regex = re.compile("b\"(?P<error>.+)\"")
+    err_regions = {}
 
     def __init__(self):
         """Initialize the settings in the class
@@ -434,27 +438,80 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 print(PKG_NAME + ": view has no completer")
             self.init_completer(view)
 
-    def show_errors(self, view):
-        # at some point we will show errors reported by clang
+    def err_regions_list(self, err_regions_dict):
+        region_list = []
+        for errors_list in err_regions_dict.values():
+            for error in errors_list:
+                region_list.append(error['region'])
+        print(region_list)
+        return region_list
+
+    def show_errors(self, view, current_error_dict):
+        regions = self.err_regions_list(current_error_dict)
+        print("showing errors")
+        view.add_regions("clang_errors", regions, "string")  
+        print(self.err_regions)  
+
+    def generate_errors_dict(self, view):
+        # first clear old regions
+        if view.id() in self.err_regions:
+            del self.err_regions[view.id()]
+        # create an empty region dict for view id
+        self.err_regions[view.id()] = {}
+        
+        # create new ones
         if view.id() in self.translation_units:
             tu = self.translation_units[view.id()]
-            regions = []
             for diag in tu.diagnostics:
-                m = self.error_regex.search(str(diag.location))
-                pos_dict = m.groupdict()
-                print(pos_dict)
-                if (pos_dict["file"] == view.file_name()):
-                    print("file matches this")
-                    row = int(pos_dict["line"])
-                    col = int(pos_dict["column"])
+                location_search = self.err_pos_regex.search(str(diag.location))
+                error_dict = location_search.groupdict()
+                m = self.err_msg_regex.search(str(diag.spelling))
+                error_dict.update(m.groupdict())
+                if (error_dict['file'] == view.file_name()):
+                    row = int(error_dict['row'])
+                    col = int(error_dict['col'])
                     point = view.text_point(row-1, col-1);
-                    point_end = view.text_point(row, 0) - 2;
-                    error_region = sublime.Region(point, point_end) 
-                    regions.append(error_region)  
-                # print(diag.location)
-                # print(diag.spelling)
-                # print(diag.option)
-        view.add_regions("clang_errors", regions, "string")     
+                    error_dict['region'] = view.word(point)
+                    if (row in self.err_regions[view.id()]):
+                        self.err_regions[view.id()][row] += [error_dict]
+                    else:
+                        self.err_regions[view.id()][row] = [error_dict]
+
+    def get_correct_cursor_pos(self, view):
+        pos = view.sel()
+        if (len(pos) > 1):
+            # we do not mess with multiple cursors
+            return None
+        (row, col) = view.rowcol(pos[0].a)
+        row += 1 
+        col += 1
+        return (row, col)
+
+    def on_selection_modified(self, view):
+        if view.id() not in self.err_regions:
+            print ("view id: {} not in regions".format(view.id()))
+            return
+        (row, col) = self.get_correct_cursor_pos(view)
+        current_err_region_dict = self.err_regions[view.id()];
+        if (row in current_err_region_dict):
+            errors_dict = current_err_region_dict[row]
+            errors_html = ""
+            for entry in errors_dict:
+                errors_html += "<p><tt>" + entry['error'] + "</tt></p>"
+            view.show_popup(errors_html)
+        else:
+            print("key: {} not in error regions".format(row))
+
+    def on_modified_async(self, view):
+        if view.id() not in self.err_regions:
+            print ("view id: {} has no error regions".format(view.id()))
+            return
+        (row, col) = self.get_correct_cursor_pos(view)
+        view.hide_popup()
+        if row in self.err_regions[view.id()]:
+            print("removing row", row)
+            del self.err_regions[view.id()][row]
+        self.show_errors(self.err_regions[view.id()]);
 
     def on_post_save_async(self, view):
         """On save we want to reparse the tu
@@ -468,7 +525,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 self.translation_units[view.id()].reparse()
                 if self.settings.verbose:
                     print(PKG_NAME + ": reparsed translation unit")
-                self.show_errors(view)
+                self.generate_errors_dict(view)
+                self.show_errors(view, self.err_regions[view.id()])
                 return
             # if there is none - generate a new one
             self.init_completer(view)

@@ -52,6 +52,7 @@ class Settings:
         triggers (string[]): triggers that trigger autocompletion
         verbose (bool): verbose flag
     """
+    translation_unit_module = None
 
     subl_settings = None
 
@@ -64,7 +65,6 @@ class Settings:
     std_flag = None
     search_clang_complete = None
     errors_on_save = None
-    translation_unit_module = None
 
     def __init__(self):
         """Initialize the class.

@@ -108,9 +108,11 @@ class Settings:
         if (version_str in cindex_dict):
             try:
                 # should work if python bindings are installed
-                import clang.cindex
-            except Exception, e:
+                cindex = importlib.import_module("clang.cindex")
+            except Exception as e:
                 # should work for other cases
+                print("cannot get default clang with error:", e)
+                print("getting bundled one")
                 cindex = importlib.import_module(cindex_dict[version_str])
             self.translation_unit_module = cindex.TranslationUnit
 

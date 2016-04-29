@@ -13,6 +13,9 @@
 	// search for .clang_complete file up the tree. Use includes from it if found
 	"search_clang_complete_file": true,
 
+	// show compile errors on save
+	"errors_on_save": true,
+
 	// triggers for auto-completion
 	"triggers" : [ ".", "->", "::"],
 

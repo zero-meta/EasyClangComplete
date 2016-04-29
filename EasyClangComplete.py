@@ -409,6 +409,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
             clang_includes.append("-I" + include)
 
         try:
+            if (self.settings.verbose):
+                print(PKG_NAME + ": compilation started.")
             tu = self.settings.translation_unit_module
             self.translation_units[view.id()] = tu.from_source(
                 view.file_name(),
@@ -464,9 +466,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
             tu = self.translation_units[view.id()]
             for diag in tu.diagnostics:
                 location_search = self.err_pos_regex.search(str(diag.location))
+                if not location_search:
+                    continue
                 error_dict = location_search.groupdict()
-                m = self.err_msg_regex.search(str(diag.spelling))
-                error_dict.update(m.groupdict())
+                msg_search = self.err_msg_regex.search(str(diag.spelling))
+                if not msg_search:
+                    continue
+                error_dict.update(msg_search.groupdict())
                 if (error_dict['file'] == view.file_name()):
                     row = int(error_dict['row'])
                     col = int(error_dict['col'])
@@ -489,7 +495,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def on_selection_modified(self, view):
         if view.id() not in self.err_regions:
-            print ("view id: {} not in regions".format(view.id()))
+            print ("view id: {} has no error regions".format(view.id()))
             return
         (row, col) = self.get_correct_cursor_pos(view)
         current_err_region_dict = self.err_regions[view.id()];
@@ -511,7 +517,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if row in self.err_regions[view.id()]:
             print("removing row", row)
             del self.err_regions[view.id()][row]
-        self.show_errors(self.err_regions[view.id()]);
+        if self.err_regions[view.id()]:
+            self.show_errors(view, self.err_regions[view.id()]);
 
     def on_post_save_async(self, view):
         """On save we want to reparse the tu
@@ -522,9 +529,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         if self.has_valid_extension(view):
             if view.id() in self.translation_units:
+                if self.settings.verbose:
+                    start = time.time()
+                    print(PKG_NAME + ": reparsing translation unit")
                 self.translation_units[view.id()].reparse()
                 if self.settings.verbose:
-                    print(PKG_NAME + ": reparsed translation unit")
+                    print("{}: reparsed translation unit in {} sec".format(
+                                    PKG_NAME, time.time() - start))
                 self.generate_errors_dict(view)
                 self.show_errors(view, self.err_regions[view.id()])
                 return

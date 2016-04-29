@@ -21,7 +21,7 @@ class test_settings(TestCase):
         self.assertIsNotNone(settings.subl_settings)
         self.assertIsNotNone(settings.translation_unit_module)
 
-        self.assertIsNotNone(settings.verbose)
+        self.assertIsNone(settings.verbose)
         self.assertIsNotNone(settings.include_parent_folder)
         self.assertIsNotNone(settings.triggers)
         self.assertIsNotNone(settings.include_dirs)

@@ -5,9 +5,6 @@ import os.path as path
 
 from .tools import PKG_NAME
 
-print(PKG_NAME)
-
-
 class Settings:
 
     """class that encapsulates sublime settings

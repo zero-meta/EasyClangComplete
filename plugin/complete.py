@@ -58,7 +58,7 @@ class CompleteHelper:
         version_regex = re.compile("\d.\d")
         found = version_regex.search(output_text)
         CompleteHelper.version_str = found.group()
-        if CompleteHelper.version_str > "3.8" and platform.system == "Darwin":
+        if CompleteHelper.version_str > "3.8" and platform.system() == "Darwin":
             # to the best of my knowledge this is the last one available on macs
             # but it is a hack, yes
             CompleteHelper.version_str = "3.7"

@@ -10,7 +10,7 @@ CompleteHelper = easy_clang_complete.plugin.complete.CompleteHelper
 # for testing sublime command
 
 
-class test_tools_command(TestCase):
+class test_complete_command(TestCase):
 
     def setUp(self):
         self.view = sublime.active_window().new_file()

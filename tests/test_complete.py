@@ -39,6 +39,6 @@ class test_tools_command(TestCase):
     def test_init(self):
         completer = CompleteHelper("clang++", verbose=False)
         self.assertIsNotNone(CompleteHelper.version_str)
-        self.assertEqual(CompleteHelper.version_str, "3.4")
         self.assertIsNotNone(CompleteHelper.tu_module)
+        self.debug("test")
 

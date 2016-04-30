@@ -8,6 +8,8 @@ easy_clang_complete = sys.modules["EasyClangComplete"]
 CompleteHelper = easy_clang_complete.plugin.complete.CompleteHelper
 
 # for testing sublime command
+
+
 class test_tools_command(TestCase):
 
     def setUp(self):
@@ -25,13 +27,14 @@ class test_tools_command(TestCase):
     def setText(self, string):
         self.view.run_command("insert", {"characters": string})
 
-    def appendText(self, string, scroll_to_end = True):
-        self.view.run_command("append", {"characters": string, 
-                              "scroll_to_end": scroll_to_end})
+    def appendText(self, string, scroll_to_end=True):
+        self.view.run_command("append", {"characters": string,
+                                         "scroll_to_end": scroll_to_end})
 
-    def move(self, dist, forward = True):
+    def move(self, dist, forward=True):
         for i in range(dist):
-          self.view.run_command("move", {"by": "characters", "forward": forward})
+            self.view.run_command(
+                "move", {"by": "characters", "forward": forward})
 
     def getRow(self, row):
         return self.view.substr(self.view.line(self.view.text_point(row, 0)))
@@ -40,5 +43,3 @@ class test_tools_command(TestCase):
         completer = CompleteHelper("clang++", verbose=False)
         self.assertIsNotNone(CompleteHelper.version_str)
         self.assertIsNotNone(CompleteHelper.tu_module)
-        self.debug("test")
-

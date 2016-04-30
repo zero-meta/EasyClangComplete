@@ -67,7 +67,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
     """
 
     # TODO: this should be probably in plugin_settings
-    valid_extensions = [".c", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
+    valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
 
     def has_valid_extension(self, view):
         """Test if the current file has a valid extension

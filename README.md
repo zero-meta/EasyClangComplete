@@ -74,6 +74,8 @@ However, with time this plugin has grown quite different from its origin and thi
 
 The trick with multiple `clang.cindex` files is inspired by this repo: https://github.com/griebd/clangHelper Thanks for inspiration!
 
+Test support is done as in [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin.
+
 If you are an experienced python developer and find that something in my code sucks completely - **DO** tell me. Python is not my main language and I am always willing to learn.
 
 ## Licence ##

@@ -32,7 +32,7 @@ You can also use a specific version of clang, e.g. `clang-3.6`. In this case don
 I am not fluent with Windows, so help needed. The plugin should work out of the box provided you have clang set up, but this needs testing and probably minor tweaks. If you are willing to help, either install the package and report errors or educate me of a simple way to install clang on Windows ^_^.
 
 ##### Mac  #####
-Unfortunately I do not own a mac. Trying to build unit tests led me to an error with getting `clang.cindex`. So for now it doesn't work on a mac. Looking for help with this. The test failed like this: https://travis-ci.org/niosus/EasyClangComplete/jobs/126671957
+Unfortunately I do not own a mac. The unit tests seem to pass on an `OSX` instance. But there is a hack. I set the version of python bindings to `3.7` by hand. There is not simple way of knowing which version the internal `OSX` `clang` corresponds to in `LLVM` versioning scheme. But do correct me if I am wrong.
 
 ## Settings highlights ##
 I will only cover most important settings here.

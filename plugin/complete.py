@@ -57,7 +57,8 @@ class CompleteHelper:
         version_regex = re.compile("\d.\d")
         found = version_regex.search(output_text)
         CompleteHelper.version_str = found.group()
-
+        if CompleteHelper.version_str > "3.8":
+            CompleteHelper.version_str = "3.8"
         if verbose:
             print(PKG_NAME + ": found a cindex for clang v: "
                   + CompleteHelper.version_str)

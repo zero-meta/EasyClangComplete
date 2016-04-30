@@ -20,7 +20,7 @@ cindex_dict = {
 }
 
 
-class CompleteHelper(object):
+class CompleteHelper:
     """docstring for CompleteHelper"""
 
     tu_module = None
@@ -73,6 +73,18 @@ class CompleteHelper(object):
                         PKG_NAME, cindex_dict[version_str]))
                 cindex = importlib.import_module(cindex_dict[version_str])
             self.tu_module = cindex.TranslationUnit
+
+    def get_diagnostics(self, view_id):
+        if view_id not in self.translation_units:
+            # no tu for this view
+            return None
+        return self.translation_units[view_id].diagnostics
+
+    def remove_tu(self, view_id, verbose):
+        if view_id not in self.translation_units:
+            # nothing to remove
+            return
+        del self.translation_units[view_id]
 
     def init_completer(self, view_id, initial_includes, search_include_file, std_flag,
                        file_name, file_body, project_base_folder, verbose):

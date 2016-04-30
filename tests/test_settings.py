@@ -44,7 +44,7 @@ class test_settings(TestCase):
                                        path.abspath(path.curdir))
         self.assertLess(len(initial_dirs), len(dirs))
         self.assertEqual(dirs[0], path.abspath(project_name+"/src"))
-        self.assertEqual(dirs[1], "/test/test")
+        self.assertEqual(dirs[1], initial_dirs[1])
         self.assertEqual(dirs[2], path.realpath(__file__))
         self.assertEqual(dirs[3], path.abspath(path.dirname(path.curdir)))
 

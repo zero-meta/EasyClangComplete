@@ -1,13 +1,16 @@
 import sublime
 import sys
+from os import path
 from unittest import TestCase
 
-easy_clang_complete = sys.modules["EasyClangComplete.EasyClangComplete"]
+easy_clang_complete = sys.modules["EasyClangComplete"]
+
+Settings = easy_clang_complete.plugin.settings.Settings
 
 class test_settings(TestCase):
 
     def test_init(self):
-        settings = easy_clang_complete.settings.Settings()
+        settings = Settings()
         self.assertIsNotNone(settings.subl_settings)
 
         self.assertIsNotNone(settings.verbose)
@@ -21,5 +24,29 @@ class test_settings(TestCase):
         self.assertIsNotNone(settings.errors_on_save)
 
     def test_valid(self):
-        settings = easy_clang_complete.settings.Settings()
+        settings = Settings()
         self.assertTrue(settings.is_valid())
+
+    def test_populate_includes(self):
+        settings = Settings()
+        self.assertTrue(settings.is_valid())
+        settings.include_file_folder = True
+        settings.include_parent_folder = True
+        project_name = "PROJECT"
+
+        settings.include_dirs = [
+            "$project_name/src",
+            "/test/test"
+        ]
+        initial_dirs = list(settings.include_dirs)
+        dirs = settings.populate_include_dirs(project_name, "", 
+                                       path.realpath(__file__), 
+                                       path.abspath(path.curdir))
+        self.assertLess(len(initial_dirs), len(dirs))
+        self.assertEqual(dirs[0], path.abspath(project_name+"/src"))
+        self.assertEqual(dirs[1], "/test/test")
+        self.assertEqual(dirs[2], path.realpath(__file__))
+        self.assertEqual(dirs[3], path.abspath(path.dirname(path.curdir)))
+
+
+

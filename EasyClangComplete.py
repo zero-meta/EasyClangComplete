@@ -10,13 +10,7 @@ Attributes:
 import sublime
 import sublime_plugin
 import os
-import ntpath
-import subprocess
-import codecs
-import re
-import tempfile
 import time
-import imp
 import importlib
 import sys
 import os.path as path
@@ -29,7 +23,7 @@ from .plugin import tools
 from .plugin import error_vis
 from .plugin.tools import PKG_NAME
 
-
+# reload the modules
 imp.reload(tools)
 imp.reload(complete)
 imp.reload(settings)
@@ -156,8 +150,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
                                            project_base_folder=project_base_folder,
                                            verbose=plugin_settings.verbose)
 
-    
-
     def on_selection_modified(self, view):
         """Called when selection is modified
 
@@ -173,10 +165,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
-        view.hide_popup()
-        (row, col) = SublBridge.cursor_pos(view)
-        compile_errors.remove_region(view.id(), row)
-        compile_errors.show_regions(view)
+        compile_errors.clear(view)
 
     def on_post_save_async(self, view):
         """On save we want to reparse the translation unit
@@ -203,7 +192,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
-        complete_helper.remove_tu(view.id())
+        complete_helper.remove_tu(view.id(), plugin_settings.verbose)
 
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code

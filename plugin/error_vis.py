@@ -77,6 +77,14 @@ class CompileErrors:
       else:
           print("key: {} not in error regions".format(row))
 
+    def clear(self, view):
+        if view.id() not in self.err_regions:
+            # no errors for this view
+            return
+        view.hide_popup()
+        self.erase_regions(view)
+        self.err_regions[view.id()].clear()
+
     def remove_region(self, view_id, row):
       if view_id not in self.err_regions:
         # no errors for this view
@@ -108,6 +116,5 @@ class CompileErrors:
         for errors_list in err_regions_dict.values():
             for error in errors_list:
                 region_list.append(error['region'])
-        print(region_list)
         return region_list
 

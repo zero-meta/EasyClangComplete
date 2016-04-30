@@ -150,7 +150,7 @@ class Settings:
             include_dir = re.sub(
                 "(\$project_base_path)", project_base_folder, include_dir)
             include_dir = re.sub("(\$project_name)", project_name, include_dir)
-            include_dir = os.path.abspath(include_dir)
+            include_dir = path.abspath(include_dir)
             include_dirs[i] = include_dir
 
         if self.include_file_folder:

@@ -24,6 +24,7 @@ class CompleteHelper:
     """docstring for CompleteHelper"""
 
     tu_module = None
+    version_str = None
 
     completions = []
     translation_units = {}
@@ -48,7 +49,6 @@ class CompleteHelper:
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             print(PKG_NAME + ": {}".format(e))
-            self.clang_binary = None
             print(PKG_NAME + ": ERROR: make sure '{}' is in PATH."
                   .format(clang_binary))
             return
@@ -56,11 +56,12 @@ class CompleteHelper:
         # now we have the output, and can extract version from it
         version_regex = re.compile("\d.\d")
         found = version_regex.search(output_text)
-        version_str = found.group()
+        CompleteHelper.version_str = found.group()
 
         if verbose:
-            print(PKG_NAME + ": found a cindex for clang v: " + version_str)
-        if version_str in cindex_dict:
+            print(PKG_NAME + ": found a cindex for clang v: "
+                  + CompleteHelper.version_str)
+        if CompleteHelper.version_str in cindex_dict:
             try:
                 # should work if python bindings are installed
                 cindex = importlib.import_module("clang.cindex")
@@ -70,9 +71,10 @@ class CompleteHelper:
                     print("{}: cannot get default clang with error: {}".format(
                         PKG_NAME, e))
                     print("{}: getting bundled one: {}".format(
-                        PKG_NAME, cindex_dict[version_str]))
-                cindex = importlib.import_module(cindex_dict[version_str])
-            self.tu_module = cindex.TranslationUnit
+                        PKG_NAME, cindex_dict[CompleteHelper.version_str]))
+                cindex = importlib.import_module(
+                    cindex_dict[CompleteHelper.version_str])
+            CompleteHelper.tu_module = cindex.TranslationUnit
 
     def get_diagnostics(self, view_id):
         if view_id not in self.translation_units:
@@ -118,7 +120,7 @@ class CompleteHelper:
             clang_includes.append("-I" + include)
 
         try:
-            TU = self.tu_module
+            TU = CompleteHelper.tu_module
             if verbose:
                 print(PKG_NAME + ": compilation started.")
             self.translation_units[view_id] = TU.from_source(
@@ -161,7 +163,8 @@ class CompleteHelper:
             print("no completions")
             return None
 
-        self.completions = CompleteHelper._process_completions(complete_results)
+        self.completions = CompleteHelper._process_completions(
+            complete_results)
         self.async_completions_ready = True
         CompleteHelper._reload_completions(view)
 

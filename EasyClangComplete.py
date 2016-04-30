@@ -10,6 +10,7 @@ Attributes:
 import sublime
 import sublime_plugin
 import os
+import imp
 import time
 import importlib
 import sys

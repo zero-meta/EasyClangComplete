@@ -35,8 +35,8 @@ class test_settings(TestCase):
         project_name = "PROJECT"
 
         settings.include_dirs = [
-            "$project_name/src",
-            "/test/test"
+            path.realpath("$project_name/src"),
+            path.realpath("/test/test")
         ]
         initial_dirs = list(settings.include_dirs)
         dirs = settings.populate_include_dirs(project_name, "", 

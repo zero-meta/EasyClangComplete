@@ -137,9 +137,8 @@ class Settings:
         Returns:
             str[]: directories where clang searches for header files
         """
-
         # initialize new include_dirs
-        include_dirs = self.include_dirs
+        include_dirs = list(self.include_dirs)
         log.debug(" populating include dirs with current variables:")
         log.debug(" project_base_name = %s", project_name)
         log.debug(" project_base_folder = %s", project_base_folder)
@@ -159,5 +158,5 @@ class Settings:
             include_dirs.append(file_parent_folder)
 
         # print resulting include dirs
-        log.debug(" include_dirs = ", include_dirs)
+        log.debug(" include_dirs = %s", include_dirs)
         return include_dirs

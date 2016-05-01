@@ -95,7 +95,7 @@ class CompleteHelper:
             return None
         return self.translation_units[view_id].diagnostics
 
-    def remove_tu(self, view_id, verbose):
+    def remove_tu(self, view_id):
         if view_id not in self.translation_units:
             log.error(" no tu for view id: %s, so not removing", view_id)
             return
@@ -103,7 +103,7 @@ class CompleteHelper:
         del self.translation_units[view_id]
 
     def init_completer(self, view_id, initial_includes, search_include_file, std_flag,
-                       file_name, file_body, project_base_folder, verbose):
+                       file_name, file_body, project_base_folder):
         """Initialize the completer
 
         Args:
@@ -121,7 +121,7 @@ class CompleteHelper:
             if clang_complete_file:
                 log.debug(" found .clang_complete: %s", clang_complete_file)
                 parsed_includes = CompleteHelper._parse_clang_complete_file(
-                    clang_complete_file, verbose)
+                    clang_complete_file)
                 all_includes += parsed_includes
 
         # initialize unsaved files
@@ -149,7 +149,7 @@ class CompleteHelper:
     def complete(self, view, cursor_pos):
         """This function is called asynchronously to create a list of
         autocompletions. Using the current translation unit it queries libclang
-        about the possible completions.
+        for the possible completions.
 
         Args:
             view (sublime.View): current view
@@ -187,7 +187,7 @@ class CompleteHelper:
         self.async_completions_ready = True
         CompleteHelper._reload_completions(view)
 
-    def reparse(self, view_id, verbose):
+    def reparse(self, view_id):
         if view_id in self.translation_units:
             log.debug(" reparsing translation_unit for view %s", view_id)
             start = time.time()
@@ -272,7 +272,7 @@ class CompleteHelper:
         return None
 
     @staticmethod
-    def _parse_clang_complete_file(file, verbose):
+    def _parse_clang_complete_file(file):
         """parse .clang_complete file
 
         Args:

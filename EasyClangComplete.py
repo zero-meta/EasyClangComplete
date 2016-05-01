@@ -41,6 +41,7 @@ compile_errors = None
 
 log = logging.getLogger(__name__)
 
+
 def plugin_loaded():
     global plugin_settings
     global complete_helper
@@ -54,6 +55,7 @@ def plugin_loaded():
         log.setLevel(logging.DEBUG)
     else:
         log.setLevel(logging.INFO)
+
 
 class EasyClangComplete(sublime_plugin.EventListener):
 
@@ -142,19 +144,29 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 log.debug(" view %s, already has a completer", view.id())
                 return
             log.debug("init completer for view id: %s", view.id())
+            project_base_name = ""
             project_base_folder = ""
             body = view.substr(sublime.Region(0, view.size()))
             variables = sublime.active_window().extract_variables()
-            if ('folder' in variables):
+            if 'folder' in variables:
                 project_base_folder = variables['folder']
-            complete_helper.init_completer(view_id=view.id(),
-                                           initial_includes=plugin_settings.include_dirs,
-                                           search_include_file=plugin_settings.search_clang_complete,
-                                           std_flag=plugin_settings.std_flag,
-                                           file_name=view.file_name(),
-                                           file_body=body,
-                                           project_base_folder=project_base_folder,
-                                           verbose=plugin_settings.verbose)
+            if 'project_base_name' in variables:
+                project_base_name = variables['project_base_name']
+            current_folder = path.dirname(view.file_name())
+            parent_folder = path.dirname(current_folder)
+            include_dirs = plugin_settings.populate_include_dirs(
+                    project_name=project_base_name,
+                    project_base_folder=project_base_folder,
+                    file_current_folder=current_folder,
+                    file_parent_folder=parent_folder)
+            complete_helper.init_completer(
+                view_id=view.id(),
+                initial_includes=include_dirs,
+                search_include_file=plugin_settings.search_clang_complete,
+                std_flag=plugin_settings.std_flag,
+                file_name=view.file_name(),
+                file_body=body,
+                project_base_folder=project_base_folder)
 
     def on_selection_modified(self, view):
         """Called when selection is modified
@@ -184,7 +196,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         log.debug(" on_post_save_async")
         if self.has_valid_extension(view):
             compile_errors.erase_regions(view)
-            complete_helper.reparse(view.id(), plugin_settings.verbose)
+            complete_helper.reparse(view.id())
             if plugin_settings.errors_on_save:
                 diagnostics = complete_helper.get_diagnostics(view.id())
                 if not diagnostics:
@@ -201,7 +213,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         """
         log.debug(" closing view %s", view.id())
-        complete_helper.remove_tu(view.id(), plugin_settings.verbose)
+        complete_helper.remove_tu(view.id())
 
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code
@@ -233,7 +245,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return (completions, sublime.INHIBIT_WORD_COMPLETIONS)
 
         log.debug(" starting async auto_complete at pos: %s", locations[0])
-            
+
         # create a daemon thread to update the completions
         completion_thread = Thread(
             target=complete_helper.complete, args=[view, locations[0]])

@@ -109,35 +109,36 @@ class CompleteHelper:
         Args:
             view (sublime.View): Description
         """
-        # initialize all includes
-        all_includes = initial_includes
-
         file_current_folder = path.dirname(file_name)
-
-        # support .clang_complete file with -I<indlude> entries
-        if search_include_file:
-            clang_complete_file = CompleteHelper._search_clang_complete_file(
-                file_current_folder, project_base_folder)
-            if clang_complete_file:
-                log.debug(" found .clang_complete: %s", clang_complete_file)
-                parsed_includes = CompleteHelper._parse_clang_complete_file(
-                    clang_complete_file)
-                all_includes += parsed_includes
 
         # initialize unsaved files
         files = [(file_name, file_body)]
 
         # init needed variables from settings
-        clang_includes = []
-        for include in all_includes:
-            clang_includes.append("-I" + include)
+        clang_flags = [std_flag]
+        for include in initial_includes:
+            clang_flags.append('-I' + include)
 
+        # support .clang_complete file with -I<indlude> entries
+        if search_include_file:
+            log.debug(" searching for .clang_complete in %s up to %s", 
+                      file_current_folder, project_base_folder)
+            clang_complete_file = CompleteHelper._search_clang_complete_file(
+                file_current_folder, project_base_folder)
+            if clang_complete_file:
+                log.debug(" found .clang_complete: %s", clang_complete_file)
+                flags = CompleteHelper._parse_clang_complete_file(
+                    clang_complete_file)
+                clang_flags += flags
+
+        log.debug(" clang flags are: %s", clang_flags)
         try:
             TU = CompleteHelper.tu_module
             start = time.time()
             log.debug(" compilation started for view id: %s", view_id)
             self.translation_units[view_id] = TU.from_source(
-                file_name, [std_flag] + clang_includes,
+                filename=file_name, 
+                args=clang_flags,
                 unsaved_files=files,
                 options=TU.PARSE_PRECOMPILED_PREAMBLE |
                 TU.PARSE_CACHE_COMPLETION_RESULTS)
@@ -281,16 +282,18 @@ class CompleteHelper:
         Returns:
             list(str): parsed list of includes from the file
         """
-        includes = []
+        flags = []
         folder = path.dirname(file)
         with open(file) as f:
             content = f.readlines()
             for line in content:
-                if line.startswith("-I"):
+                if line.startswith('-D'):
+                    flags.append(line)
+                elif line.startswith('-I'):
                     path_to_add = line[2:].rstrip()
                     if path.isabs(path_to_add):
-                        includes.append(path.normpath(path_to_add))
+                        flags.append('-I' + path.normpath(path_to_add))
                     else:
-                        includes.append(path.join(folder, path_to_add))
-        log.debug(" .clang_complete contains includes: %s", includes)
-        return includes
+                        flags.append('-I' + path.join(folder, path_to_add))
+        log.debug(" .clang_complete contains flags: %s", flags)
+        return flags

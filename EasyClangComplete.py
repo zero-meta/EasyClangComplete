@@ -14,6 +14,7 @@ import imp
 import time
 import importlib
 import sys
+import logging
 import os.path as path
 
 from threading import Thread
@@ -38,6 +39,7 @@ plugin_settings = None
 complete_helper = None
 compile_errors = None
 
+log = logging.getLogger(__name__)
 
 def plugin_loaded():
     global plugin_settings
@@ -46,7 +48,12 @@ def plugin_loaded():
     plugin_settings = settings.Settings()
     complete_helper = complete.CompleteHelper(plugin_settings.clang_binary,
                                               plugin_settings.verbose)
-    compile_errors = error_vis.CompileErrors()
+    compile_errors = error_vis.CompileErrors(plugin_settings.verbose)
+
+    if plugin_settings.verbose:
+        log.setLevel(logging.DEBUG)
+    else:
+        log.setLevel(logging.INFO)
 
 class EasyClangComplete(sublime_plugin.EventListener):
 
@@ -66,7 +73,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
     Deleted Attributes:
         syntax_regex (regex): Regex to detect syntax
     """
-
     # TODO: this should be probably in plugin_settings
     valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
 
@@ -113,7 +119,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 return False
 
         word_on_the_left = view.substr(view.word(point - trigger_length))
-        if (word_on_the_left.isdigit()):
+        if word_on_the_left.isdigit():
             # don't autocomplete digits
             return False
 
@@ -130,13 +136,12 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
+        log.debug(" on_activated_async view id %s", view.id())
         if self.has_valid_extension(view):
             if view.id() in complete_helper.translation_units:
-                if plugin_settings.verbose:
-                    print(PKG_NAME + ": view already has a completer")
+                log.debug(" view %s, already has a completer", view.id())
                 return
-            if plugin_settings.verbose:
-                print(PKG_NAME + ": view has no completer")
+            log.debug("init completer for view id: %s", view.id())
             project_base_folder = ""
             body = view.substr(sublime.Region(0, view.size()))
             variables = sublime.active_window().extract_variables()
@@ -166,6 +171,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
+        log.debug(" on_modified_async view id %s", view.id())
         compile_errors.clear(view)
 
     def on_post_save_async(self, view):
@@ -175,6 +181,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
+        log.debug(" on_post_save_async")
         if self.has_valid_extension(view):
             compile_errors.erase_regions(view)
             complete_helper.reparse(view.id(), plugin_settings.verbose)
@@ -193,6 +200,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
+        log.debug(" closing view %s", view.id())
         complete_helper.remove_tu(view.id(), plugin_settings.verbose)
 
     def on_query_completions(self, view, prefix, locations):
@@ -207,6 +215,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Returns:
             sublime.Completions: completions with a flag
         """
+        log.debug(" on_query_completions view id %s", view.id())
         if view.is_scratch():
             return None
 
@@ -223,9 +232,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
             completions = []
             return (completions, sublime.INHIBIT_WORD_COMPLETIONS)
 
-        if plugin_settings.verbose:
-            print("{}: starting async auto_complete at pos: {}".format(
-                PKG_NAME, locations[0]))
+        log.debug(" starting async auto_complete at pos: %s", locations[0])
+            
         # create a daemon thread to update the completions
         completion_thread = Thread(
             target=complete_helper.complete, args=[view, locations[0]])

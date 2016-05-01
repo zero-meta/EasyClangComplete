@@ -4,11 +4,14 @@ import importlib
 import sublime
 import time
 import platform
+import logging
 
 from os import path
 from os import listdir
 
 from .tools import PKG_NAME
+
+log = logging.getLogger(__name__)
 
 cindex_dict = {
     '3.2': PKG_NAME + ".clang.cindex32",
@@ -37,21 +40,27 @@ class CompleteHelper:
         Args:
             view (sublime.View): Description
         """
+        if verbose:
+            log.setLevel(logging.DEBUG)
+        else:
+            log.setLevel(logging.INFO)
+
         # check if clang binary is defined
         if not clang_binary:
-            if verbose:
-                print(PKG_NAME + ": clang binary not defined")
+            log.critical(" clang binary not defined!")
             return
 
         # run the cmd to get the proper version of the installed clang
         check_version_cmd = clang_binary + " --version"
         try:
+            log.info(" Getting version from command: `%s`", check_version_cmd)
             output = subprocess.check_output(check_version_cmd, shell=True)
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
-            print(PKG_NAME + ": {}".format(e))
-            print(PKG_NAME + ": ERROR: make sure '{}' is in PATH."
-                  .format(clang_binary))
+            error_dict = {"clang_binary": clang_binary,
+                          "error": e,
+                          "advice": "make sure the specified binary is in PATH"}
+            log.error(" Calling clang binary failed.", error_dict)
             return
 
         # now we have the output, and can extract version from it
@@ -62,34 +71,35 @@ class CompleteHelper:
             # to the best of my knowledge this is the last one available on macs
             # but it is a hack, yes
             CompleteHelper.version_str = "3.7"
-        if verbose:
-            print(PKG_NAME + ": found a cindex for clang v: "
-                  + CompleteHelper.version_str)
+            info = {"platform": platform.system()}
+            log.warning(" Wrong version reported. Reducing it to %s",
+                        CompleteHelper.version_str, info)
+        log.info(" Found clang version: %s",
+                 CompleteHelper.version_str)
         if CompleteHelper.version_str in cindex_dict:
             try:
                 # should work if python bindings are installed
                 cindex = importlib.import_module("clang.cindex")
             except Exception as e:
                 # should work for other cases
-                if verbose:
-                    print("{}: cannot get default clang with error: {}".format(
-                        PKG_NAME, e))
-                    print("{}: getting bundled one: {}".format(
-                        PKG_NAME, cindex_dict[CompleteHelper.version_str]))
+                log.warning(" cannot get default cindex with error: %s", e)
+                log.warning(" using bundled one: %s",
+                            cindex_dict[CompleteHelper.version_str])
                 cindex = importlib.import_module(
                     cindex_dict[CompleteHelper.version_str])
             CompleteHelper.tu_module = cindex.TranslationUnit
 
     def get_diagnostics(self, view_id):
         if view_id not in self.translation_units:
-            # no tu for this view
+            log.debug(" no diagnostics for view id: %s", view_id)
             return None
         return self.translation_units[view_id].diagnostics
 
     def remove_tu(self, view_id, verbose):
         if view_id not in self.translation_units:
-            # nothing to remove
+            log.error(" no tu for view id: %s, so not removing", view_id)
             return
+        log.debug(" removing translation unit for view id: %s", view_id)
         del self.translation_units[view_id]
 
     def init_completer(self, view_id, initial_includes, search_include_file, std_flag,
@@ -109,8 +119,7 @@ class CompleteHelper:
             clang_complete_file = CompleteHelper._search_clang_complete_file(
                 file_current_folder, project_base_folder)
             if clang_complete_file:
-                if verbose:
-                    print("{}: found {}".format(PKG_NAME, clang_complete_file))
+                log.debug(" found .clang_complete: %s", clang_complete_file)
                 parsed_includes = CompleteHelper._parse_clang_complete_file(
                     clang_complete_file, verbose)
                 all_includes += parsed_includes
@@ -125,17 +134,17 @@ class CompleteHelper:
 
         try:
             TU = CompleteHelper.tu_module
-            if verbose:
-                print(PKG_NAME + ": compilation started.")
+            start = time.time()
+            log.debug(" compilation started for view id: %s", view_id)
             self.translation_units[view_id] = TU.from_source(
                 file_name, [std_flag] + clang_includes,
                 unsaved_files=files,
                 options=TU.PARSE_PRECOMPILED_PREAMBLE |
                 TU.PARSE_CACHE_COMPLETION_RESULTS)
-            if verbose:
-                print(PKG_NAME + ": compilation done.")
+            end = time.time()
+            log.debug(" compilation done in %s seconds", end - start)
         except Exception as e:
-            print(PKG_NAME + ":", e)
+            log.error(" error while compiling: %s", e)
 
     def complete(self, view, cursor_pos):
         """This function is called asynchronously to create a list of
@@ -157,15 +166,21 @@ class CompleteHelper:
 
         # do nothing if there in no translation_unit present
         if not view.id() in self.translation_units:
+            log.debug(" cannot complete. No translation unit for view %s",
+                      view.id())
             return None
         # execute clang code completion
+        start = time.time()
+        log.debug(" started code complete for view %s", view.id())
         complete_results = self.translation_units[view.id()].codeComplete(
             view.file_name(),
             row, col,
             unsaved_files=files)
+        end = time.time()
         if complete_results is None or len(complete_results.results) == 0:
-            print("no completions")
+            log.debug(" no completions")
             return None
+        log.debug(" code complete done in %s seconds", end - start)
 
         self.completions = CompleteHelper._process_completions(
             complete_results)
@@ -174,14 +189,13 @@ class CompleteHelper:
 
     def reparse(self, view_id, verbose):
         if view_id in self.translation_units:
-            if verbose:
-                start = time.time()
-                print(PKG_NAME + ": reparsing translation unit")
+            log.debug(" reparsing translation_unit for view %s", view_id)
+            start = time.time()
             self.translation_units[view_id].reparse()
-            if verbose:
-                print("{}: reparsed translation unit in {} sec".format(
-                    PKG_NAME, time.time() - start))
+            log.debug(" reparsed translation unit in %s seconds", 
+                      time.time() - start)
             return True
+        log.error(" no translation unit for view id %s")
         return False
 
     @staticmethod
@@ -193,6 +207,7 @@ class CompleteHelper:
             view (sublime.View): current_view
 
         """
+        log.debug(" reload completion tooltip")
         view.run_command('hide_auto_complete')
         view.run_command('auto_complete', {
             'disable_auto_insert': True,
@@ -251,7 +266,7 @@ class CompleteHelper:
             for file in listdir(current_folder):
                 if file == ".clang_complete":
                     return path.join(current_folder, file)
-            if (current_folder == path.dirname(current_folder)):
+            if current_folder == path.dirname(current_folder):
                 break
             current_folder = path.dirname(current_folder)
         return None
@@ -277,7 +292,5 @@ class CompleteHelper:
                         includes.append(path.normpath(path_to_add))
                     else:
                         includes.append(path.join(folder, path_to_add))
-        if verbose:
-            print("{}: .clang_complete contains includes: {}".format(
-                PKG_NAME, includes))
+        log.debug(" .clang_complete contains includes: %s", includes)
         return includes

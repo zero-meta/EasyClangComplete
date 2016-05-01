@@ -1,9 +1,12 @@
 import sublime
+import logging
 import re
 
 import os.path as path
 
 from .tools import PKG_NAME
+
+log = logging.getLogger(__name__)
 
 class Settings:
 
@@ -45,18 +48,20 @@ class Settings:
         """
         self.load_settings()
         if not self.is_valid():
-            print(PKG_NAME + ": Error encountered while loading settings.")
-            print(PKG_NAME + ": NO AUTOCOMPLETION WILL BE AVAILABLE.")
+            log.critical(" Could not load settings!")
+            log.critical(" NO AUTOCOMPLETE WILL BE AVAILABLE")
             return
         if self.verbose:
-            print(PKG_NAME + ": settings successfully loaded")
+            log.setLevel(logging.DEBUG)
+            log.info(" settings successfully loaded")
+        else:
+            log.setLevel(logging.INFO)
 
     def on_settings_changed(self):
         """When user changes settings, trigger this.
         """
         self.load_settings()
-        if (self.verbose):
-            print(PKG_NAME + ": settings changed and reloaded")
+        log.info(" settings changed and reloaded")
 
     def load_settings(self):
         """Load settings from sublime dictionary to internal variables
@@ -79,11 +84,9 @@ class Settings:
         self.subl_settings.clear_on_change(PKG_NAME)
         self.subl_settings.add_on_change(PKG_NAME, self.on_settings_changed)
 
-        if (self.std_flag is None):
+        if self.std_flag is None:
             self.std_flag = "-std=c++11"
-            if (self.verbose):
-                print(PKG_NAME + ": set std_flag to default: '{}'".format(
-                    self.std_flag))
+            log.debug(" set std_flag to default: %s", self.std_flag)
 
     def is_valid(self):
         """Check settings validity. If any of the settings is None the settings
@@ -93,37 +96,37 @@ class Settings:
             bool: validity of settings
         """
         if self.subl_settings is None:
-            print(PKG_NAME + ":ERROR: no sublime settings found")
+            log.critical(" no subl_settings found")
             return False
         if self.verbose is None:
-            print(PKG_NAME + ":ERROR: no verbose flag found")
+            log.critical(" no verbose flag found")
             return False
         if self.include_parent_folder is None:
-            print(PKG_NAME + ":ERROR: no include_parent_folder flag found")
+            log.critical(" no include_parent_folder flag found")
             return False
         if self.include_file_folder is None:
-            print(PKG_NAME + ":ERROR: no include_file_folder flag found")
+            log.critical(" no include_file_folder flag found")
             return False
         if self.complete_all is None:
-            print(PKG_NAME + ":ERROR: no autocomplete_all flag found")
+            log.critical(" no autocomplete_all flag found")
             return False
         if self.triggers is None:
-            print(PKG_NAME + ":ERROR: no triggers setting found")
+            log.critical(" no triggers found")
             return False
         if self.include_dirs is None:
-            print(PKG_NAME + ":ERROR: no include_dirs found")
+            log.critical(" no include_dirs setting found")
             return False
         if self.clang_binary is None:
-            print(PKG_NAME + ":ERROR: no clang_binary setting found")
+            log.critical(" no clang_binary setting found")
             return False
         if self.std_flag is None:
-            print(PKG_NAME + ":ERROR: no std_flag setting found")
+            log.critical(" no std_flag setting found")
             return False
         if self.search_clang_complete is None:
-            print(PKG_NAME + ":ERROR: no search_clang_complete setting found")
+            log.critical(" no search_clang_complete setting found")
             return False
         if self.errors_on_save is None:
-            print(PKG_NAME + ":ERROR: no errors_on_save setting found")
+            log.critical(" no errors_on_save setting found")
             return False
         return True
 
@@ -137,13 +140,10 @@ class Settings:
 
         # initialize new include_dirs
         include_dirs = self.include_dirs
-
-        if self.verbose:
-            print(PKG_NAME + ": project_base_name = {}".format(project_name))
-            print(PKG_NAME + ": project_base_folder = {}".format(
-                project_base_folder))
-            print(PKG_NAME + ": file_parent_folder = {}".format(
-                file_parent_folder))
+        log.debug(" populating include dirs with current variables:")
+        log.debug(" project_base_name = %s", project_name)
+        log.debug(" project_base_folder = %s", project_base_folder)
+        log.debug(" file_parent_folder = %s", file_parent_folder)
 
         # replace project related variables to real ones
         for i, include_dir in enumerate(include_dirs):
@@ -159,7 +159,5 @@ class Settings:
             include_dirs.append(file_parent_folder)
 
         # print resulting include dirs
-        if self.verbose:
-            print("{}: include_dirs from settings: {}".format(
-                PKG_NAME, include_dirs))
+        log.debug(" include_dirs = ", include_dirs)
         return include_dirs

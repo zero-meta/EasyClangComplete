@@ -1,4 +1,8 @@
 import re
+import logging
+
+log = logging.getLogger(__name__)
+
 
 class CompileErrors:
     """docstring for CompileErrors"""
@@ -12,6 +16,12 @@ class CompileErrors:
 
     err_regions = {}
 
+    def __init__(self, verbose):
+        if verbose:
+            log.setLevel(logging.DEBUG)
+        else:
+            log.setLevel(logging.INFO)
+
     def generate(self, view, tu_diagnostics):
         """Generate a dictionary that stores all errors along with their
         positions and descriptions. Needed to show these errors on the screen.
@@ -19,8 +29,10 @@ class CompileErrors:
         Args:
             view (sublime.View): current view
         """
+        log.debug(" generating error regions for view %s", view.id())
         # first clear old regions
         if view.id() in self.err_regions:
+            log.debug(" removing old error regions")
             del self.err_regions[view.id()]
         # create an empty region dict for view id
         self.err_regions[view.id()] = {}
@@ -45,6 +57,7 @@ class CompileErrors:
                     self.err_regions[view.id()][row] += [error_dict]
                 else:
                     self.err_regions[view.id()][row] = [error_dict]
+        log.debug(" new %s error regions ready", len(self.err_regions))
 
     def show_regions(self, view):
         """Show current error regions
@@ -58,24 +71,26 @@ class CompileErrors:
           return
         current_error_dict = self.err_regions[view.id()]
         regions = CompileErrors._as_region_list(current_error_dict)
+        log.debug(" showing error regions: %s", regions)
         view.add_regions(CompileErrors._TAG, regions, "string")
 
     def erase_regions(self, view):
         if view.id() not in self.err_regions:
           # view has no errors for it
           return
+        log.debug(" erasing error regions for view %s", view.id())
         view.erase_regions(CompileErrors._TAG)
 
     def show_popup_if_needed(self, view, row):
-      if view.id() not in self.err_regions:
+        if view.id() not in self.err_regions:
             return
-      current_err_region_dict = self.err_regions[view.id()]
-      if (row in current_err_region_dict):
-          errors_dict = current_err_region_dict[row]
-          errors_html = CompileErrors._as_html(errors_dict)
-          view.show_popup(errors_html)
-      else:
-          print("key: {} not in error regions".format(row))
+        current_err_region_dict = self.err_regions[view.id()]
+        if (row in current_err_region_dict):
+            errors_dict = current_err_region_dict[row]
+            errors_html = CompileErrors._as_html(errors_dict)
+            view.show_popup(errors_html)
+        else:
+            log.debug(" no error regions for row: %s", row)
 
     def clear(self, view):
         if view.id() not in self.err_regions:

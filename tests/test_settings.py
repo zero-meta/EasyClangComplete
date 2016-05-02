@@ -5,7 +5,7 @@ from unittest import TestCase
 
 easy_clang_complete = sys.modules["EasyClangComplete"]
 
-Settings = easy_clang_complete.plugin.settings.Settings
+Settings = easy_clang_complete.plugin.plugin_settings.Settings
 
 class test_settings(TestCase):
 

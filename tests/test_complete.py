@@ -6,10 +6,7 @@ from unittest import TestCase
 
 easy_clang_complete = sys.modules["EasyClangComplete"]
 
-CompleteHelper = easy_clang_complete.plugin.complete.CompleteHelper
-
-# for testing sublime command
-
+Completer = easy_clang_complete.plugin.libclang_complete.Completer
 
 class test_complete_command(TestCase):
 
@@ -66,6 +63,6 @@ class test_complete_command(TestCase):
         self.assertEqual(line, "}\n")
 
     def test_init(self):
-        completer = CompleteHelper("clang++", verbose=False)
-        self.assertIsNotNone(CompleteHelper.version_str)
-        self.assertIsNotNone(CompleteHelper.tu_module)
+        completer = Completer("clang++", verbose=False)
+        self.assertIsNotNone(Completer.version_str)
+        self.assertIsNotNone(Completer.tu_module)

@@ -51,7 +51,7 @@ def plugin_loaded():
     global completer
     global compile_errors
     settings = plugin_settings.Settings()
-    completer = libclang_complete.LibClangCompleter(settings.clang_binary,
+    completer = libclang_complete.Completer(settings.clang_binary,
                                                     settings.verbose)
     compile_errors = error_vis.CompileErrors(settings.verbose)
 

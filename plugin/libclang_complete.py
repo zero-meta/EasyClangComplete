@@ -30,7 +30,7 @@ cindex_dict = {
 }
 
 
-class LibClangCompleter:
+class Completer:
 
     """Encapsulates completions based on libclang
 
@@ -51,7 +51,7 @@ class LibClangCompleter:
     async_completions_ready = False
 
     def __init__(self, clang_binary, verbose):
-        """Initialize the LibClangCompleter
+        """Initialize the Completer
 
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
@@ -84,18 +84,17 @@ class LibClangCompleter:
         # now we have the output, and can extract version from it
         version_regex = re.compile("\d.\d")
         found = version_regex.search(output_text)
-        LibClangCompleter.version_str = found.group()
-        if LibClangCompleter.version_str > "3.8"
-                and platform.system() == "Darwin":
+        Completer.version_str = found.group()
+        if Completer.version_str > "3.8" and platform.system() == "Darwin":
             # to the best of my knowledge this is the last one available on macs
             # but it is a hack, yes
-            LibClangCompleter.version_str = "3.7"
+            Completer.version_str = "3.7"
             info = {"platform": platform.system()}
             log.warning(" Wrong version reported. Reducing it to %s",
-                        LibClangCompleter.version_str, info)
+                        Completer.version_str, info)
         log.info(" Found clang version: %s",
-                 LibClangCompleter.version_str)
-        if LibClangCompleter.version_str in cindex_dict:
+                 Completer.version_str)
+        if Completer.version_str in cindex_dict:
             try:
                 # should work if python bindings are installed
                 cindex = importlib.import_module("clang.cindex")
@@ -103,10 +102,10 @@ class LibClangCompleter:
                 # should work for other cases
                 log.warning(" cannot get default cindex with error: %s", e)
                 log.warning(" using bundled one: %s",
-                            cindex_dict[LibClangCompleter.version_str])
+                            cindex_dict[Completer.version_str])
                 cindex = importlib.import_module(
-                    cindex_dict[LibClangCompleter.version_str])
-            LibClangCompleter.tu_module = cindex.TranslationUnit
+                    cindex_dict[Completer.version_str])
+            Completer.tu_module = cindex.TranslationUnit
 
     def get_diagnostics(self, view_id):
         """Every TU has diagnostics. And we can get errors from them. This
@@ -164,17 +163,17 @@ class LibClangCompleter:
         if search_include_file:
             log.debug(" searching for .clang_complete in %s up to %s",
                       file_current_folder, project_base_folder)
-            clang_complete_file = LibClangCompleter._search_clang_complete_file(
+            clang_complete_file = Completer._search_clang_complete_file(
                 file_current_folder, project_base_folder)
             if clang_complete_file:
                 log.debug(" found .clang_complete: %s", clang_complete_file)
-                flags = LibClangCompleter._parse_clang_complete_file(
+                flags = Completer._parse_clang_complete_file(
                     clang_complete_file)
                 clang_flags += flags
 
         log.debug(" clang flags are: %s", clang_flags)
         try:
-            TU = LibClangCompleter.tu_module
+            TU = Completer.tu_module
             start = time.time()
             log.debug(" compilation started for view id: %s", view_id)
             self.translation_units[view_id] = TU.from_source(
@@ -224,10 +223,10 @@ class LibClangCompleter:
             return None
         log.debug(" code complete done in %s seconds", end - start)
 
-        self.completions = LibClangCompleter._process_completions(
+        self.completions = Completer._process_completions(
             complete_results)
         self.async_completions_ready = True
-        LibClangCompleter._reload_completions(view)
+        Completer._reload_completions(view)
 
     def reparse(self, view_id):
         """Reparse the translation unit. This speeds up completions

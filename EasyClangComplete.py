@@ -1,10 +1,13 @@
 """EasyClangComplete plugin for Sublime Text 3.
 
-Provides completion suggestions for C/C++ languages based on clang output
+Provides completion suggestions for C/C++ languages based on clang
 
 Attributes:
-    cindex_dict (dict): names for cindex files with keys being clang versions
-    PKG_NAME (string): Name of the package
+    compile_errors (error_vis.CompileErrors): class that handles error vis
+    completer (libclang_complete.LibClangCompleter): class that handles 
+                                                        autocompletion
+    settings (plugin_settings.Settings): class that encapsulates settings
+    log (logging.Logger): logger for this module
 """
 
 import sublime
@@ -19,39 +22,40 @@ import os.path as path
 
 from threading import Thread
 
-from .plugin import settings
-from .plugin import complete
 from .plugin import tools
 from .plugin import error_vis
-from .plugin.tools import PKG_NAME
+from .plugin import plugin_settings
+from .plugin import libclang_complete
 
 # reload the modules
 imp.reload(tools)
-imp.reload(complete)
-imp.reload(settings)
+imp.reload(plugin_settings)
 imp.reload(error_vis)
+imp.reload(libclang_complete)
 
 from .plugin.tools import SublBridge
 
 # unfortunately because of how subl initializes the plugins I cannot move these
 # inside of some class.
-plugin_settings = None
-complete_helper = None
+settings = None
+completer = None
 compile_errors = None
 
 log = logging.getLogger(__name__)
 
-
 def plugin_loaded():
-    global plugin_settings
-    global complete_helper
+    """called right after sublime api is ready to use. We need it to initialize
+    all the different classes that encapsulate functionality. We can only
+    properly init them after sublime api is available."""
+    global settings
+    global completer
     global compile_errors
-    plugin_settings = settings.Settings()
-    complete_helper = complete.CompleteHelper(plugin_settings.clang_binary,
-                                              plugin_settings.verbose)
-    compile_errors = error_vis.CompileErrors(plugin_settings.verbose)
+    settings = plugin_settings.Settings()
+    completer = libclang_complete.LibClangCompleter(settings.clang_binary,
+                                                    settings.verbose)
+    compile_errors = error_vis.CompileErrors(settings.verbose)
 
-    if plugin_settings.verbose:
+    if settings.verbose:
         log.setLevel(logging.DEBUG)
     else:
         log.setLevel(logging.INFO)
@@ -62,20 +66,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
     """Class that handles clang based auto completion
 
     Attributes:
-        async_completions_ready (bool): flag that shows if there are 
-            completions available from an autocomplete async call
         completions (list): list of completions
-        err_msg_regex (TYPE): Description
-        err_pos_regex (TYPE): Description
-        err_regions (dict): Description
-        plugin_settings (Settings): Custom handler for plugin_settings
-        translation_units (dict): dict of translation_units
         valid_extensions (list): list of valid extentions for autocompletion
 
-    Deleted Attributes:
-        syntax_regex (regex): Regex to detect syntax
     """
-    # TODO: this should be probably in plugin_settings
+    # TODO: this should be probably in settings
     valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
 
     def has_valid_extension(self, view):
@@ -104,7 +99,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Returns:
             bool: trigger is valid
         """
-        if plugin_settings.complete_all:
+        if settings.complete_all:
             return True
 
         trigger_length = 1
@@ -125,7 +120,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             # don't autocomplete digits
             return False
 
-        for trigger in plugin_settings.triggers:
+        for trigger in settings.triggers:
             if current_char in trigger:
                 return True
         return False
@@ -140,7 +135,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         log.debug(" on_activated_async view id %s", view.id())
         if self.has_valid_extension(view):
-            if view.id() in complete_helper.translation_units:
+            if view.id() in completer.translation_units:
                 log.debug(" view %s, already has a completer", view.id())
                 return
             log.debug("init completer for view id: %s", view.id())
@@ -154,16 +149,16 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 project_base_name = variables['project_base_name']
             current_folder = path.dirname(view.file_name())
             parent_folder = path.dirname(current_folder)
-            include_dirs = plugin_settings.populate_include_dirs(
-                    project_name=project_base_name,
-                    project_base_folder=project_base_folder,
-                    file_current_folder=current_folder,
-                    file_parent_folder=parent_folder)
-            complete_helper.init_completer(
+            include_dirs = settings.populate_include_dirs(
+                project_name=project_base_name,
+                project_base_folder=project_base_folder,
+                file_current_folder=current_folder,
+                file_parent_folder=parent_folder)
+            completer.init_completer(
                 view_id=view.id(),
                 initial_includes=include_dirs,
-                search_include_file=plugin_settings.search_clang_complete,
-                std_flag=plugin_settings.std_flag,
+                search_include_file=settings.search_clang_complete,
+                std_flag=settings.std_flag,
                 file_name=view.file_name(),
                 file_body=body,
                 project_base_folder=project_base_folder)
@@ -196,9 +191,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         log.debug(" on_post_save_async")
         if self.has_valid_extension(view):
             compile_errors.erase_regions(view)
-            complete_helper.reparse(view.id())
-            if plugin_settings.errors_on_save:
-                diagnostics = complete_helper.get_diagnostics(view.id())
+            completer.reparse(view.id())
+            if settings.errors_on_save:
+                diagnostics = completer.get_diagnostics(view.id())
                 if not diagnostics:
                     # no diagnostics
                     return
@@ -213,7 +208,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         """
         log.debug(" closing view %s", view.id())
-        complete_helper.remove_tu(view.id())
+        completer.remove_tu(view.id())
 
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code
@@ -234,9 +229,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if not self.has_valid_extension(view):
             return None
 
-        if complete_helper.async_completions_ready:
-            complete_helper.async_completions_ready = False
-            return (complete_helper.completions, sublime.INHIBIT_WORD_COMPLETIONS)
+        if completer.async_completions_ready:
+            completer.async_completions_ready = False
+            return (completer.completions, sublime.INHIBIT_WORD_COMPLETIONS)
 
         # Verify that character under the cursor is one allowed trigger
         if (not self.needs_autocompletion(locations[0], view)):
@@ -248,7 +243,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         # create a daemon thread to update the completions
         completion_thread = Thread(
-            target=complete_helper.complete, args=[view, locations[0]])
+            target=completer.complete, args=[view, locations[0]])
         completion_thread.deamon = True
         completion_thread.start()
 

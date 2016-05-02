@@ -1,3 +1,9 @@
+"""Summary
+
+Attributes:
+    cindex_dict (dict): dict of cindex entries for each version of clang
+    log (logging.Logger): logger for this module
+"""
 import re
 import subprocess
 import importlib
@@ -24,8 +30,18 @@ cindex_dict = {
 }
 
 
-class CompleteHelper:
-    """docstring for CompleteHelper"""
+class LibClangCompleter:
+
+    """Encapsulates completions based on libclang
+
+    Attributes:
+        async_completions_ready (bool): turns true if there are completions
+                                    that have become ready from an async call
+        completions (list): current completions
+        translation_units (dict): Dictionary of translation units for view ids
+        tu_module (cindex.TranslationUnit): module for proper cindex
+        version_str (str): clang version string
+    """
 
     tu_module = None
     version_str = None
@@ -35,10 +51,12 @@ class CompleteHelper:
     async_completions_ready = False
 
     def __init__(self, clang_binary, verbose):
-        """Initialize the CompleteHelper
+        """Initialize the LibClangCompleter
 
         Args:
-            view (sublime.View): Description
+            clang_binary (str): string for clang binary e.g. 'clang-3.6++'
+            verbose (bool): shows if we should show debug info
+
         """
         if verbose:
             log.setLevel(logging.DEBUG)
@@ -59,24 +77,25 @@ class CompleteHelper:
         except subprocess.CalledProcessError as e:
             error_dict = {"clang_binary": clang_binary,
                           "error": e,
-                          "advice": "make sure the specified binary is in PATH"}
+                          "advice": "make sure `clang_binary` is in PATH"}
             log.error(" Calling clang binary failed.", error_dict)
             return
 
         # now we have the output, and can extract version from it
         version_regex = re.compile("\d.\d")
         found = version_regex.search(output_text)
-        CompleteHelper.version_str = found.group()
-        if CompleteHelper.version_str > "3.8" and platform.system() == "Darwin":
+        LibClangCompleter.version_str = found.group()
+        if LibClangCompleter.version_str > "3.8"
+                and platform.system() == "Darwin":
             # to the best of my knowledge this is the last one available on macs
             # but it is a hack, yes
-            CompleteHelper.version_str = "3.7"
+            LibClangCompleter.version_str = "3.7"
             info = {"platform": platform.system()}
             log.warning(" Wrong version reported. Reducing it to %s",
-                        CompleteHelper.version_str, info)
+                        LibClangCompleter.version_str, info)
         log.info(" Found clang version: %s",
-                 CompleteHelper.version_str)
-        if CompleteHelper.version_str in cindex_dict:
+                 LibClangCompleter.version_str)
+        if LibClangCompleter.version_str in cindex_dict:
             try:
                 # should work if python bindings are installed
                 cindex = importlib.import_module("clang.cindex")
@@ -84,30 +103,52 @@ class CompleteHelper:
                 # should work for other cases
                 log.warning(" cannot get default cindex with error: %s", e)
                 log.warning(" using bundled one: %s",
-                            cindex_dict[CompleteHelper.version_str])
+                            cindex_dict[LibClangCompleter.version_str])
                 cindex = importlib.import_module(
-                    cindex_dict[CompleteHelper.version_str])
-            CompleteHelper.tu_module = cindex.TranslationUnit
+                    cindex_dict[LibClangCompleter.version_str])
+            LibClangCompleter.tu_module = cindex.TranslationUnit
 
     def get_diagnostics(self, view_id):
+        """Every TU has diagnostics. And we can get errors from them. This
+        functions returns current diagnostics for tu for view id.
+
+        Args:
+            view_id (int): view id
+
+        Returns:
+            tu.diagnostics: relevant diagnostics
+        """
         if view_id not in self.translation_units:
             log.debug(" no diagnostics for view id: %s", view_id)
             return None
         return self.translation_units[view_id].diagnostics
 
     def remove_tu(self, view_id):
+        """Remove tu for this view. Happens when we don't need it anymore.
+
+        Args:
+            view_id (int): view id
+
+        """
         if view_id not in self.translation_units:
             log.error(" no tu for view id: %s, so not removing", view_id)
             return
         log.debug(" removing translation unit for view id: %s", view_id)
         del self.translation_units[view_id]
 
-    def init_completer(self, view_id, initial_includes, search_include_file, std_flag,
-                       file_name, file_body, project_base_folder):
+    def init_completer(self, view_id, initial_includes, search_include_file, 
+                       std_flag, file_name, file_body, project_base_folder):
         """Initialize the completer
 
         Args:
-            view (sublime.View): Description
+            view_id (int): view id
+            initial_includes (str[]): includes from settings
+            search_include_file (bool): should we search for .clang_complete?
+            std_flag (str): std flag, e.g. std=c++11
+            file_name (str): file full path
+            file_body (str): content of the file
+            project_base_folder (str): project folder
+
         """
         file_current_folder = path.dirname(file_name)
 
@@ -121,23 +162,23 @@ class CompleteHelper:
 
         # support .clang_complete file with -I<indlude> entries
         if search_include_file:
-            log.debug(" searching for .clang_complete in %s up to %s", 
+            log.debug(" searching for .clang_complete in %s up to %s",
                       file_current_folder, project_base_folder)
-            clang_complete_file = CompleteHelper._search_clang_complete_file(
+            clang_complete_file = LibClangCompleter._search_clang_complete_file(
                 file_current_folder, project_base_folder)
             if clang_complete_file:
                 log.debug(" found .clang_complete: %s", clang_complete_file)
-                flags = CompleteHelper._parse_clang_complete_file(
+                flags = LibClangCompleter._parse_clang_complete_file(
                     clang_complete_file)
                 clang_flags += flags
 
         log.debug(" clang flags are: %s", clang_flags)
         try:
-            TU = CompleteHelper.tu_module
+            TU = LibClangCompleter.tu_module
             start = time.time()
             log.debug(" compilation started for view id: %s", view_id)
             self.translation_units[view_id] = TU.from_source(
-                filename=file_name, 
+                filename=file_name,
                 args=clang_flags,
                 unsaved_files=files,
                 options=TU.PARSE_PRECOMPILED_PREAMBLE |
@@ -183,17 +224,26 @@ class CompleteHelper:
             return None
         log.debug(" code complete done in %s seconds", end - start)
 
-        self.completions = CompleteHelper._process_completions(
+        self.completions = LibClangCompleter._process_completions(
             complete_results)
         self.async_completions_ready = True
-        CompleteHelper._reload_completions(view)
+        LibClangCompleter._reload_completions(view)
 
     def reparse(self, view_id):
+        """Reparse the translation unit. This speeds up completions
+        significantly, so we perform this upon file save.
+
+        Args:
+            view_id (int): view id
+
+        Returns:
+            bool: reparsed successfully
+        """
         if view_id in self.translation_units:
             log.debug(" reparsing translation_unit for view %s", view_id)
             start = time.time()
             self.translation_units[view_id].reparse()
-            log.debug(" reparsed translation unit in %s seconds", 
+            log.debug(" reparsed translation unit in %s seconds",
                       time.time() - start)
             return True
         log.error(" no translation unit for view id %s")

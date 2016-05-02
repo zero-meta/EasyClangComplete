@@ -19,6 +19,9 @@
 	// triggers for auto-completion
 	"triggers" : [ ".", "->", "::"],
 
+	// use libclang. If set to false will use clang_binary -cc1 output instead
+	"use_libclang" : true,
+	
 	// make plugin verbose
 	"verbose" : false,
 

@@ -26,12 +26,14 @@ from .plugin import tools
 from .plugin import error_vis
 from .plugin import plugin_settings
 from .plugin import libclang_complete
+from .plugin import clang_bin_complete
 
 # reload the modules
 imp.reload(tools)
 imp.reload(plugin_settings)
 imp.reload(error_vis)
 imp.reload(libclang_complete)
+imp.reload(clang_bin_complete)
 
 from .plugin.tools import SublBridge
 
@@ -43,6 +45,7 @@ compile_errors = None
 
 log = logging.getLogger(__name__)
 
+
 def plugin_loaded():
     """called right after sublime api is ready to use. We need it to initialize
     all the different classes that encapsulate functionality. We can only
@@ -51,8 +54,18 @@ def plugin_loaded():
     global completer
     global compile_errors
     settings = plugin_settings.Settings()
-    completer = libclang_complete.Completer(settings.clang_binary,
-                                                    settings.verbose)
+    if settings.use_libclang:
+        log.info(" init completer based on libclang")
+        completer = libclang_complete.Completer(settings.clang_binary, 
+                                                settings.verbose)
+        if not completer.tu_module:
+            log.error(" cannot initialize completer with libclang.")
+            log.info(" falling back to using clang in a subprocess.")
+            completer = None
+    if not completer:
+        log.info(" init completer based on clang from cmd")
+        completer = clang_bin_complete.Completer(settings.clang_binary,
+                                                 settings.verbose)
     compile_errors = error_vis.CompileErrors(settings.verbose)
 
     if settings.verbose:
@@ -135,7 +148,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         log.debug(" on_activated_async view id %s", view.id())
         if self.has_valid_extension(view):
-            if view.id() in completer.translation_units:
+            if completer.has_completer(view.id()):
                 log.debug(" view %s, already has a completer", view.id())
                 return
             log.debug("init completer for view id: %s", view.id())

@@ -6,11 +6,11 @@ Attributes:
 """
 import re
 import subprocess
-import importlib
 import sublime
 import time
 import platform
 import logging
+import tempfile
 
 from os import path
 from os import listdir
@@ -19,20 +19,10 @@ from .tools import PKG_NAME
 
 log = logging.getLogger(__name__)
 
-cindex_dict = {
-    '3.2': PKG_NAME + ".clang.cindex32",
-    '3.3': PKG_NAME + ".clang.cindex33",
-    '3.4': PKG_NAME + ".clang.cindex34",
-    '3.5': PKG_NAME + ".clang.cindex35",
-    '3.6': PKG_NAME + ".clang.cindex36",
-    '3.7': PKG_NAME + ".clang.cindex37",
-    '3.8': PKG_NAME + ".clang.cindex38",
-}
-
 
 class Completer:
 
-    """Encapsulates completions based on libclang
+    """Encapsulates completions based on the output from clang_binary
 
     Attributes:
         async_completions_ready (bool): turns true if there are completions
@@ -43,12 +33,35 @@ class Completer:
         version_str (str): clang version string
     """
 
-    tu_module = None
+    clang_binary = None
     version_str = None
+    init_flags = ["-cc1", "-fsyntax-only", "-x c++"]
+    flags = []
 
     completions = []
-    translation_units = {}
     async_completions_ready = False
+
+    compl_regex = re.compile("COMPLETION:\s(?P<name>.*)\s:\s(?P<content>.*)")
+
+    PARAM_TAG = "param"
+    TYPE_TAG = "type"
+    OPTS_TAG = "opts"
+    PARAM_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}"
+    group_params = "(?P<{param_tag}>[{param_chars}]+)".format(
+        param_chars=PARAM_CHARS,
+        param_tag=PARAM_TAG)
+    group_types = "(?P<{type_tag}>[{type_chars}]+)".format(
+        type_tag=TYPE_TAG,
+        type_chars=PARAM_CHARS)
+    group_opts = "(?P<{opts_tag}>[{type_chars}]+)".format(
+        opts_tag=OPTS_TAG,
+        type_chars=PARAM_CHARS)
+
+    compl_content_regex = re.compile(
+        "\<#{group_params}#\>|\[#{group_types}#\]".format(
+            group_params=group_params, group_types=group_types))
+
+    opts_regex = re.compile("{{#{}#}}".format(group_opts))
 
     def __init__(self, clang_binary, verbose):
         """Initialize the Completer
@@ -68,6 +81,7 @@ class Completer:
             log.critical(" clang binary not defined!")
             return
 
+        Completer.clang_binary = clang_binary
         # run the cmd to get the proper version of the installed clang
         check_version_cmd = clang_binary + " --version"
         try:
@@ -85,62 +99,22 @@ class Completer:
         version_regex = re.compile("\d.\d")
         found = version_regex.search(output_text)
         Completer.version_str = found.group()
-        if Completer.version_str > "3.8" and platform.system() == "Darwin":
-            # to the best of my knowledge this is the last one available on macs
-            # but it is a hack, yes
-            Completer.version_str = "3.7"
-            info = {"platform": platform.system()}
-            log.warning(" Wrong version reported. Reducing it to %s",
-                        Completer.version_str, info)
         log.info(" Found clang version: %s",
                  Completer.version_str)
-        if Completer.version_str in cindex_dict:
-            try:
-                # should work if python bindings are installed
-                cindex = importlib.import_module("clang.cindex")
-            except Exception as e:
-                # should work for other cases
-                log.warning(" cannot get default cindex with error: %s", e)
-                log.warning(" using bundled one: %s",
-                            cindex_dict[Completer.version_str])
-                cindex = importlib.import_module(
-                    cindex_dict[Completer.version_str])
-            Completer.tu_module = cindex.TranslationUnit
 
     def get_diagnostics(self, view_id):
-        """Every TU has diagnostics. And we can get errors from them. This
-        functions returns current diagnostics for tu for view id.
-
-        Args:
-            view_id (int): view id
-
-        Returns:
-            tu.diagnostics: relevant diagnostics
-        """
-        if view_id not in self.translation_units:
-            log.debug(" no diagnostics for view id: %s", view_id)
-            return None
-        return self.translation_units[view_id].diagnostics
+        log.debug(" not implemented")
+        return None
 
     def remove_tu(self, view_id):
-        """Remove tu for this view. Happens when we don't need it anymore.
-
-        Args:
-            view_id (int): view id
-
-        """
-        if view_id not in self.translation_units:
-            log.error(" no tu for view id: %s, so not removing", view_id)
-            return
-        log.debug(" removing translation unit for view id: %s", view_id)
-        del self.translation_units[view_id]
+        self.flags = []
 
     def has_completer(self, view_id):
-        if view_id in self.translation_units:
+        if len(self.flags) > 0:
             return True
         return False
 
-    def init_completer(self, view_id, initial_includes, search_include_file, 
+    def init_completer(self, view_id, initial_includes, search_include_file,
                        std_flag, file_name, file_body, project_base_folder):
         """Initialize the completer
 
@@ -160,9 +134,10 @@ class Completer:
         files = [(file_name, file_body)]
 
         # init needed variables from settings
-        clang_flags = [std_flag]
+        Completer.init_flags += [std_flag]
+        self.flags = []
         for include in initial_includes:
-            clang_flags.append('-I' + include)
+            self.flags.append('-I' + include)
 
         # support .clang_complete file with -I<indlude> entries
         if search_include_file:
@@ -174,23 +149,9 @@ class Completer:
                 log.debug(" found .clang_complete: %s", clang_complete_file)
                 flags = Completer._parse_clang_complete_file(
                     clang_complete_file)
-                clang_flags += flags
+                self.flags += flags
 
-        log.debug(" clang flags are: %s", clang_flags)
-        try:
-            TU = Completer.tu_module
-            start = time.time()
-            log.debug(" compilation started for view id: %s", view_id)
-            self.translation_units[view_id] = TU.from_source(
-                filename=file_name,
-                args=clang_flags,
-                unsaved_files=files,
-                options=TU.PARSE_PRECOMPILED_PREAMBLE |
-                TU.PARSE_CACHE_COMPLETION_RESULTS)
-            end = time.time()
-            log.debug(" compilation done in %s seconds", end - start)
-        except Exception as e:
-            log.error(" error while compiling: %s", e)
+        log.debug(" clang flags are: %s", self.flags)
 
     def complete(self, view, cursor_pos):
         """This function is called asynchronously to create a list of
@@ -202,31 +163,43 @@ class Completer:
             cursor_pos (int): sublime provided poistion of the cursor
 
         """
+
         file_body = view.substr(sublime.Region(0, view.size()))
         (row, col) = view.rowcol(cursor_pos)
         row += 1
         col += 1
 
-        # unsaved files
-        files = [(view.file_name(), file_body)]
+        tempdir = tempfile.gettempdir()
+        temp_file_name = path.join(tempdir, 'test.cpp')
+        with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
+            tmp_file.write(file_body)
 
-        # do nothing if there in no translation_unit present
-        if not view.id() in self.translation_units:
-            log.debug(" cannot complete. No translation unit for view %s",
-                      view.id())
-            return None
+        complete_at_str = "{complete_flag} {file}:{row}:{col} {file}".format(
+            complete_flag="-code-completion-at",
+            file=temp_file_name, row=row, col=col)
+
+        complete_cmd = "{binary} {init} {complete_at} {include_flags}".format(
+            binary=Completer.clang_binary,
+            init=" ".join(Completer.init_flags),
+            complete_at=complete_at_str,
+            include_flags=" ".join(self.flags))
+        log.debug(" clang command: \n%s", complete_cmd)
         # execute clang code completion
         start = time.time()
         log.debug(" started code complete for view %s", view.id())
-        complete_results = self.translation_units[view.id()].codeComplete(
-            view.file_name(),
-            row, col,
-            unsaved_files=files)
+
+        try:
+            output = subprocess.check_output(complete_cmd, shell=True)
+            output_text = ''.join(map(chr, output))
+        except subprocess.CalledProcessError as e:
+            output_text = e.output.decode("utf-8")
+            log.critical(" %s", output_text)
+        # Process clang output, find COMPLETION lines and return them with a
+        # little formating
+        complete_results = output_text.splitlines()
         end = time.time()
-        if complete_results is None or len(complete_results.results) == 0:
-            log.debug(" no completions")
-            return None
         log.debug(" code complete done in %s seconds", end - start)
+        log.debug(" completions: %s", complete_results)
 
         self.completions = Completer._process_completions(
             complete_results)
@@ -243,15 +216,7 @@ class Completer:
         Returns:
             bool: reparsed successfully
         """
-        if view_id in self.translation_units:
-            log.debug(" reparsing translation_unit for view %s", view_id)
-            start = time.time()
-            self.translation_units[view_id].reparse()
-            log.debug(" reparsed translation unit in %s seconds",
-                      time.time() - start)
-            return True
-        log.error(" no translation unit for view id %s")
-        return False
+        return True
 
     @staticmethod
     def _reload_completions(view):
@@ -279,28 +244,40 @@ class Completer:
         Returns:
             list: updated completions
         """
+        class Parser:
+            place_holders = 0
+
+            def tokenize_params(match):
+                Parser.place_holders += 1
+                dict_match = match.groupdict()
+                if dict_match[Completer.PARAM_TAG]:
+                    return "${{{count}:{text}}}".format(
+                        count=Parser.place_holders, 
+                        text=dict_match[Completer.PARAM_TAG])
+                return ''
+
+            def make_pretty(match):
+                dict_match = match.groupdict()
+                if dict_match[Completer.PARAM_TAG]:
+                    return dict_match[Completer.PARAM_TAG]
+                if dict_match[Completer.TYPE_TAG]:
+                    return dict_match[Completer.TYPE_TAG] + ' '
+                return ''
+
         completions = []
-        for c in complete_results.results:
-            hint = ''
-            contents = ''
-            place_holders = 1
-            for chunk in c.string:
-                hint += chunk.spelling
-                if chunk.isKindTypedText():
-                    trigger = chunk.spelling
-                if chunk.isKindResultType():
-                    hint += ' '
-                    continue
-                if chunk.isKindOptional():
-                    continue
-                if chunk.isKindInformative():
-                    continue
-                if chunk.isKindPlaceHolder():
-                    contents += ('${' + str(place_holders) + ':' +
-                                 chunk.spelling + '}')
-                    place_holders += 1
-                else:
-                    contents += chunk.spelling
+        for completion in complete_results:
+            pos_search = Completer.compl_regex.search(completion)
+            comp_dict = pos_search.groupdict()
+            log.debug("completions parsed: %s", comp_dict)
+            trigger = comp_dict['name']
+            contents = re.sub(Completer.compl_content_regex,
+                              Parser.tokenize_params,
+                              comp_dict['content'])
+            contents = re.sub(Completer.opts_regex, '', contents)
+            hint = re.sub(Completer.compl_content_regex,
+                          Parser.make_pretty,
+                          comp_dict['content'])
+            hint = re.sub(Completer.opts_regex, '', hint)
             completions.append([trigger + "\t" + hint, contents])
         return completions
 

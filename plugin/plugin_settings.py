@@ -44,6 +44,7 @@ class Settings:
     std_flag = None
     search_clang_complete = None
     errors_on_save = None
+    use_libclang = None
 
     def __init__(self):
         """Initialize the class.
@@ -80,6 +81,7 @@ class Settings:
         self.clang_binary = self.subl_settings.get("clang_binary")
         self.errors_on_save = self.subl_settings.get("errors_on_save")
         self.std_flag = self.subl_settings.get("std_flag")
+        self.use_libclang = self.subl_settings.get("use_libclang")
         self.search_clang_complete = self.subl_settings.get(
             "search_clang_complete_file")
 
@@ -129,6 +131,9 @@ class Settings:
             return False
         if self.errors_on_save is None:
             log.critical(" no errors_on_save setting found")
+            return False
+        if self.use_libclang is None:
+            log.critical(" no use_libclang setting found")
             return False
         return True
 

@@ -63,7 +63,7 @@ def plugin_loaded():
     if settings.use_libclang:
         log.info(" init completer based on libclang")
         completer = libclang_complete.Completer(settings.clang_binary)
-        if not completer.tu_module:
+        if not completer.valid:
             log.error(" cannot initialize completer with libclang.")
             log.info(" falling back to using clang in a subprocess.")
             completer = None

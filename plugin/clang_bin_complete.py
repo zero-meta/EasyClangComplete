@@ -17,6 +17,8 @@ from os import listdir
 
 from .tools import PKG_NAME
 
+log = logging.getLogger(__name__)
+
 class Completer:
 
     """Encapsulates completions based on the output from clang_binary

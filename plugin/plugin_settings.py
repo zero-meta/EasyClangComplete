@@ -29,6 +29,7 @@ class Settings:
         std_flag (string): flag of the c++ std library, e.g. -std=c++11
         subl_settings (sublime.settings): link to sublime text settings dict
         triggers (string[]): triggers that trigger autocompletion
+        use_libclang (TYPE): Description
         verbose (bool): verbose flag
     """
 

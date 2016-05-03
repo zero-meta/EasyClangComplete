@@ -33,13 +33,14 @@ cindex_dict = {
 class Completer:
 
     """Encapsulates completions based on libclang
-
+    
     Attributes:
         async_completions_ready (bool): turns true if there are completions
                                     that have become ready from an async call
         completions (list): current completions
         translation_units (dict): Dictionary of translation units for view ids
         tu_module (cindex.TranslationUnit): module for proper cindex
+        valid (bool): validity of this completer
         version_str (str): clang version string
     """
 
@@ -49,14 +50,14 @@ class Completer:
     completions = []
     translation_units = {}
     async_completions_ready = False
+    valid = False
 
     def __init__(self, clang_binary):
         """Initialize the Completer
-
+        
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
-            verbose (bool): shows if we should show debug info
-
+        
         """
         # check if clang binary is defined
         if not clang_binary:
@@ -101,14 +102,21 @@ class Completer:
                 cindex = importlib.import_module(
                     cindex_dict[Completer.version_str])
             Completer.tu_module = cindex.TranslationUnit
+            # check if we can build an index. If not, set valid to false
+            try:
+                cindex.Index.create()
+                self.valid = True
+            except Exception as e:
+                log.error(" error: %s", e)
+                self.valid = False
 
     def get_diagnostics(self, view_id):
         """Every TU has diagnostics. And we can get errors from them. This
         functions returns current diagnostics for tu for view id.
-
+        
         Args:
             view_id (int): view id
-
+        
         Returns:
             tu.diagnostics: relevant diagnostics
         """
@@ -119,10 +127,10 @@ class Completer:
 
     def remove_tu(self, view_id):
         """Remove tu for this view. Happens when we don't need it anymore.
-
+        
         Args:
             view_id (int): view id
-
+        
         """
         if view_id not in self.translation_units:
             log.error(" no tu for view id: %s, so not removing", view_id)
@@ -131,14 +139,22 @@ class Completer:
         del self.translation_units[view_id]
 
     def has_completer(self, view_id):
+        """find if there is a completer for the view
+        
+        Args:
+            view_id (int): current view id
+        
+        Returns:
+            bool: has completer
+        """
         if view_id in self.translation_units:
             return True
         return False
 
-    def init_completer(self, view_id, initial_includes, search_include_file, 
+    def init_completer(self, view_id, initial_includes, search_include_file,
                        std_flag, file_name, file_body, project_base_folder):
         """Initialize the completer
-
+        
         Args:
             view_id (int): view id
             initial_includes (str[]): includes from settings
@@ -147,7 +163,7 @@ class Completer:
             file_name (str): file full path
             file_body (str): content of the file
             project_base_folder (str): project folder
-
+        
         """
         file_current_folder = path.dirname(file_name)
 
@@ -191,11 +207,11 @@ class Completer:
         """This function is called asynchronously to create a list of
         autocompletions. Using the current translation unit it queries libclang
         for the possible completions.
-
+        
         Args:
             view (sublime.View): current view
             cursor_pos (int): sublime provided poistion of the cursor
-
+        
         """
         file_body = view.substr(sublime.Region(0, view.size()))
         (row, col) = view.rowcol(cursor_pos)
@@ -231,10 +247,10 @@ class Completer:
     def reparse(self, view_id):
         """Reparse the translation unit. This speeds up completions
         significantly, so we perform this upon file save.
-
+        
         Args:
             view_id (int): view id
-
+        
         Returns:
             bool: reparsed successfully
         """
@@ -252,10 +268,10 @@ class Completer:
     def _reload_completions(view):
         """Ask sublime to reload the completions. Needed to update the active 
         completion list when async autocompletion task has finished.
-
+        
         Args:
             view (sublime.View): current_view
-
+        
         """
         log.debug(" reload completion tooltip")
         view.run_command('hide_auto_complete')
@@ -267,10 +283,10 @@ class Completer:
     @staticmethod
     def _process_completions(complete_results):
         """Create snippet-like structures from a list of completions
-
+        
         Args:
             complete_results (list): raw completions list
-
+        
         Returns:
             list: updated completions
         """
@@ -302,11 +318,11 @@ class Completer:
     @staticmethod
     def _search_clang_complete_file(start_folder, stop_folder):
         """search for .clang_complete file up the tree
-
+        
         Args:
             start_folder (str): path to folder where we start the search
             stop_folder (str): path to folder we should not go beyond
-
+        
         Returns:
             str: path to .clang_complete file or None if not found
         """
@@ -324,10 +340,10 @@ class Completer:
     @staticmethod
     def _parse_clang_complete_file(file):
         """parse .clang_complete file
-
+        
         Args:
             file (str): path to a file
-
+        
         Returns:
             list(str): parsed list of includes from the file
         """

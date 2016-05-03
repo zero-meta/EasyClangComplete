@@ -22,9 +22,6 @@ import os.path as path
 
 from threading import Thread
 
-log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
-
 from .plugin import tools
 from .plugin import error_vis
 from .plugin import plugin_settings
@@ -45,6 +42,7 @@ from .plugin.tools import SublBridge
 settings = None
 completer = None
 compile_errors = None
+log = None
 
 def plugin_loaded():
     """called right after sublime api is ready to use. We need it to initialize
@@ -53,6 +51,8 @@ def plugin_loaded():
     global settings
     global completer
     global compile_errors
+    global log
+    log = logging.getLogger(__name__)
     settings = plugin_settings.Settings()
     if settings.use_libclang:
         log.info(" init completer based on libclang")

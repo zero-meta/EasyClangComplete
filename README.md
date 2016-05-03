@@ -11,7 +11,7 @@ Linux & OSX | Windows
 
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++ for Sublime Text 3. It is built to function in an asynchronous way, so that you will not have to wait even when completions take slightly longer to load.
 
-The plugin uses `libclang` with its python bindings to provide clang-based autocompletions.
+The plugin uses `libclang` with its python bindings to provide clang-based autocompletions. In case `libclang` cannot be initialized or found it will use completions based on `clang -cc1` run from the terminal. If you want this as default behabior, set the setting `use_libclang` to `false`.
 
 This plugin is intended to be easy to use. You should just add the folders your project uses to `include_dirs` list in the settings and everything should just work. If you experience problems - create an issue. I will try to respond as soon as possible.
 
@@ -58,6 +58,9 @@ Make sure that sublime will actually autocomplete your code on specific characte
     + See [my own settings](https://github.com/niosus/config-sublime/blob/master/Packages%2FUser%2FEasyClangComplete.sublime-settings#L4) as an example if you wish.
 - `std_flag`:
     + sets the standard flag that will be used for compilation. Defaults to `std=c++11`
+- `use_libclang`:
+    + if `true` use libclang as backend. It is buggy on Windows and until there are good solutions to issue #4 there is a fallback option:
+    + use output from `clang -cc1 -completion-at` command and parse it with regular expressions.
 - `search_clang_complete_file`:
     + seach for `.clang_complete` file up the tree. Project folder is the last one to search for the file.
     + If the file is found, its contents of style `-I<some_local_path>` are appended to include flags.

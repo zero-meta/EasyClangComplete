@@ -15,7 +15,8 @@ class test_complete_command(TestCase):
     body = None
 
     def setUp(self):
-        self.view = sublime.active_window().open_file("test.cpp")
+        file_name = path.join(path.dirname(__file__), 'test.cpp')
+        self.view = sublime.active_window().open_file(file_name)
         while self.view.is_loading():
             time.sleep(0.1)
         # make sure we have a window to work with

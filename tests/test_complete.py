@@ -1,26 +1,23 @@
 import sublime
 import sys
 import tempfile
+import time
 from os import path
 from unittest import TestCase
 
 easy_clang_complete = sys.modules["EasyClangComplete"]
 
 Completer = easy_clang_complete.plugin.libclang_complete.Completer
+Settings = easy_clang_complete.plugin.plugin_settings.Settings
+
 
 class test_complete_command(TestCase):
+    body = None
 
     def setUp(self):
-        tempdir = tempfile.gettempdir()
-        temp_file_name = path.join(tempdir, 'test.cpp');
-        file = open(temp_file_name, 'w+')
-        file.write("#include <vector>\n" 
-                   + "int main(int argc, char const *argv[]) {\n" 
-                   + "std::vector<int> vec;\n" 
-                   + "return 0;\n" 
-                   + "}\n")
-        file.write("using std::vector")
-        self.view = sublime.active_window().open_file(temp_file_name)
+        self.view = sublime.active_window().open_file("test.cpp")
+        while self.view.is_loading():
+            time.sleep(0.1)
         # make sure we have a window to work with
         s = sublime.load_settings("Preferences.sublime-settings")
         s.set("close_windows_when_empty", False)
@@ -47,22 +44,69 @@ class test_complete_command(TestCase):
         return self.view.substr(self.view.line(self.view.text_point(row, 0)))
 
     def test_setup(self):
-        tempdir = tempfile.gettempdir()
-        temp_file_name = path.join(tempdir, 'test.cpp');
-        self.assertEqual(self.view.file_name(), temp_file_name)
-        file = open(temp_file_name, 'r')
+        file_name = path.join(path.dirname(__file__), 'test.cpp')
+        self.assertEqual(self.view.file_name(), file_name)
+        file = open(file_name, 'r')
+        row = 0
         line = file.readline()
-        self.assertEqual(line, "#include <vector>\n")
-        line = file.readline()
-        self.assertEqual(line, "int main(int argc, char const *argv[]) {\n")
-        line = file.readline()
-        self.assertEqual(line, "std::vector<int> vec;\n")
-        line = file.readline()
-        self.assertEqual(line, "return 0;\n")
-        line = file.readline()
-        self.assertEqual(line, "}\n")
+        while line:
+            self.assertEqual(line[:-1], self.getRow(row))
+            row += 1
+            line = file.readline()
+        file.close()
 
     def test_init(self):
+        tempdir = tempfile.gettempdir()
         completer = Completer("clang++")
         self.assertIsNotNone(Completer.version_str)
         self.assertIsNotNone(Completer.tu_module)
+
+    def test_init_completer(self):
+        body = self.view.substr(sublime.Region(0, self.view.size()))
+        settings = Settings()
+        current_folder = path.dirname(self.view.file_name())
+        parent_folder = path.dirname(current_folder)
+        include_dirs = settings.populate_include_dirs(
+            project_name='test',
+            project_base_folder='',
+            file_current_folder=current_folder,
+            file_parent_folder=parent_folder)
+        completer = Completer("clang++")
+        completer.init_completer(view_id=self.view.id(),
+                                 initial_includes=include_dirs,
+                                 search_include_file=False,
+                                 std_flag="std=c++11",
+                                 file_name=self.view.file_name(),
+                                 file_body=body,
+                                 project_base_folder='')
+        self.assertTrue(completer.has_completer(self.view.id()))
+
+    def test_complete(self):
+        body = self.view.substr(sublime.Region(0, self.view.size()))
+        settings = Settings()
+        current_folder = path.dirname(self.view.file_name())
+        parent_folder = path.dirname(current_folder)
+        include_dirs = settings.populate_include_dirs(
+            project_name='test',
+            project_base_folder='',
+            file_current_folder=current_folder,
+            file_parent_folder=parent_folder)
+        completer = Completer("clang++")
+        completer.init_completer(view_id=self.view.id(),
+                                 initial_includes=include_dirs,
+                                 search_include_file=False,
+                                 std_flag="std=c++11",
+                                 file_name=self.view.file_name(),
+                                 file_body=body,
+                                 project_base_folder='')
+        self.assertTrue(completer.has_completer(self.view.id()))
+        self.assertEqual(self.getRow(5), "  a.")
+        pos = self.view.text_point(5, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
+        completer.complete(self.view, pos)
+        while not completer.async_completions_ready:
+            time.sleep(0.1)
+        self.assertIsNotNone(completer.completions)
+        expected = ['a\tint a', 'a']
+        self.assertTrue(expected in completer.completions)

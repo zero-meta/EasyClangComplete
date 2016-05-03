@@ -51,6 +51,7 @@ Make sure that sublime will actually autocomplete your code on specific characte
 ```
 
 ##### EasyClangComplete Settings  #####
+**PLEASE RESTART SUBLIME TEXT AFTER EACH SETTINGS CHANGE**
 - `include_dirs`:
     + stores the locations where `clang` should be looking for external headers, e.g. `Boost`, `Ros`, `Eigen`, `OpenCV`, etc.
     + you can use placeholders like `$project_base_name` or `$project_base_path` to make includes more convenient.
@@ -60,7 +61,7 @@ Make sure that sublime will actually autocomplete your code on specific characte
     + sets the standard flag that will be used for compilation. Defaults to `std=c++11`
 - `use_libclang`:
     + if `true` use libclang as backend. It is buggy on Windows and until there are good solutions to issue #4 there is a fallback option:
-    + use output from `clang -cc1 -completion-at` command and parse it with regular expressions.
+    + if `false` or if first option failed, use output from `clang -cc1 -completion-at` command and parse it with regular expressions.
 - `search_clang_complete_file`:
     + seach for `.clang_complete` file up the tree. Project folder is the last one to search for the file.
     + If the file is found, its contents of style `-I<some_local_path>` are appended to include flags.

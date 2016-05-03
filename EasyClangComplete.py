@@ -23,6 +23,7 @@ import os.path as path
 from threading import Thread
 
 log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 from .plugin import tools
 from .plugin import error_vis

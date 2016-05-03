@@ -80,6 +80,7 @@ class test_complete_command(TestCase):
                                  file_name=self.view.file_name(),
                                  file_body=body,
                                  project_base_folder='')
+        self.assertTrue(completer.valid)
         self.assertTrue(completer.has_completer(self.view.id()))
 
     def test_complete(self):
@@ -100,6 +101,7 @@ class test_complete_command(TestCase):
                                  file_name=self.view.file_name(),
                                  file_body=body,
                                  project_base_folder='')
+        self.assertTrue(completer.valid)
         self.assertTrue(completer.has_completer(self.view.id()))
         self.assertEqual(self.getRow(5), "  a.")
         pos = self.view.text_point(5, 4)

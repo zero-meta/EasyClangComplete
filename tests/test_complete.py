@@ -63,6 +63,6 @@ class test_complete_command(TestCase):
         self.assertEqual(line, "}\n")
 
     def test_init(self):
-        completer = Completer("clang++", verbose=False)
+        completer = Completer("clang++")
         self.assertIsNotNone(Completer.version_str)
         self.assertIsNotNone(Completer.tu_module)

@@ -22,6 +22,8 @@ import os.path as path
 
 from threading import Thread
 
+log = logging.getLogger(__name__)
+
 from .plugin import tools
 from .plugin import error_vis
 from .plugin import plugin_settings
@@ -42,9 +44,6 @@ from .plugin.tools import SublBridge
 settings = None
 completer = None
 compile_errors = None
-
-log = logging.getLogger(__name__)
-
 
 def plugin_loaded():
     """called right after sublime api is ready to use. We need it to initialize
@@ -69,8 +68,10 @@ def plugin_loaded():
     compile_errors = error_vis.CompileErrors(settings.verbose)
 
     if settings.verbose:
+        log.info(" setting logging to DEBUG")
         log.setLevel(logging.DEBUG)
     else:
+        log.info(" setting logging to INFO")
         log.setLevel(logging.INFO)
 
 

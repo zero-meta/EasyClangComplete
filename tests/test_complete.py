@@ -7,7 +7,7 @@ from unittest import TestCase
 
 easy_clang_complete = sys.modules["EasyClangComplete"]
 
-Completer = easy_clang_complete.plugin.libclang_complete.Completer
+Completer = easy_clang_complete.plugin.clang_bin_complete.Completer
 Settings = easy_clang_complete.plugin.plugin_settings.Settings
 
 
@@ -57,10 +57,8 @@ class test_complete_command(TestCase):
         file.close()
 
     def test_init(self):
-        tempdir = tempfile.gettempdir()
         completer = Completer("clang++")
         self.assertIsNotNone(Completer.version_str)
-        self.assertIsNotNone(Completer.tu_module)
 
     def test_init_completer(self):
         body = self.view.substr(sublime.Region(0, self.view.size()))
@@ -80,7 +78,6 @@ class test_complete_command(TestCase):
                                  file_name=self.view.file_name(),
                                  file_body=body,
                                  project_base_folder='')
-        self.assertTrue(completer.valid)
         self.assertTrue(completer.has_completer(self.view.id()))
 
     def test_complete(self):
@@ -101,15 +98,18 @@ class test_complete_command(TestCase):
                                  file_name=self.view.file_name(),
                                  file_body=body,
                                  project_base_folder='')
-        self.assertTrue(completer.valid)
         self.assertTrue(completer.has_completer(self.view.id()))
         self.assertEqual(self.getRow(5), "  a.")
         pos = self.view.text_point(5, 4)
         current_word = self.view.substr(self.view.word(pos))
         self.assertEqual(current_word, ".\n")
         completer.complete(self.view, pos)
+        counter = 0
         while not completer.async_completions_ready:
             time.sleep(0.1)
+            counter += 1
+            if counter > 20:
+                break
         self.assertIsNotNone(completer.completions)
         expected = ['a\tint a', 'a']
         self.assertTrue(expected in completer.completions)

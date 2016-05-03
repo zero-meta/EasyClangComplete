@@ -42,7 +42,8 @@ from .plugin.tools import SublBridge
 settings = None
 completer = None
 compile_errors = None
-log = None
+
+log = logging.getLogger(__name__)
 
 def plugin_loaded():
     """called right after sublime api is ready to use. We need it to initialize
@@ -51,29 +52,26 @@ def plugin_loaded():
     global settings
     global completer
     global compile_errors
-    global log
-    log = logging.getLogger(__name__)
     settings = plugin_settings.Settings()
+    # init the loggers
+    if settings.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+    # init everythin else
     if settings.use_libclang:
         log.info(" init completer based on libclang")
-        completer = libclang_complete.Completer(settings.clang_binary, 
-                                                settings.verbose)
+        completer = libclang_complete.Completer(settings.clang_binary)
         if not completer.tu_module:
             log.error(" cannot initialize completer with libclang.")
             log.info(" falling back to using clang in a subprocess.")
             completer = None
     if not completer:
         log.info(" init completer based on clang from cmd")
-        completer = clang_bin_complete.Completer(settings.clang_binary,
-                                                 settings.verbose)
-    compile_errors = error_vis.CompileErrors(settings.verbose)
+        completer = clang_bin_complete.Completer(settings.clang_binary)
+    compile_errors = error_vis.CompileErrors()
 
-    if settings.verbose:
-        log.info(" setting logging to DEBUG")
-        log.setLevel(logging.DEBUG)
-    else:
-        log.info(" setting logging to INFO")
-        log.setLevel(logging.INFO)
 
 
 class EasyClangComplete(sublime_plugin.EventListener):

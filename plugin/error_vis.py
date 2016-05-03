@@ -16,12 +16,6 @@ class CompileErrors:
 
     err_regions = {}
 
-    def __init__(self, verbose):
-        if verbose:
-            log.setLevel(logging.DEBUG)
-        else:
-            log.setLevel(logging.INFO)
-
     def generate(self, view, tu_diagnostics):
         """Generate a dictionary that stores all errors along with their
         positions and descriptions. Needed to show these errors on the screen.

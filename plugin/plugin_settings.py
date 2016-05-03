@@ -54,11 +54,6 @@ class Settings:
             log.critical(" Could not load settings!")
             log.critical(" NO AUTOCOMPLETE WILL BE AVAILABLE")
             return
-        if self.verbose:
-            log.setLevel(logging.DEBUG)
-            log.info(" settings successfully loaded")
-        else:
-            log.setLevel(logging.INFO)
 
     def on_settings_changed(self):
         """When user changes settings, trigger this.

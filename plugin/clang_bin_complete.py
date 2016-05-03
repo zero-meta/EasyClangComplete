@@ -17,9 +17,6 @@ from os import listdir
 
 from .tools import PKG_NAME
 
-log = logging.getLogger(__name__)
-
-
 class Completer:
 
     """Encapsulates completions based on the output from clang_binary
@@ -63,7 +60,7 @@ class Completer:
 
     opts_regex = re.compile("{{#{}#}}".format(group_opts))
 
-    def __init__(self, clang_binary, verbose):
+    def __init__(self, clang_binary):
         """Initialize the Completer
 
         Args:
@@ -71,11 +68,6 @@ class Completer:
             verbose (bool): shows if we should show debug info
 
         """
-        if verbose:
-            log.setLevel(logging.DEBUG)
-        else:
-            log.setLevel(logging.INFO)
-
         # check if clang binary is defined
         if not clang_binary:
             log.critical(" clang binary not defined!")

@@ -65,6 +65,8 @@ Make sure that sublime will actually autocomplete your code on specific characte
 - `search_clang_complete_file`:
     + seach for `.clang_complete` file up the tree. Project folder is the last one to search for the file.
     + If the file is found, its contents of style `-I<some_local_path>` are appended to include flags.
+- `errors_on_save`:
+    + if `use_libclang` is `true` the plugin can highlight errors on save. A tooltip with an error message will be shown if the caret goes over a highlighted line.
 - `triggers`:
     + defaults are `".", "::", "->"`. The autocompletion does not trigger on `>` or `:`. It also ignores float numbers like `3.14`.
 

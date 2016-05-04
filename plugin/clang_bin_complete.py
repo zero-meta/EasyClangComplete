@@ -19,6 +19,7 @@ from .tools import PKG_NAME
 
 log = logging.getLogger(__name__)
 
+
 class Completer:
 
     """Encapsulates completions based on the output from clang_binary
@@ -36,6 +37,7 @@ class Completer:
     version_str = None
     init_flags = ["-cc1", "-fsyntax-only", "-x c++"]
     flags = []
+    std_flag = None
 
     completions = []
     async_completions_ready = False
@@ -127,8 +129,10 @@ class Completer:
         # initialize unsaved files
         files = [(file_name, file_body)]
 
+        # set std_flag
+        self.std_flag = std_flag
+
         # init needed variables from settings
-        Completer.init_flags += [std_flag]
         self.flags = []
         for include in initial_includes:
             self.flags.append('-I' + include)
@@ -172,11 +176,12 @@ class Completer:
             complete_flag="-code-completion-at",
             file=temp_file_name, row=row, col=col)
 
-        complete_cmd = "{binary} {init} {complete_at} {include_flags}".format(
+        complete_cmd = "{binary} {init} {std} {complete_at} {includes}".format(
             binary=Completer.clang_binary,
             init=" ".join(Completer.init_flags),
+            std=self.std_flag,
             complete_at=complete_at_str,
-            include_flags=" ".join(self.flags))
+            includes=" ".join(self.flags))
         log.debug(" clang command: \n%s", complete_cmd)
         # execute clang code completion
         start = time.time()
@@ -246,7 +251,7 @@ class Completer:
                 dict_match = match.groupdict()
                 if dict_match[Completer.PARAM_TAG]:
                     return "${{{count}:{text}}}".format(
-                        count=Parser.place_holders, 
+                        count=Parser.place_holders,
                         text=dict_match[Completer.PARAM_TAG])
                 return ''
 

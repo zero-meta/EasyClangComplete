@@ -41,7 +41,6 @@ from .plugin.tools import SublBridge
 # inside of some class.
 settings = None
 completer = None
-compile_errors = None
 
 log = logging.getLogger(__name__)
 
@@ -51,7 +50,6 @@ def plugin_loaded():
     properly init them after sublime api is available."""
     global settings
     global completer
-    global compile_errors
     settings = plugin_settings.Settings()
     # init the loggers
     if settings.verbose:
@@ -70,8 +68,6 @@ def plugin_loaded():
     if not completer:
         log.info(" init completer based on clang from cmd")
         completer = clang_bin_complete.Completer(settings.clang_binary)
-    compile_errors = error_vis.CompileErrors()
-
 
 
 class EasyClangComplete(sublime_plugin.EventListener):
@@ -183,7 +179,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
         """
         (row, col) = SublBridge.cursor_pos(view)
-        compile_errors.show_popup_if_needed(view, row)
+        completer.error_vis.show_popup_if_needed(view, row)
 
     def on_modified_async(self, view):
         """called in a worker thread when view is modified
@@ -192,7 +188,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
         """
         log.debug(" on_modified_async view id %s", view.id())
-        compile_errors.clear(view)
+        completer.error_vis.clear(view)
 
     def on_post_save_async(self, view):
         """On save we want to reparse the translation unit
@@ -203,15 +199,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         log.debug(" on_post_save_async")
         if self.has_valid_extension(view):
-            compile_errors.erase_regions(view)
-            completer.reparse(view.id())
+            completer.error_vis.erase_regions(view)
+            completer.reparse(view)
             if settings.errors_on_save:
                 diagnostics = completer.get_diagnostics(view.id())
                 if not diagnostics:
                     # no diagnostics
                     return
-                compile_errors.generate(view, diagnostics)
-                compile_errors.show_regions(view)
 
     def on_close(self, view):
         """Remove the translation unit when view is closed

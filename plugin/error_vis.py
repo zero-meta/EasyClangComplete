@@ -1,22 +1,29 @@
 import re
 import logging
+from os import path
 
 log = logging.getLogger(__name__)
 
+FORMAT_LIBCLANG = "libclang"
+FORMAT_BINARY = "binary"
 
 class CompileErrors:
     """docstring for CompileErrors"""
 
     pos_regex = re.compile("'(?P<file>.+)'.*"  # file
-                               + "line\s(?P<row>\d+), "  # row
-                                 + "column\s(?P<col>\d+)")  # col
+                           + "line\s(?P<row>\d+), "  # row
+                           + "column\s(?P<col>\d+)")  # col
     msg_regex = re.compile("b\"(?P<error>.+)\"")
+    error_regex = re.compile("(?P<file>.*):" + 
+                             "(?P<row>\d+):(?P<col>\d+): " +
+                             ".*error: (?P<error>.*)")
+
 
     _TAG = "easy_clang_complete_errors"
 
     err_regions = {}
 
-    def generate(self, view, tu_diagnostics):
+    def generate(self, view, input, error_format):
         """Generate a dictionary that stores all errors along with their
         positions and descriptions. Needed to show these errors on the screen.
 
@@ -31,6 +38,28 @@ class CompileErrors:
         # create an empty region dict for view id
         self.err_regions[view.id()] = {}
 
+        if error_format == FORMAT_LIBCLANG:
+            # expect a tu_diagnostics instance
+            self.errors_from_tu_diag(view, input)
+        elif error_format == FORMAT_BINARY:
+            # expect a list of strings for each line of cmd output
+            self.errors_from_clang_output(view, input)
+        else:
+            logging.critical(
+                " error_format:'%s' should match '%s' or '%s'", 
+                error_format, FORMAT_LIBCLANG, FORMAT_BINARY)
+        log.debug(" %s error regions ready", len(self.err_regions))
+
+
+    def errors_from_clang_output(self, view, clang_output):
+        for line in clang_output:
+            error_search = CompileErrors.error_regex.search(line)
+            if not error_search:
+                continue
+            error_dict = error_search.groupdict()
+            self.add_error(view, error_dict)
+
+    def errors_from_tu_diag(self, view, tu_diagnostics):
         # create new ones
         for diag in tu_diagnostics:
             location = str(diag.location)
@@ -42,16 +71,19 @@ class CompileErrors:
                 continue
             error_dict = pos_search.groupdict()
             error_dict.update(msg_search.groupdict())
-            if error_dict['file'] == view.file_name():
-                row = int(error_dict['row'])
-                col = int(error_dict['col'])
-                point = view.text_point(row - 1, col - 1)
-                error_dict['region'] = view.word(point)
-                if (row in self.err_regions[view.id()]):
-                    self.err_regions[view.id()][row] += [error_dict]
-                else:
-                    self.err_regions[view.id()][row] = [error_dict]
-        log.debug(" new %s error regions ready", len(self.err_regions))
+            self.add_error(view, error_dict)
+
+    def add_error(self, view, error_dict):
+        logging.debug(" adding error %s", error_dict)
+        if path.basename(error_dict['file']) == path.basename(view.file_name()):
+            row = int(error_dict['row'])
+            col = int(error_dict['col'])
+            point = view.text_point(row - 1, col - 1)
+            error_dict['region'] = view.word(point)
+            if (row in self.err_regions[view.id()]):
+                self.err_regions[view.id()][row] += [error_dict]
+            else:
+                self.err_regions[view.id()][row] = [error_dict]
 
     def show_regions(self, view):
         """Show current error regions
@@ -61,8 +93,8 @@ class CompileErrors:
             current_error_dict (dict): error dict for current view
         """
         if view.id() not in self.err_regions:
-          # view has no errors for it
-          return
+            # view has no errors for it
+            return
         current_error_dict = self.err_regions[view.id()]
         regions = CompileErrors._as_region_list(current_error_dict)
         log.debug(" showing error regions: %s", regions)
@@ -70,8 +102,8 @@ class CompileErrors:
 
     def erase_regions(self, view):
         if view.id() not in self.err_regions:
-          # view has no errors for it
-          return
+            # view has no errors for it
+            return
         log.debug(" erasing error regions for view %s", view.id())
         view.erase_regions(CompileErrors._TAG)
 
@@ -95,14 +127,14 @@ class CompileErrors:
         self.err_regions[view.id()].clear()
 
     def remove_region(self, view_id, row):
-      if view_id not in self.err_regions:
-        # no errors for this view
-        return
-      current_error_dict = self.err_regions[view_id]
-      if row not in current_error_dict:
-        # no errors for this row
-        return
-      del current_error_dict[row]
+        if view_id not in self.err_regions:
+            # no errors for this view
+            return
+        current_error_dict = self.err_regions[view_id]
+        if row not in current_error_dict:
+            # no errors for this row
+            return
+        del current_error_dict[row]
 
     @staticmethod
     def _as_html(errors_dict):
@@ -126,4 +158,3 @@ class CompileErrors:
             for error in errors_list:
                 region_list.append(error['region'])
         return region_list
-

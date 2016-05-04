@@ -15,6 +15,8 @@ import tempfile
 from os import path
 from os import listdir
 
+from .error_vis import CompileErrors
+from .error_vis import FORMAT_BINARY
 from .tools import PKG_NAME
 
 log = logging.getLogger(__name__)
@@ -35,6 +37,8 @@ class Completer:
 
     clang_binary = None
     version_str = None
+    error_vis = None
+
     init_flags = ["-cc1", "-fsyntax-only", "-x c++"]
     flags = []
     std_flag = None
@@ -43,7 +47,7 @@ class Completer:
     async_completions_ready = False
 
     compl_regex = re.compile("COMPLETION:\s(?P<name>.*)\s:\s(?P<content>.*)")
-
+    
     PARAM_TAG = "param"
     TYPE_TAG = "type"
     OPTS_TAG = "opts"
@@ -97,11 +101,14 @@ class Completer:
         Completer.version_str = found.group()
         log.info(" Found clang version: %s",
                  Completer.version_str)
+        # initialize error visuzlization
+        self.error_vis = CompileErrors()
 
     def get_diagnostics(self, view_id):
         log.debug(" not implemented")
         return None
 
+    # TODO: rename this!
     def remove_tu(self, view_id):
         self.flags = []
 
@@ -168,7 +175,7 @@ class Completer:
         col += 1
 
         tempdir = tempfile.gettempdir()
-        temp_file_name = path.join(tempdir, 'test.cpp')
+        temp_file_name = path.join(tempdir, path.basename(view.file_name()))
         with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
             tmp_file.write(file_body)
 
@@ -188,33 +195,63 @@ class Completer:
         log.debug(" started code complete for view %s", view.id())
 
         try:
-            output = subprocess.check_output(complete_cmd, shell=True)
+            output = subprocess.check_output(complete_cmd, 
+                                             stderr=subprocess.STDOUT, 
+                                             shell=True)
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")
-            log.critical(" %s", output_text)
+            log.error(" clang process finished with code: \n%s", e.returncode)
+            log.error(" clang process output: \n%s", output_text)
+            self.error_vis.generate(view, output_text.splitlines(), FORMAT_BINARY)
+            self.error_vis.show_regions(view)
+
         # Process clang output, find COMPLETION lines and return them with a
         # little formating
         complete_results = output_text.splitlines()
         end = time.time()
         log.debug(" code complete done in %s seconds", end - start)
-        log.debug(" completions: %s", complete_results)
 
         self.completions = Completer._process_completions(
             complete_results)
         self.async_completions_ready = True
         Completer._reload_completions(view)
 
-    def reparse(self, view_id):
-        """Reparse the translation unit. This speeds up completions
-        significantly, so we perform this upon file save.
+    # TODO: rename this
+    def reparse(self, view):
+        file_body = view.substr(sublime.Region(0, view.size()))
 
-        Args:
-            view_id (int): view id
+        tempdir = tempfile.gettempdir()
+        temp_file_name = path.join(tempdir, path.basename(view.file_name()))
+        with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
+            tmp_file.write(file_body)
 
-        Returns:
-            bool: reparsed successfully
-        """
+        complete_cmd = "{binary} {init} {std} {file} {includes}".format(
+            binary=Completer.clang_binary,
+            init=" ".join(Completer.init_flags),
+            std=self.std_flag,
+            file=temp_file_name,
+            includes=" ".join(self.flags))
+        log.debug(" clang command: \n%s", complete_cmd)
+        # execute clang code completion
+        start = time.time()
+        log.debug(" started rebuilding view %s", view.id())
+
+        try:
+            output = subprocess.check_output(complete_cmd, 
+                                             stderr=subprocess.STDOUT, 
+                                             shell=True)
+            output_text = ''.join(map(chr, output))
+        except subprocess.CalledProcessError as e:
+            output_text = e.output.decode("utf-8")
+            log.error(" clang process finished with code: \n%s", e.returncode)
+            log.error(" clang process output: \n%s", output_text)
+            self.error_vis.generate(view, output_text.splitlines(), FORMAT_BINARY)
+            self.error_vis.show_regions(view)
+            return False
+
+        end = time.time()
+        log.debug(" rebuilding done in %s seconds", end - start)
         return True
 
     @staticmethod

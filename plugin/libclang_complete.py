@@ -15,6 +15,8 @@ import logging
 from os import path
 from os import listdir
 
+from .error_vis import CompileErrors
+from .error_vis import FORMAT_LIBCLANG
 from .tools import PKG_NAME
 
 log = logging.getLogger(__name__)
@@ -46,6 +48,7 @@ class Completer:
 
     tu_module = None
     version_str = None
+    error_vis = None
 
     completions = []
     translation_units = {}
@@ -109,6 +112,8 @@ class Completer:
             except Exception as e:
                 log.error(" error: %s", e)
                 self.valid = False
+        # initialize error visuzlization
+        self.error_vis = CompileErrors()
 
     def get_diagnostics(self, view_id):
         """Every TU has diagnostics. And we can get errors from them. This
@@ -244,7 +249,7 @@ class Completer:
         self.async_completions_ready = True
         Completer._reload_completions(view)
 
-    def reparse(self, view_id):
+    def reparse(self, view):
         """Reparse the translation unit. This speeds up completions
         significantly, so we perform this upon file save.
         
@@ -254,12 +259,16 @@ class Completer:
         Returns:
             bool: reparsed successfully
         """
-        if view_id in self.translation_units:
-            log.debug(" reparsing translation_unit for view %s", view_id)
+        if view.id() in self.translation_units:
+            log.debug(" reparsing translation_unit for view %s", view.id())
             start = time.time()
-            self.translation_units[view_id].reparse()
+            self.translation_units[view.id()].reparse()
             log.debug(" reparsed translation unit in %s seconds",
                       time.time() - start)
+            self.error_vis.generate(
+                view, self.translation_units[view.id()].diagnostics, 
+                error_vis.LIBCLANG)
+            self.error_vis.show_regions()
             return True
         log.error(" no translation unit for view id %s")
         return False

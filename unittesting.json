@@ -3,6 +3,6 @@
     "pattern" : "test*.py",
     "async": true,
     "deferred": false,
-    "verbosity": 3,
+    "verbosity": 5,
     "output": "<panel>"
 }

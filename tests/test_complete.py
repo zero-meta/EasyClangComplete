@@ -2,6 +2,7 @@ import sublime
 import sys
 import tempfile
 import time
+import logging
 from os import path
 from unittest import TestCase
 
@@ -10,9 +11,10 @@ easy_clang_complete = sys.modules["EasyClangComplete"]
 Completer = easy_clang_complete.plugin.clang_bin_complete.Completer
 Settings = easy_clang_complete.plugin.plugin_settings.Settings
 
+logger = logging.getLogger('UnitTesting')
+logger.setLevel(logging.DEBUG)
 
 class test_complete_command(TestCase):
-    body = None
 
     def setUp(self):
         file_name = path.join(path.dirname(__file__), 'test.cpp')
@@ -57,8 +59,10 @@ class test_complete_command(TestCase):
         file.close()
 
     def test_init(self):
+        logger.debug('\n')
         completer = Completer("clang++")
         self.assertIsNotNone(Completer.version_str)
+        logger.debug('clang version: %s', Completer.version_str)
 
     def test_init_completer(self):
         body = self.view.substr(sublime.Region(0, self.view.size()))

@@ -22,18 +22,20 @@ import os.path as path
 
 from threading import Thread
 
-from .plugin import tools
-from .plugin import error_vis
-from .plugin import plugin_settings
-from .plugin import libclang_complete
-from .plugin import clang_bin_complete
+sys.path.append(path.dirname(__file__))
+
+from plugin import tools
+from plugin import error_vis
+from plugin import plugin_settings
+from plugin.completion import lib_complete
+from plugin.completion import bin_complete
 
 # reload the modules
 imp.reload(tools)
 imp.reload(plugin_settings)
 imp.reload(error_vis)
-imp.reload(libclang_complete)
-imp.reload(clang_bin_complete)
+imp.reload(lib_complete)
+imp.reload(bin_complete)
 
 from .plugin.tools import SublBridge
 

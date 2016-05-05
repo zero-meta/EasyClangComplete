@@ -11,13 +11,15 @@ import sublime
 import time
 import platform
 import logging
+import sys
 
 from os import path
 from os import listdir
 
-from .error_vis import CompileErrors
-from .error_vis import FORMAT_LIBCLANG
-from .tools import PKG_NAME
+from plugin.error_vis import CompileErrors
+from plugin.error_vis import FORMAT_LIBCLANG
+from plugin.tools import PKG_NAME
+from plugin.completion.base_complete import Completer
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +34,7 @@ cindex_dict = {
 }
 
 
-class Completer:
+class LibClangCompleter(Completer):
 
     """Encapsulates completions based on libclang
     
@@ -50,10 +52,7 @@ class Completer:
     version_str = None
     error_vis = None
 
-    completions = []
     translation_units = {}
-    async_completions_ready = False
-    valid = False
 
     def __init__(self, clang_binary):
         """Initialize the Completer
@@ -62,37 +61,9 @@ class Completer:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
         
         """
-        # check if clang binary is defined
-        if not clang_binary:
-            log.critical(" clang binary not defined!")
-            return
+        Completer.__init__(self, clang_binary)
 
-        # run the cmd to get the proper version of the installed clang
-        check_version_cmd = clang_binary + " --version"
-        try:
-            log.info(" Getting version from command: `%s`", check_version_cmd)
-            output = subprocess.check_output(check_version_cmd, shell=True)
-            output_text = ''.join(map(chr, output))
-        except subprocess.CalledProcessError as e:
-            error_dict = {"clang_binary": clang_binary,
-                          "error": e,
-                          "advice": "make sure `clang_binary` is in PATH"}
-            log.error(" Calling clang binary failed.", error_dict)
-            return
-
-        # now we have the output, and can extract version from it
-        version_regex = re.compile("\d.\d")
-        found = version_regex.search(output_text)
-        Completer.version_str = found.group()
-        if Completer.version_str > "3.8" and platform.system() == "Darwin":
-            # to the best of my knowledge this is the last one available on macs
-            # but it is a hack, yes
-            Completer.version_str = "3.7"
-            info = {"platform": platform.system()}
-            log.warning(" Wrong version reported. Reducing it to %s",
-                        Completer.version_str, info)
-        log.info(" Found clang version: %s",
-                 Completer.version_str)
+        # initialize cindex
         if Completer.version_str in cindex_dict:
             try:
                 # should work if python bindings are installed
@@ -112,25 +83,8 @@ class Completer:
             except Exception as e:
                 log.error(" error: %s", e)
                 self.valid = False
-        # initialize error visuzlization
-        self.error_vis = CompileErrors()
 
-    def get_diagnostics(self, view_id):
-        """Every TU has diagnostics. And we can get errors from them. This
-        functions returns current diagnostics for tu for view id.
-        
-        Args:
-            view_id (int): view id
-        
-        Returns:
-            tu.diagnostics: relevant diagnostics
-        """
-        if view_id not in self.translation_units:
-            log.debug(" no diagnostics for view id: %s", view_id)
-            return None
-        return self.translation_units[view_id].diagnostics
-
-    def remove_tu(self, view_id):
+    def remove(self, view_id):
         """Remove tu for this view. Happens when we don't need it anymore.
         
         Args:
@@ -143,7 +97,7 @@ class Completer:
         log.debug(" removing translation unit for view id: %s", view_id)
         del self.translation_units[view_id]
 
-    def has_completer(self, view_id):
+    def exists_for_view(self, view_id):
         """find if there is a completer for the view
         
         Args:
@@ -156,8 +110,7 @@ class Completer:
             return True
         return False
 
-    def init_completer(self, view_id, initial_includes, search_include_file,
-                       std_flag, file_name, file_body, project_base_folder):
+    def init(self, view, includes, settings, project_folder):
         """Initialize the completer
         
         Args:
@@ -170,22 +123,24 @@ class Completer:
             project_base_folder (str): project folder
         
         """
-        file_current_folder = path.dirname(file_name)
+        file_name = view.file_name()
+        file_body = view.substr(sublime.Region(0, view.size()))
+        file_folder = path.dirname(file_name)
 
         # initialize unsaved files
         files = [(file_name, file_body)]
 
         # init needed variables from settings
-        clang_flags = [std_flag]
-        for include in initial_includes:
+        clang_flags = [settings.std_flag]
+        for include in includes:
             clang_flags.append('-I' + include)
 
         # support .clang_complete file with -I<indlude> entries
         if search_include_file:
             log.debug(" searching for .clang_complete in %s up to %s",
-                      file_current_folder, project_base_folder)
+                      file_folder, project_folder)
             clang_complete_file = Completer._search_clang_complete_file(
-                file_current_folder, project_base_folder)
+                file_folder, project_folder)
             if clang_complete_file:
                 log.debug(" found .clang_complete: %s", clang_complete_file)
                 flags = Completer._parse_clang_complete_file(
@@ -234,22 +189,21 @@ class Completer:
         # execute clang code completion
         start = time.time()
         log.debug(" started code complete for view %s", view.id())
-        complete_results = self.translation_units[view.id()].codeComplete(
+        complete_obj = self.translation_units[view.id()].codeComplete(
             view.file_name(),
             row, col,
             unsaved_files=files)
         end = time.time()
-        if complete_results is None or len(complete_results.results) == 0:
+        if complete_obj is None or len(complete_obj.results) == 0:
             log.debug(" no completions")
             return None
         log.debug(" code complete done in %s seconds", end - start)
 
-        self.completions = Completer._process_completions(
-            complete_results)
+        self.completions = LibClangCompleter._parse_completions(complete_obj)
         self.async_completions_ready = True
         Completer._reload_completions(view)
 
-    def reparse(self, view):
+    def update(self, view, show_errors):
         """Reparse the translation unit. This speeds up completions
         significantly, so we perform this upon file save.
         
@@ -265,32 +219,18 @@ class Completer:
             self.translation_units[view.id()].reparse()
             log.debug(" reparsed translation unit in %s seconds",
                       time.time() - start)
-            self.error_vis.generate(
-                view, self.translation_units[view.id()].diagnostics, 
-                error_vis.LIBCLANG)
-            self.error_vis.show_regions()
+            if show_errors:
+                logging.debug(" visualizing errors")
+                self.error_vis.generate(
+                    view, self.translation_units[view.id()].diagnostics, 
+                    error_vis.LIBCLANG)
+                self.error_vis.show_regions()
             return True
         log.error(" no translation unit for view id %s")
         return False
 
     @staticmethod
-    def _reload_completions(view):
-        """Ask sublime to reload the completions. Needed to update the active 
-        completion list when async autocompletion task has finished.
-        
-        Args:
-            view (sublime.View): current_view
-        
-        """
-        log.debug(" reload completion tooltip")
-        view.run_command('hide_auto_complete')
-        view.run_command('auto_complete', {
-            'disable_auto_insert': True,
-            'api_completions_only': True,
-            'next_competion_if_showing': True, })
-
-    @staticmethod
-    def _process_completions(complete_results):
+    def _parse_completions(complete_results):
         """Create snippet-like structures from a list of completions
         
         Args:
@@ -323,51 +263,3 @@ class Completer:
                     contents += chunk.spelling
             completions.append([trigger + "\t" + hint, contents])
         return completions
-
-    @staticmethod
-    def _search_clang_complete_file(start_folder, stop_folder):
-        """search for .clang_complete file up the tree
-        
-        Args:
-            start_folder (str): path to folder where we start the search
-            stop_folder (str): path to folder we should not go beyond
-        
-        Returns:
-            str: path to .clang_complete file or None if not found
-        """
-        current_folder = start_folder
-        one_past_stop_folder = path.dirname(stop_folder)
-        while current_folder != one_past_stop_folder:
-            for file in listdir(current_folder):
-                if file == ".clang_complete":
-                    return path.join(current_folder, file)
-            if current_folder == path.dirname(current_folder):
-                break
-            current_folder = path.dirname(current_folder)
-        return None
-
-    @staticmethod
-    def _parse_clang_complete_file(file):
-        """parse .clang_complete file
-        
-        Args:
-            file (str): path to a file
-        
-        Returns:
-            list(str): parsed list of includes from the file
-        """
-        flags = []
-        folder = path.dirname(file)
-        with open(file) as f:
-            content = f.readlines()
-            for line in content:
-                if line.startswith('-D'):
-                    flags.append(line)
-                elif line.startswith('-I'):
-                    path_to_add = line[2:].rstrip()
-                    if path.isabs(path_to_add):
-                        flags.append('-I' + path.normpath(path_to_add))
-                    else:
-                        flags.append('-I' + path.join(folder, path_to_add))
-        log.debug(" .clang_complete contains flags: %s", flags)
-        return flags

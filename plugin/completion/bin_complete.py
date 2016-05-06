@@ -227,11 +227,10 @@ class Completer(BaseCompleter):
         """update build for current view
         
         Args:
-            view (TYPE): Description
-            show_errors (TYPE): Description
+            view (sublime.View): this view
+            show_errors (TYPE): do we need to show errors? If not this is a 
+                dummy function as we gain nothing from building it with binary.
         
-        Returns:
-            TYPE: Description
         """
         if view.id() not in self.flags_dict:
             log.error(" Cannot update view %s. No build flags.", view.id())

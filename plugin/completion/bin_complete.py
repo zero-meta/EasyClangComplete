@@ -292,9 +292,10 @@ class Completer(BaseCompleter):
             Attributes:
                 place_holders (int): number of place holders in use
             """
-            place_holders = 0
+            def __init__(self):
+                self.place_holders = 0
 
-            def tokenize_params(match):
+            def tokenize_params(self, match):
                 """Create tockens from a match. Used as part or re.sub function
                 
                 Args:
@@ -303,15 +304,15 @@ class Completer(BaseCompleter):
                 Returns:
                     str: current match, wrapped in snippet
                 """
-                Parser.place_holders += 1
                 dict_match = match.groupdict()
                 if dict_match[Completer.PARAM_TAG]:
+                    self.place_holders += 1
                     return "${{{count}:{text}}}".format(
-                        count=Parser.place_holders,
+                        count=self.place_holders,
                         text=dict_match[Completer.PARAM_TAG])
                 return ''
 
-            def make_pretty(match):
+            def make_pretty(self, match):
                 """Process raw match and remove ugly placeholders. Needed to
                 have a human readable text for each completion.
                 
@@ -338,12 +339,13 @@ class Completer(BaseCompleter):
             comp_dict = pos_search.groupdict()
             log.debug("completions parsed: %s", comp_dict)
             trigger = comp_dict['name']
+            parser = Parser()
             contents = re.sub(Completer.compl_content_regex,
-                              Parser.tokenize_params,
+                              parser.tokenize_params,
                               comp_dict['content'])
             contents = re.sub(Completer.opts_regex, '', contents)
             hint = re.sub(Completer.compl_content_regex,
-                          Parser.make_pretty,
+                          parser.make_pretty,
                           comp_dict['content'])
             hint = re.sub(Completer.opts_regex, '', hint)
             completions.append([trigger + "\t" + hint, contents])

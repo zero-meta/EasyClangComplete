@@ -205,6 +205,7 @@ class Completer(BaseCompleter):
         log.debug(" code complete done in %s seconds", end - start)
 
         self.completions = Completer._parse_completions(complete_obj)
+        log.debug(self.completions)
         self.async_completions_ready = True
         Completer._reload_completions(view)
         if show_errors:

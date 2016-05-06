@@ -11,12 +11,14 @@ Linux & OSX | Windows
 
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++ for Sublime Text 3. It is built to function in an asynchronous way, so that you will not have to wait even when completions take slightly longer to load.
 
-The plugin uses `libclang` with its python bindings to provide clang-based autocompletions. In case `libclang` cannot be initialized or found it will use completions based on `clang -cc1` run from the terminal. If you want this as default behabior, set the setting `use_libclang` to `false`.
+The plugin uses `libclang` with its python bindings to provide clang-based autocompletions. In case `libclang` cannot be initialized or found it will use completions based on `clang -cc1` run from the command line. If you want this as default behavior, set the setting `use_libclang` to `false`.
 
 This plugin is intended to be easy to use. You should just add the folders your project uses to `include_dirs` list in the settings and everything should just work. If you experience problems - create an issue. I will try to respond as soon as possible.
 
 ## How to install ##
-Clone this repository into the folder where the packages of your Sublime Text 3 live. Then follow the OS-specific setup below:
+Use `Package Control` for Sublime Text. Install `EasyClangComplete` plugin from there. Then follow the OS-specific setup below.
+
+If you cannot find it there or have other reasons not to use package control, clone this repository into the folder where the packages of your Sublime Text 3 live. Then follow the OS-specific setup below.
 
 ##### Ubuntu #####
 I have tested it on Ubuntu 14.04 and here the setup should be as simple as:
@@ -27,12 +29,17 @@ You can also use a specific version of clang, e.g. `clang-3.6`. In this case don
 ```
 "clang_binary" : "clang++-3.6"
 ```
+Ubuntu uses full featured `libclang` support which provides the full experience with blazingly fast autocompletion even for large code bases thanks to `reparse` python bindings function.
 
 ##### Windows #####
-I am not fluent with Windows, so help needed. The plugin should work out of the box provided you have clang set up, but this needs testing and probably minor tweaks. If you are willing to help, either install the package and report errors or educate me of a simple way to install clang on Windows ^_^.
+Just download the latest clang from the [clang website](http://llvm.org/releases/download.html). This should be enough to trigger simple completions. Additional steps may be needed if you want to use STL or third party libraries. It seems clang does not package standard library, so you will have to get it from visual studio or alike.
+
+*Help needed:* Currently this plugin works for Windows only in a fallback mode by running a command in the cmd and parsing the output with regex. It works and should be fine for general user, but it would be cool to make it work with libclang as it is faster and should be more robust. I don't know Windows and I don't work in it, so if you are an expect in Windows - educate me! Fire up the issue with your suggestions! Let's make it work.
 
 ##### Mac  #####
-Unfortunately I do not own a mac. The unit tests seem to pass on an `OSX` instance. But there is a hack. I set the version of python bindings to `3.7` by hand. There is not simple way of knowing which version the internal `OSX` `clang` corresponds to in `LLVM` versioning scheme. But do correct me if I am wrong.
+Mac comes with `clang`. The only catch is that its versioning is different from `llvm` one. This makes it hard to match `libclang` to it. However, the autocompletions should be working out of the box. You may need additional setup to use STL or third party libraries.
+
+*Help needed:* Unfortunately I do not own a mac. The unit tests for simple completion using `clang` binary pass on an `OSX` instance. But there is a hack. I set the version of python bindings to `3.7` by hand. There is not simple way of knowing which version the internal `OSX` `clang` corresponds to in `LLVM` versioning scheme. But do correct me if I am wrong. Help me to make `libclang` work on a Mac!
 
 ## Settings highlights ##
 I will only cover most important settings here.

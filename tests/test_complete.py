@@ -144,6 +144,7 @@ class test_complete_command(TestCase):
             counter += 1
             if counter > 20:
                 break
+        print(completer.completions[:10])
         self.assertIsNotNone(completer.completions)
         expected = ['assign\tvoid assign(initializer_list<value_type> __l)',
                     'assign(${8:initializer_list<value_type> __l})']

@@ -17,8 +17,8 @@ before_install:
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
             export DISPLAY=:99.0;
             sh -e /etc/init.d/xvfb start;
-            sudo apt-get update -qq
-            sudo apt-get install -qq build-essential
+            sudo apt-get update -qq;
+            sudo apt-get install -qq build-essential;
       fi
 
 install:

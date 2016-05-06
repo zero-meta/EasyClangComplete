@@ -56,7 +56,7 @@ class Completer(BaseCompleter):
     """
     clang_binary = None
 
-    init_flags = ["-cc1", "-fsyntax-only", "-x c++", "-stdlib=libc++"]
+    init_flags = ["-cc1", "-fsyntax-only", "-x c++"]
     flags_dict = {}
     std_flag = None
 

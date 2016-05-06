@@ -147,6 +147,6 @@ class test_complete_command(TestCase):
                 break
         print(completer.completions[:10])
         self.assertIsNotNone(completer.completions)
-        expected = ['assign\tvoid assign(initializer_list<value_type> __l)',
-                    'assign(${1:initializer_list<value_type> __l})']
+        expected = ['assign\tvoid assign(size_type __n, const value_type &__val)',
+                    'assign(${1:size_type __n}, ${2:const value_type &__val})']
         self.assertTrue(expected in completer.completions)

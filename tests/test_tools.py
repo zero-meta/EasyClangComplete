@@ -6,7 +6,6 @@ from unittest import TestCase
 easy_clang_complete = sys.modules["EasyClangComplete"]
 
 SublBridge = easy_clang_complete.plugin.tools.SublBridge
-
 # for testing sublime command
 class test_tools_command(TestCase):
 

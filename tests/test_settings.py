@@ -2,10 +2,10 @@ import sublime
 import sys
 from os import path
 from unittest import TestCase
+import logging
 
-easy_clang_complete = sys.modules["EasyClangComplete"]
-
-Settings = easy_clang_complete.plugin.plugin_settings.Settings
+sys.path.append(path.dirname(path.dirname(__file__)))
+from plugin.plugin_settings import Settings
 
 class test_settings(TestCase):
 

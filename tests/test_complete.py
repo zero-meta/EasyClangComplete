@@ -6,13 +6,9 @@ import logging
 from os import path
 from unittest import TestCase
 
-easy_clang_complete = sys.modules["EasyClangComplete"]
-
-Completer = easy_clang_complete.plugin.clang_bin_complete.Completer
-Settings = easy_clang_complete.plugin.plugin_settings.Settings
-
-logger = logging.getLogger('UnitTesting')
-logger.setLevel(logging.DEBUG)
+sys.path.append(path.dirname(path.dirname(__file__)))
+from plugin.plugin_settings import Settings
+from plugin.completion.bin_complete import Completer
 
 class test_complete_command(TestCase):
 
@@ -59,10 +55,8 @@ class test_complete_command(TestCase):
         file.close()
 
     def test_init(self):
-        logger.debug('\n')
         completer = Completer("clang++")
-        self.assertIsNotNone(Completer.version_str)
-        logger.debug('clang version: %s', Completer.version_str)
+        self.assertIsNotNone(completer.version_str)
 
     def test_init_completer(self):
         body = self.view.substr(sublime.Region(0, self.view.size()))
@@ -75,14 +69,11 @@ class test_complete_command(TestCase):
             file_current_folder=current_folder,
             file_parent_folder=parent_folder)
         completer = Completer("clang++")
-        completer.init_completer(view_id=self.view.id(),
-                                 initial_includes=include_dirs,
-                                 search_include_file=False,
-                                 std_flag="std=c++11",
-                                 file_name=self.view.file_name(),
-                                 file_body=body,
-                                 project_base_folder='')
-        self.assertTrue(completer.has_completer(self.view.id()))
+        completer.init(view=self.view,
+                       includes=include_dirs,
+                       settings=settings,
+                       project_folder='')
+        self.assertTrue(completer.exists_for_view(self.view.id()))
 
     def test_complete(self):
         body = self.view.substr(sublime.Region(0, self.view.size()))
@@ -95,19 +86,16 @@ class test_complete_command(TestCase):
             file_current_folder=current_folder,
             file_parent_folder=parent_folder)
         completer = Completer("clang++")
-        completer.init_completer(view_id=self.view.id(),
-                                 initial_includes=include_dirs,
-                                 search_include_file=False,
-                                 std_flag="std=c++11",
-                                 file_name=self.view.file_name(),
-                                 file_body=body,
-                                 project_base_folder='')
-        self.assertTrue(completer.has_completer(self.view.id()))
+        completer.init(view=self.view,
+                        includes=include_dirs,
+                        settings=settings,
+                        project_folder='')
+        self.assertTrue(completer.exists_for_view(self.view.id()))
         self.assertEqual(self.getRow(5), "  a.")
         pos = self.view.text_point(5, 4)
         current_word = self.view.substr(self.view.word(pos))
         self.assertEqual(current_word, ".\n")
-        completer.complete(self.view, pos)
+        completer.complete(self.view, pos, settings.errors_on_save)
         counter = 0
         while not completer.async_completions_ready:
             time.sleep(0.1)

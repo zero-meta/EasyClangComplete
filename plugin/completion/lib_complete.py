@@ -39,23 +39,17 @@ class Completer(BaseCompleter):
     """Encapsulates completions based on libclang
     
     Attributes:
-        async_completions_ready (bool): turns true if there are completions
-                                    that have become ready from an async call
-        completions (list): current completions
-        translation_units (dict): Dictionary of translation units for view ids
         tu_module (cindex.TranslationUnit): module for proper cindex
-        valid (bool): validity of this completer
-        version_str (str): clang version string
+        translation_units (dict): dictionary of tu's for each view id
     """
 
     tu_module = None
-    version_str = None
-    error_vis = None
 
     translation_units = {}
 
     def __init__(self, clang_binary):
-        """Initialize the Completer
+        """Initialize the Completer from clang binary, reading its version.
+        Picks an according cindex for the found version.
         
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
@@ -111,17 +105,13 @@ class Completer(BaseCompleter):
         return False
 
     def init(self, view, includes, settings, project_folder):
-        """Initialize the completer
+        """Initialize the completer. Builds the view.
         
         Args:
-            view_id (int): view id
-            initial_includes (str[]): includes from settings
-            search_include_file (bool): should we search for .clang_complete?
-            std_flag (str): std flag, e.g. std=c++11
-            file_name (str): file full path
-            file_body (str): content of the file
-            project_base_folder (str): project folder
-        
+            view (sublime.View): current view
+            includes (list): includes from settings
+            settings (Settings): plugin settings
+            project_folder (str): current project folder
         """
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
@@ -171,11 +161,12 @@ class Completer(BaseCompleter):
     def complete(self, view, cursor_pos, show_errors):
         """This function is called asynchronously to create a list of
         autocompletions. Using the current translation unit it queries libclang
-        for the possible completions.
+        for the possible completions. It also shows compile errors if needed.
         
         Args:
             view (sublime.View): current view
             cursor_pos (int): sublime provided poistion of the cursor
+            show_errors (bool): controls if we need to show errors
         
         """
         file_body = view.substr(sublime.Region(0, view.size()))
@@ -219,10 +210,12 @@ class Completer(BaseCompleter):
         significantly, so we perform this upon file save.
         
         Args:
-            view_id (int): view id
+            view (sublime.View): current view
+            show_errors (bool): if true - highlight compile errors
         
         Returns:
             bool: reparsed successfully
+        
         """
         if view.id() in self.translation_units:
             log.debug(" reparsing translation_unit for view %s", view.id())

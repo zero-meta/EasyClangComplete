@@ -1,8 +1,10 @@
 """Summary
 
 Attributes:
-    cindex_dict (dict): dict of cindex entries for each version of clang
     log (logging.Logger): logger for this module
+
+Deleted Attributes:
+    cindex_dict (dict): dict of cindex entries for each version of clang
 """
 import re
 import subprocess
@@ -26,14 +28,31 @@ log = logging.getLogger(__name__)
 class Completer(BaseCompleter):
 
     """Encapsulates completions based on the output from clang_binary
-
+    
     Attributes:
+        
+        clang_binary (str): e.g. "clang++" or "clang++-3.6"
+        flags_dict (dict): compilation flags lists for each view
+        init_flags (list): flags that every command needs
+        std_flag (TYPE): std flag, e.g. "std=c++11"
+        
+        completions (list): current completions
         async_completions_ready (bool): turns true if there are completions
                                     that have become ready from an async call
-        completions (list): current completions
-        translation_units (dict): Dictionary of translation units for view ids
-        tu_module (cindex.TranslationUnit): module for proper cindex
-        version_str (str): clang version string
+    
+        compl_regex (regex): regex to parse raw completion into name and content
+        compl_content_regex (regex): regex to parse the content of the completion
+        opts_regex (regex): regex to detect optional parameters
+    
+        group_params (str): string that describes a group to capture function parameters
+        group_types (str): string that describes a group to capture type names
+        group_opts (str): string that describes a group to capture optional parameters
+        
+        PARAM_CHARS (str): chars allowed to be part of function or type
+        PARAM_TAG (str): function params tag for convenience
+        TYPE_TAG (str): type name tag for convenience
+        OPTS_TAG (str): optional params tag for convenience
+    
     """
     clang_binary = None
 
@@ -53,9 +72,9 @@ class Completer(BaseCompleter):
     group_types = "(?P<{type_tag}>[{type_chars}]+)".format(
         type_tag=TYPE_TAG,
         type_chars=PARAM_CHARS)
-    group_opts = "(?P<{opts_tag}>[{type_chars}]+)".format(
+    group_opts = "(?P<{opts_tag}>[{opts_chars}]+)".format(
         opts_tag=OPTS_TAG,
-        type_chars=PARAM_CHARS)
+        opts_chars=PARAM_CHARS)
 
     compl_content_regex = re.compile(
         "\<#{group_params}#\>|\[#{group_types}#\]".format(
@@ -65,21 +84,33 @@ class Completer(BaseCompleter):
 
     def __init__(self, clang_binary):
         """Initialize the Completer
-
+        
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
-            verbose (bool): shows if we should show debug info
-
+        
         """
         # init common completer interface
         BaseCompleter.__init__(self, clang_binary)
         Completer.clang_binary = clang_binary
 
     def remove(self, view_id):
+        """remove compile flags for view
+        
+        Args:
+            view_id (int): current view id
+        """
         if view_id in self.flags_dict:
             self.flags_dict[view_id] = []
 
     def exists_for_view(self, view_id):
+        """check if compile flags exist for view id
+        
+        Args:
+            view_id (int): current view id
+        
+        Returns:
+            bool: compile flags exist for this view
+        """
         if view_id not in self.flags_dict:
             log.debug(" no build flags for view: %s", view_id)
             return False
@@ -89,16 +120,13 @@ class Completer(BaseCompleter):
 
     def init(self, view, includes, settings, project_folder):
         """Initialize the completer
-
+        
         Args:
-            view_id (int): view id
-            initial_includes (str[]): includes from settings
-            search_include_file (bool): should we search for .clang_complete?
-            std_flag (str): std flag, e.g. std=c++11
-            file_name (str): file full path
-            file_body (str): content of the file
-            project_base_folder (str): project folder
-
+            view (sublime.View): current view
+            includes (list): includes from settings
+            settings (Settings): plugin settings
+            project_folder (str): current project folder
+        
         """
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
@@ -131,13 +159,14 @@ class Completer(BaseCompleter):
 
     def complete(self, view, cursor_pos, show_errors):
         """This function is called asynchronously to create a list of
-        autocompletions. Using the current translation unit it queries libclang
-        for the possible completions.
-
+        autocompletions. It builds up a clang command that is then executed
+        as a subprocess. The output is parsed for completions and/or errors
+        
         Args:
             view (sublime.View): current view
             cursor_pos (int): sublime provided poistion of the cursor
-
+            show_errors (bool): true if we want to visualize errors
+        
         """
         if not view.id() in self.flags_dict:
             log.error(" cannot complete view: %s", view.id())
@@ -195,9 +224,24 @@ class Completer(BaseCompleter):
         Completer._reload_completions(view)
 
     def update(self, view, show_errors):
+        """update build for current view
+        
+        Args:
+            view (TYPE): Description
+            show_errors (TYPE): Description
+        
+        Returns:
+            TYPE: Description
+        """
         if view.id() not in self.flags_dict:
             log.error(" Cannot update view %s. No build flags.", view.id())
             return False
+
+        if not show_errors:
+            # in this class there is no need to rebuild the file. It brings no
+            # benefits. We only want to do it if we need to show errors.
+            return False
+
         file_body = view.substr(sublime.Region(0, view.size()))
 
         tempdir = tempfile.gettempdir()
@@ -225,9 +269,8 @@ class Completer(BaseCompleter):
             output_text = e.output.decode("utf-8")
             log.info(" clang process finished with code: \n%s", e.returncode)
             log.info(" clang process output: \n%s", output_text)
-            if show_errors:
-                self.error_vis.generate(view, output_text.splitlines(), FORMAT_BINARY)
-                self.error_vis.show_regions(view)
+            self.error_vis.generate(view, output_text.splitlines(), FORMAT_BINARY)
+            self.error_vis.show_regions(view)
             return False
 
         end = time.time()
@@ -237,17 +280,30 @@ class Completer(BaseCompleter):
     @staticmethod
     def _parse_completions(complete_results):
         """Create snippet-like structures from a list of completions
-
+        
         Args:
             complete_results (list): raw completions list
-
+        
         Returns:
             list: updated completions
         """
         class Parser:
+            """Help class to parse completions with regex
+            
+            Attributes:
+                place_holders (int): number of place holders in use
+            """
             place_holders = 0
 
             def tokenize_params(match):
+                """Create tockens from a match. Used as part or re.sub function
+                
+                Args:
+                    match (re.match): current match
+                
+                Returns:
+                    str: current match, wrapped in snippet
+                """
                 Parser.place_holders += 1
                 dict_match = match.groupdict()
                 if dict_match[Completer.PARAM_TAG]:
@@ -257,6 +313,15 @@ class Completer(BaseCompleter):
                 return ''
 
             def make_pretty(match):
+                """Process raw match and remove ugly placeholders. Needed to
+                have a human readable text for each completion.
+                
+                Args:
+                    match (re.match): current completion
+                
+                Returns:
+                    str: match stripped from unneeded placeholders
+                """
                 dict_match = match.groupdict()
                 if dict_match[Completer.PARAM_TAG]:
                     return dict_match[Completer.PARAM_TAG]

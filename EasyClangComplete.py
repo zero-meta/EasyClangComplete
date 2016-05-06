@@ -3,11 +3,13 @@
 Provides completion suggestions for C/C++ languages based on clang
 
 Attributes:
-    compile_errors (error_vis.CompileErrors): class that handles error vis
-    completer (libclang_complete.LibClangCompleter): class that handles 
-                                                        autocompletion
-    settings (plugin_settings.Settings): class that encapsulates settings
+    completer (plugin.completion.base_completion.BaseCompleter): 
+        This object handles auto completion. It can be one of the following:
+        - bin_complete.Completer
+        - lib_complete.Completer
+
     log (logging.Logger): logger for this module
+    settings (plugin_settings.Settings): class that encapsulates settings
 """
 
 import sublime
@@ -74,10 +76,9 @@ def plugin_loaded():
 
 class EasyClangComplete(sublime_plugin.EventListener):
 
-    """Class that handles clang based auto completion
+    """Base class for this plugin. Most of the functionality is delegated
 
     Attributes:
-        completions (list): list of completions
         valid_extensions (list): list of valid extentions for autocompletion
 
     """
@@ -137,8 +138,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         return False
 
     def on_activated_async(self, view):
-        """When view becomes active, create a translation unit for it if it 
-        doesn't already have one
+        """Called upon activating a view. Execution in a worker thread.
 
         Args:
             view (sublime.View): current view
@@ -172,7 +172,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 project_folder=project_base_folder)
 
     def on_selection_modified(self, view):
-        """Called when selection is modified
+        """Called when selection is modified. Executed in gui thread.
 
         Args:
             view (sublime.View): current view
@@ -182,7 +182,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             completer.error_vis.show_popup_if_needed(view, row)
 
     def on_modified_async(self, view):
-        """called in a worker thread when view is modified
+        """Called in a worker thread when view is modified
 
         Args:
             view (sublime.View): current view
@@ -192,7 +192,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             completer.error_vis.clear(view)
 
     def on_post_save_async(self, view):
-        """On save we want to reparse the translation unit
+        """On save. Executed in a worker thread.
 
         Args:
             view (sublime.View): current view
@@ -204,7 +204,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             completer.update(view, settings.errors_on_save)
 
     def on_close(self, view):
-        """Remove the translation unit when view is closed
+        """Called on closing the view.
 
         Args:
             view (sublime.View): current view

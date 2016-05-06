@@ -18,12 +18,12 @@ from os import listdir
 from plugin.error_vis import CompileErrors
 from plugin.error_vis import FORMAT_BINARY
 from plugin.tools import PKG_NAME
-from plugin.completion.base_complete import Completer
+from plugin.completion.base_complete import BaseCompleter
 
 log = logging.getLogger(__name__)
 
 
-class ClangBinCompleter(Completer):
+class Completer(BaseCompleter):
 
     """Encapsulates completions based on the output from clang_binary
 
@@ -72,7 +72,8 @@ class ClangBinCompleter(Completer):
 
         """
         # init common completer interface
-        Completer.__init__(self, clang_binary)
+        BaseCompleter.__init__(self, clang_binary)
+        Completer.clang_binary = clang_binary
 
     def remove(self, view_id):
         if view_id in self.flags_dict:
@@ -107,7 +108,7 @@ class ClangBinCompleter(Completer):
         files = [(file_name, file_body)]
 
         # set std_flag
-        self.std_flag = std_flag
+        self.std_flag = settings.std_flag
 
         # init needed variables from settings
         self.flags_dict[view.id()] = []
@@ -115,7 +116,7 @@ class ClangBinCompleter(Completer):
             self.flags_dict[view.id()].append('-I' + include)
 
         # support .clang_complete file with -I<indlude> entries
-        if search_include_file:
+        if settings.search_clang_complete:
             log.debug(" searching for .clang_complete in %s up to %s",
                       file_folder, project_folder)
             clang_complete_file = Completer._search_clang_complete_file(
@@ -126,9 +127,9 @@ class ClangBinCompleter(Completer):
                     clang_complete_file)
                 self.flags_dict[view.id()] += flags
 
-        log.debug(" clang flags are: %s", self.flags)
+        log.debug(" clang flags are: %s", self.flags_dict[view.id()])
 
-    def complete(self, view, cursor_pos):
+    def complete(self, view, cursor_pos, show_errors):
         """This function is called asynchronously to create a list of
         autocompletions. Using the current translation unit it queries libclang
         for the possible completions.
@@ -174,10 +175,12 @@ class ClangBinCompleter(Completer):
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")
-            log.error(" clang process finished with code: \n%s", e.returncode)
-            log.error(" clang process output: \n%s", output_text)
-            self.error_vis.generate(view, output_text.splitlines(), FORMAT_BINARY)
-            self.error_vis.show_regions(view)
+            log.info(" clang process finished with code: \n%s", e.returncode)
+            log.info(" clang process output: \n%s", output_text)
+            if show_errors:
+                self.error_vis.generate(view, output_text.splitlines(), 
+                                        FORMAT_BINARY)
+                self.error_vis.show_regions(view)
             # we could stop here, but we continue as sometimes there are still
             # valid completions even though there were errors encountered
 
@@ -187,11 +190,14 @@ class ClangBinCompleter(Completer):
         end = time.time()
         log.debug(" code complete done in %s seconds", end - start)
 
-        self.completions = ClangBinCompleter._parse_completions(raw_complete)
+        self.completions = Completer._parse_completions(raw_complete)
         self.async_completions_ready = True
         Completer._reload_completions(view)
 
-    def update(self, view):
+    def update(self, view, show_errors):
+        if view.id() not in self.flags_dict:
+            log.error(" Cannot update view %s. No build flags.", view.id())
+            return False
         file_body = view.substr(sublime.Region(0, view.size()))
 
         tempdir = tempfile.gettempdir()
@@ -204,7 +210,7 @@ class ClangBinCompleter(Completer):
             init=" ".join(Completer.init_flags),
             std=self.std_flag,
             file=temp_file_name,
-            includes=" ".join(self.flags))
+            includes=" ".join(self.flags_dict[view.id()]))
         log.debug(" clang command: \n%s", complete_cmd)
         # execute clang code completion
         start = time.time()
@@ -217,10 +223,11 @@ class ClangBinCompleter(Completer):
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")
-            log.error(" clang process finished with code: \n%s", e.returncode)
-            log.error(" clang process output: \n%s", output_text)
-            self.error_vis.generate(view, output_text.splitlines(), FORMAT_BINARY)
-            self.error_vis.show_regions(view)
+            log.info(" clang process finished with code: \n%s", e.returncode)
+            log.info(" clang process output: \n%s", output_text)
+            if show_errors:
+                self.error_vis.generate(view, output_text.splitlines(), FORMAT_BINARY)
+                self.error_vis.show_regions(view)
             return False
 
         end = time.time()

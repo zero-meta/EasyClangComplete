@@ -19,7 +19,7 @@ from os import listdir
 from plugin.error_vis import CompileErrors
 from plugin.error_vis import FORMAT_LIBCLANG
 from plugin.tools import PKG_NAME
-from plugin.completion.base_complete import Completer
+from plugin.completion.base_complete import BaseCompleter
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ cindex_dict = {
 }
 
 
-class LibClangCompleter(Completer):
+class Completer(BaseCompleter):
 
     """Encapsulates completions based on libclang
     
@@ -61,10 +61,10 @@ class LibClangCompleter(Completer):
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
         
         """
-        Completer.__init__(self, clang_binary)
+        BaseCompleter.__init__(self, clang_binary)
 
         # initialize cindex
-        if Completer.version_str in cindex_dict:
+        if self.version_str in cindex_dict:
             try:
                 # should work if python bindings are installed
                 cindex = importlib.import_module("clang.cindex")
@@ -72,9 +72,9 @@ class LibClangCompleter(Completer):
                 # should work for other cases
                 log.warning(" cannot get default cindex with error: %s", e)
                 log.warning(" using bundled one: %s",
-                            cindex_dict[Completer.version_str])
+                            cindex_dict[self.version_str])
                 cindex = importlib.import_module(
-                    cindex_dict[Completer.version_str])
+                    cindex_dict[self.version_str])
             Completer.tu_module = cindex.TranslationUnit
             # check if we can build an index. If not, set valid to false
             try:
@@ -136,14 +136,14 @@ class LibClangCompleter(Completer):
             clang_flags.append('-I' + include)
 
         # support .clang_complete file with -I<indlude> entries
-        if search_include_file:
+        if settings.search_clang_complete:
             log.debug(" searching for .clang_complete in %s up to %s",
                       file_folder, project_folder)
-            clang_complete_file = Completer._search_clang_complete_file(
+            clang_complete_file = BaseCompleter._search_clang_complete_file(
                 file_folder, project_folder)
             if clang_complete_file:
                 log.debug(" found .clang_complete: %s", clang_complete_file)
-                flags = Completer._parse_clang_complete_file(
+                flags = BaseCompleter._parse_clang_complete_file(
                     clang_complete_file)
                 clang_flags += flags
 
@@ -151,8 +151,8 @@ class LibClangCompleter(Completer):
         try:
             TU = Completer.tu_module
             start = time.time()
-            log.debug(" compilation started for view id: %s", view_id)
-            self.translation_units[view_id] = TU.from_source(
+            log.debug(" compilation started for view id: %s", view.id())
+            self.translation_units[view.id()] = TU.from_source(
                 filename=file_name,
                 args=clang_flags,
                 unsaved_files=files,
@@ -162,8 +162,13 @@ class LibClangCompleter(Completer):
             log.debug(" compilation done in %s seconds", end - start)
         except Exception as e:
             log.error(" error while compiling: %s", e)
+        if settings.errors_on_save:
+            self.error_vis.generate(
+                view, self.translation_units[view.id()].diagnostics, 
+                FORMAT_LIBCLANG)
+            self.error_vis.show_regions(view)
 
-    def complete(self, view, cursor_pos):
+    def complete(self, view, cursor_pos, show_errors):
         """This function is called asynchronously to create a list of
         autocompletions. Using the current translation unit it queries libclang
         for the possible completions.
@@ -199,9 +204,14 @@ class LibClangCompleter(Completer):
             return None
         log.debug(" code complete done in %s seconds", end - start)
 
-        self.completions = LibClangCompleter._parse_completions(complete_obj)
+        self.completions = Completer._parse_completions(complete_obj)
         self.async_completions_ready = True
         Completer._reload_completions(view)
+        if show_errors:
+            self.error_vis.generate(
+                view, self.translation_units[view.id()].diagnostics, 
+                FORMAT_LIBCLANG)
+            self.error_vis.show_regions(view)
 
     def update(self, view, show_errors):
         """Reparse the translation unit. This speeds up completions
@@ -220,11 +230,10 @@ class LibClangCompleter(Completer):
             log.debug(" reparsed translation unit in %s seconds",
                       time.time() - start)
             if show_errors:
-                logging.debug(" visualizing errors")
                 self.error_vis.generate(
                     view, self.translation_units[view.id()].diagnostics, 
-                    error_vis.LIBCLANG)
-                self.error_vis.show_regions()
+                    FORMAT_LIBCLANG)
+                self.error_vis.show_regions(view)
             return True
         log.error(" no translation unit for view id %s")
         return False

@@ -62,14 +62,14 @@ def plugin_loaded():
     # init everythin else
     if settings.use_libclang:
         log.info(" init completer based on libclang")
-        completer = libclang_complete.Completer(settings.clang_binary)
+        completer = lib_complete.Completer(settings.clang_binary)
         if not completer.valid:
             log.error(" cannot initialize completer with libclang.")
             log.info(" falling back to using clang in a subprocess.")
             completer = None
     if not completer:
         log.info(" init completer based on clang from cmd")
-        completer = clang_bin_complete.Completer(settings.clang_binary)
+        completer = bin_complete.Completer(settings.clang_binary)
 
 
 class EasyClangComplete(sublime_plugin.EventListener):
@@ -146,7 +146,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         log.debug(" on_activated_async view id %s", view.id())
         if self.has_valid_extension(view):
-            if completer.has_completer(view.id()):
+            if completer.exists_for_view(view.id()):
                 log.debug(" view %s, already has a completer", view.id())
                 return
             log.debug("init completer for view id: %s", view.id())
@@ -165,14 +165,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 project_base_folder=project_base_folder,
                 file_current_folder=current_folder,
                 file_parent_folder=parent_folder)
-            completer.init_completer(
-                view_id=view.id(),
-                initial_includes=include_dirs,
-                search_include_file=settings.search_clang_complete,
-                std_flag=settings.std_flag,
-                file_name=view.file_name(),
-                file_body=body,
-                project_base_folder=project_base_folder)
+            completer.init(
+                view=view,
+                includes=include_dirs,
+                settings=settings,
+                project_folder=project_base_folder)
 
     def on_selection_modified(self, view):
         """Called when selection is modified
@@ -180,8 +177,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
-        (row, col) = SublBridge.cursor_pos(view)
-        completer.error_vis.show_popup_if_needed(view, row)
+        if self.has_valid_extension(view):
+            (row, col) = SublBridge.cursor_pos(view)
+            completer.error_vis.show_popup_if_needed(view, row)
 
     def on_modified_async(self, view):
         """called in a worker thread when view is modified
@@ -190,7 +188,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
         """
         log.debug(" on_modified_async view id %s", view.id())
-        completer.error_vis.clear(view)
+        if self.has_valid_extension(view):
+            completer.error_vis.clear(view)
 
     def on_post_save_async(self, view):
         """On save we want to reparse the translation unit
@@ -199,15 +198,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
-        log.debug(" on_post_save_async")
+        log.debug(" saving view: %s", view.id())
         if self.has_valid_extension(view):
             completer.error_vis.erase_regions(view)
-            completer.reparse(view)
-            if settings.errors_on_save:
-                diagnostics = completer.get_diagnostics(view.id())
-                if not diagnostics:
-                    # no diagnostics
-                    return
+            completer.update(view, settings.errors_on_save)
 
     def on_close(self, view):
         """Remove the translation unit when view is closed
@@ -217,7 +211,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         """
         log.debug(" closing view %s", view.id())
-        completer.remove_tu(view.id())
+        if self.has_valid_extension(view):
+            completer.remove(view.id())
 
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code
@@ -252,7 +247,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         # create a daemon thread to update the completions
         completion_thread = Thread(
-            target=completer.complete, args=[view, locations[0]])
+            target=completer.complete, 
+            args=[view, locations[0], settings.errors_on_save])
         completion_thread.deamon = True
         completion_thread.start()
 

@@ -20,7 +20,7 @@ from plugin.tools import PKG_NAME
 
 log = logging.getLogger(__name__)
 
-class Completer:
+class BaseCompleter:
     version_str = None
     error_vis = None
 
@@ -30,7 +30,7 @@ class Completer:
     valid = False
 
     def __init__(self, clang_binary):
-        """Initialize the Completer
+        """Initialize the BaseCompleter
         
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
@@ -49,15 +49,15 @@ class Completer:
         # now we have the output, and can extract version from it
         version_regex = re.compile("\d.\d")
         found = version_regex.search(output_text)
-        Completer.version_str = found.group()
-        if Completer.version_str > "3.8" and platform.system() == "Darwin":
+        self.version_str = found.group()
+        if self.version_str > "3.8" and platform.system() == "Darwin":
             # to the best of my knowledge this is the last one available on macs
             # but it is a hack, yes
-            Completer.version_str = "3.7"
+            self.version_str = "3.7"
             info = {"platform": platform.system()}
             log.warning(" Wrong version reported. Reducing it to %s",
-                        Completer.version_str, info)
-        log.info(" Found clang version: %s", Completer.version_str)
+                        self.version_str, info)
+        log.info(" Found clang version: %s", self.version_str)
         # initialize error visuzlization
         self.error_vis = CompileErrors()
 
@@ -67,13 +67,13 @@ class Completer:
     def exists_for_view(self, view_id):
         raise NotImplementedError("calling abstract method")
 
-    def init(self, view, includes, settings, project_folder):
+    def init(self, view, includes, settings, project_folder, show_errors):
         raise NotImplementedError("calling abstract method")
 
-    def complete(self, view, cursor_pos):
+    def complete(self, view, cursor_pos, show_errors):
         raise NotImplementedError("calling abstract method")
 
-    def update(self, view):
+    def update(self, view, show_errors):
         raise NotImplementedError("calling abstract method")
 
     @staticmethod

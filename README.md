@@ -32,14 +32,14 @@ You can also use a specific version of clang, e.g. `clang-3.6`. In this case don
 Ubuntu uses full featured `libclang` support which provides the full experience with blazingly fast autocompletion even for large code bases thanks to `reparse` python bindings function.
 
 ##### Windows #####
-Just download the latest clang from the [clang website](http://llvm.org/releases/download.html). This should be enough to trigger simple completions. Additional steps may be needed if you want to use STL or third party libraries. It seems clang does not package standard library, so you will have to get it from visual studio or alike.
+Just download the latest clang from the [clang website](http://llvm.org/releases/download.html). This should be enough to trigger simple completions. Additional steps may be needed if you want to use STL or third party libraries. I assume it is relatively easy to make it work with `MinGW` (do open an issue to tell me more about it) by just adjusting the includes in settings or using a proper `.clang_complete` file. It is relatively hard to use it with Microsoft visual c++. Info is on [official Clang 3.9 website](http://clang.llvm.org/docs/MSVCCompatibility.html)
 
-*Help needed:* Currently this plugin works for Windows only in a fallback mode by running a command in the cmd and parsing the output with regex. It works and should be fine for general user, but it would be cool to make it work with libclang as it is faster and should be more robust. I don't know Windows and I don't work in it, so if you are an expect in Windows - educate me! Fire up the issue with your suggestions! Let's make it work.
+*Help needed:* Currently this plugin works for Windows only in a fallback mode by running a command in the cmd and parsing the output with regex. It works and should be fine for general user, but it would be cool to make it work with libclang as it is faster and should be more robust. I don't know much about Windows and I don't work in it, so if you are an expect in Windows - educate me! Fire up the issue with your suggestions! Let's make it work.
 
 ##### Mac  #####
 Mac comes with `clang`. The only catch is that its versioning is different from `llvm` one. This makes it hard to match `libclang` to it. However, the autocompletions should be working out of the box. You may need additional setup to use STL or third party libraries.
 
-*Help needed:* Unfortunately I do not own a mac. The unit tests for simple completion using `clang` binary pass on an `OSX` instance. But there is a hack. I set the version of python bindings to `3.7` by hand. There is not simple way of knowing which version the internal `OSX` `clang` corresponds to in `LLVM` versioning scheme. But do correct me if I am wrong. Help me to make `libclang` work on a Mac!
+*Help needed:* Unfortunately I do not own a mac. The unit tests for completion using `clang` binary pass on an `OSX` instance both for completing user-defined structures and for STL auto-completion. But there is a hack. I set the version of python bindings to `3.7` by hand. There is not simple way of knowing which version the internal `OSX` `clang` corresponds to in `LLVM` versioning scheme. But do correct me if I am wrong. Help me to make `libclang` work on a Mac!
 
 ## Settings highlights ##
 I will only cover most important settings here.
@@ -87,9 +87,12 @@ However, with time this plugin has grown quite different from its origin and thi
 
 The trick with multiple `clang.cindex` files is inspired by this repo: https://github.com/griebd/clangHelper Thanks for inspiration!
 
-Test support is done as in [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin.
-
 If you are an experienced python developer and find that something in my code sucks completely - **DO** tell me. Python is not my main language and I am always willing to learn.
+
+## Tests ##
+I have tried to cover most crucial functionality with unit tests using [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin. To check out the current status navigate to:
+- [Travis-ci](https://travis-ci.org/niosus/EasyClangComplete) for Linux/OSX builds.
+- [Appveyor](https://ci.appveyor.com/project/niosus/easyclangcomplete) for Windows build.
 
 ## Licence ##
 ![licence](http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-1.png)

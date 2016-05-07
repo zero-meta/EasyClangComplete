@@ -5,7 +5,7 @@
 						"/usr/include",
 						"$project_base_path/src",
 						"/workspace/$project_name/src",
-						"C:\\Program Files (x86)\\Microsoft Visual Studio 15.0\\VC\\include"
+						"C:\\Program Files (x86)\\Microsoft Visual Studio 10.0\\VC\\include"
 						],
 
 	// set the standard library flag. 

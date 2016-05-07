@@ -192,7 +192,7 @@ class Completer(BaseCompleter):
             std=self.std_flag,
             complete_at=complete_at_str,
             includes=" ".join(self.flags_dict[view.id()]))
-        log.debug(" clang command: \n%s", complete_cmd)
+        log.warning(" clang command: \n%s", complete_cmd)
         # execute clang code completion
         start = time.time()
         log.debug(" started code complete for view %s", view.id())

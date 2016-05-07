@@ -137,7 +137,7 @@ class Completer(BaseCompleter):
                     clang_complete_file)
                 clang_flags += flags
 
-        log.debug(" clang flags are: %s", clang_flags)
+        log.warning(" clang flags are: %s", clang_flags)
         try:
             TU = Completer.tu_module
             start = time.time()

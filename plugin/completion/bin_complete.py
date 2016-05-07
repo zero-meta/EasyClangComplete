@@ -141,9 +141,9 @@ class Completer(BaseCompleter):
         # init needed variables from settings
         self.flags_dict[view.id()] = []
         for include in includes:
-            self.flags_dict[view.id()].append('-I' + include)
+            self.flags_dict[view.id()].append('-I "{}"'.format(include))
 
-        # support .clang_complete file with -I<indlude> entries
+        # support .clang_complete file with -I "<indlude>" entries
         if settings.search_clang_complete:
             log.debug(" searching for .clang_complete in %s up to %s",
                       file_folder, project_folder)

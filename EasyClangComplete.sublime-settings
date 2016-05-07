@@ -5,6 +5,7 @@
 						"/usr/include",
 						"/usr/include/c++/4.6",  // this is for travis build
 						"/usr/include/c++/4.6/x86_64-linux-gnu",
+						"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\include",
 						"$project_base_path/src",
 						"/workspace/$project_name/src",
 						],

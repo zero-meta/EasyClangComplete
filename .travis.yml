@@ -23,6 +23,9 @@ before_install:
     - sudo apt-get install gcc-4.8 -y
     - sudo apt-get install build-essential -y
     - ls /usr/include/c++
+    - sudo find / -name "iostream"
+    - sudo find / -name "stdbool.h"
+    - sudo find / -name "c++config.h"
 
 install:
     - sh travis.sh bootstrap

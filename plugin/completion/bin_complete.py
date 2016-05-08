@@ -65,7 +65,7 @@ class Completer(BaseCompleter):
     PARAM_TAG = "param"
     TYPE_TAG = "type"
     OPTS_TAG = "opts"
-    PARAM_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}"
+    PARAM_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}!"
     group_params = "(?P<{param_tag}>[{param_chars}]+)".format(
         param_chars=PARAM_CHARS,
         param_tag=PARAM_TAG)

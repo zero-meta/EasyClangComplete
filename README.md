@@ -6,40 +6,41 @@ Sublime Text 3 plugin that offers auto-completion for C++
 
 Linux & OSX | Windows
 ------------|------------
-[![Build Status](https://travis-ci.org/niosus/EasyClangComplete.svg?branch=master)](https://travis-ci.org/niosus/EasyClangComplete.svg?branch=master) | [![Build status](https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true)](https://ci.appveyor.com/project/niosus/easyclangcomplete/branch/master)
+[![Build Status](https://travis-ci.org/niosus/EasyClangComplete.svg?branch=master)](https://travis-ci.org/niosus/EasyClangComplete) | [![Build status](https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true)](https://ci.appveyor.com/project/niosus/easyclangcomplete/branch/master)
 
 
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++ for Sublime Text 3. It is built to function in an asynchronous way, so that you will not have to wait even when completions take slightly longer to load.
 
-The plugin uses `libclang` with its python bindings to provide clang-based autocompletions. In case `libclang` cannot be initialized or found it will use completions based on `clang -cc1` run from the command line. If you want this as default behavior, set the setting `use_libclang` to `false`.
+The plugin uses `libclang` with its python bindings to provide clang-based autocompletions. In case `libclang` cannot be initialized or found it will use completions based on the output of `clang -code-completion-at` run from the command line. If you want this as default behavior, set the setting `use_libclang` to `false`.
 
-This plugin is intended to be easy to use. You should just add the folders your project uses to `include_dirs` list in the settings and everything should just work. If you experience problems - create an issue. I will try to respond as soon as possible.
+This plugin is intended to be easy to use. It should autocomplete STL out of the box and you should just add the folders your project uses to `include_dirs` list in the settings to make it autocomplete code all your project. If you experience problems - create an issue. I will try to respond as soon as possible.
 
 ## How to install ##
 Use `Package Control` for Sublime Text. Install `EasyClangComplete` plugin from there. Then follow the OS-specific setup below.
 
 If you cannot find it there or have other reasons not to use package control, clone this repository into the folder where the packages of your Sublime Text 3 live. Then follow the OS-specific setup below.
 
-##### Ubuntu #####
+##### Linux #####
 I have tested it on Ubuntu 14.04 and here the setup should be as simple as:
 ```bash
 sudo apt-get install clang
 ```
-You can also use a specific version of clang, e.g. `clang-3.6`. In this case don't forget to set the correct binary name in the settings, e.g.:
+You can also install any specific version of clang, e.g. `clang-3.6`. In this case don't forget to set the correct binary name in the settings, e.g.:
 ```
 "clang_binary" : "clang++-3.6"
 ```
 Ubuntu uses full featured `libclang` support which provides the full experience with blazingly fast autocompletion even for large code bases thanks to `reparse` python bindings function.
 
 ##### Windows #####
-Just download the latest clang from the [clang website](http://llvm.org/releases/download.html). This should be enough to trigger simple completions. Additional steps may be needed if you want to use STL or third party libraries. I assume it is relatively easy to make it work with `MinGW` (do open an issue to tell me more about it) by just adjusting the includes in settings or using a proper `.clang_complete` file. It is relatively hard to use it with Microsoft visual c++. Info is on [official Clang 3.9 website](http://clang.llvm.org/docs/MSVCCompatibility.html)
+Just download the latest clang from the [clang website](http://llvm.org/releases/download.html). This should be enough to trigger simple completions. Additional steps may be needed if you want to use STL or third party libraries.
 
-*Help needed:* Currently this plugin works for Windows only in a fallback mode by running a command in the cmd and parsing the output with regex. It works and should be fine for general user, but it would be cool to make it work with libclang as it is faster and should be more robust. I don't know much about Windows and I don't work in it, so if you are an expect in Windows - educate me! Fire up the issue with your suggestions! Let's make it work.
+- `Microsoft visual C++` - works out of the box for visual studio 2015. Should also work for older version, but I haven't tested it. Please report back if it works for you on an older version out of the box.
+- `MinGW` - setup should be similar to linux setup and provided all paths are configured correcty should work out of the box. `
 
-Latest status - If using `-fms-compatibility` flag for binary I can avoid most of the errors, but the code still doesn't autocomplete STL.
+*Help needed:* Currently this plugin works for Windows only in a binary mode by running a command in the cmd and parsing the output with regex. It works and should be fine for general user, but it would be cool to make it work with libclang as it is faster and should be more robust. I don't know much about Windows and I don't work in it, so if you are an expect in Windows - educate me! Fire up the issue with your suggestions! Let's make it work.
 
 ##### Mac  #####
-Mac comes with `clang`. The only catch is that its versioning is different from `llvm` one. This makes it hard to match `libclang` to it. However, the autocompletions should be working out of the box. You may need additional setup to use STL or third party libraries.
+Mac comes with `clang`. The only catch is that its versioning is different from `llvm` one. This makes it hard to match `libclang` to it. However, the autocompletions should be working out of the box.
 
 *Help needed:* Unfortunately I do not own a mac. The unit tests for completion using `clang` binary pass on an `OSX` instance both for completing user-defined structures and for STL auto-completion. But there is a hack. I set the version of python bindings to `3.7` by hand. There is not simple way of knowing which version the internal `OSX` `clang` corresponds to in `LLVM` versioning scheme. But do correct me if I am wrong. Help me to make `libclang` work on a Mac!
 
@@ -92,9 +93,7 @@ The trick with multiple `clang.cindex` files is inspired by this repo: https://g
 If you are an experienced python developer and find that something in my code sucks completely - **DO** tell me. Python is not my main language and I am always willing to learn.
 
 ## Tests ##
-I have tried to cover most crucial functionality with unit tests using [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin. To check out the current status navigate to:
-- [Travis-ci](https://travis-ci.org/niosus/EasyClangComplete) for Linux/OSX builds.
-- [Appveyor](https://ci.appveyor.com/project/niosus/easyclangcomplete) for Windows build.
+I have tried to cover most crucial functionality with unit tests using [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin. To check out the current status click on relevant badge on top of the page.
 
 ## Licence ##
 ![licence](http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-1.png)

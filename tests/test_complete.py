@@ -115,9 +115,6 @@ class test_complete_command(TestCase):
         self.assertTrue(expected in completer.completions)
 
     def test_complete_vector(self):
-        if platform.system() == "Windows":
-            logging.warning(" NOT TESTING VECTOR COMPLETION ON WINDOWS!")
-            return
         file_name = path.join(path.dirname(__file__), 'test_vector.cpp')
         self.view = sublime.active_window().open_file(file_name)
         while self.view.is_loading():

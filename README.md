@@ -36,6 +36,8 @@ Just download the latest clang from the [clang website](http://llvm.org/releases
 
 *Help needed:* Currently this plugin works for Windows only in a fallback mode by running a command in the cmd and parsing the output with regex. It works and should be fine for general user, but it would be cool to make it work with libclang as it is faster and should be more robust. I don't know much about Windows and I don't work in it, so if you are an expect in Windows - educate me! Fire up the issue with your suggestions! Let's make it work.
 
+Latest status - If using `-fms-compatibility` flag for binary I can avoid most of the errors, but the code still doesn't autocomplete STL.
+
 ##### Mac  #####
 Mac comes with `clang`. The only catch is that its versioning is different from `llvm` one. This makes it hard to match `libclang` to it. However, the autocompletions should be working out of the box. You may need additional setup to use STL or third party libraries.
 

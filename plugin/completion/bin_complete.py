@@ -56,7 +56,7 @@ class Completer(BaseCompleter):
     """
     clang_binary = None
 
-    init_flags = ["-cc1", "-fsyntax-only", "-x c++"]
+    init_flags = ["-c", "-fsyntax-only", "-x c++"]
     flags_dict = {}
     std_flag = None
 
@@ -182,8 +182,8 @@ class Completer(BaseCompleter):
         with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
             tmp_file.write(file_body)
 
-        complete_at_str = "{complete_flag} {file}:{row}:{col} {file}".format(
-            complete_flag="-code-completion-at",
+        complete_at_str = "{complete_flag}={file}:{row}:{col} {file}".format(
+            complete_flag="-Xclang -code-completion-at",
             file=temp_file_name, row=row, col=col)
 
         complete_cmd = "{binary} {init} {std} {complete_at} {includes}".format(

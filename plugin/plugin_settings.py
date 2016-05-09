@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 class Settings:
 
     """class that encapsulates sublime settings
-    
+
     Attributes:
         clang_binary (string): name of clang binary to be used
         complete_all (bool): flag to trigger autocompletion on every keystroke
@@ -24,7 +24,7 @@ class Settings:
         include_dirs (string[]): array of directories with headers
         include_file_folder (bool): if true, current location -> 'include_dirs'
         include_parent_folder (bool): if true, parent is added to 'include_dirs'
-        search_clang_complete (bool): if true will search for '.clang_complete' 
+        search_clang_complete (bool): if true will search for '.clang_complete'
                                                                 file up the tree
         std_flag (string): flag of the c++ std library, e.g. -std=c++11
         subl_settings (sublime.settings): link to sublime text settings dict
@@ -91,7 +91,7 @@ class Settings:
     def is_valid(self):
         """Check settings validity. If any of the settings is None the settings
         are not valid.
-        
+
         Returns:
             bool: validity of settings
         """
@@ -136,14 +136,13 @@ class Settings:
     def populate_include_dirs(self, project_name, project_base_folder,
                               file_current_folder, file_parent_folder):
         """populate the include dirs based on the project
-        
-        
+
         Args:
             project_name (str): project name
             project_base_folder (str): project folder
             file_current_folder (str): current file folder
             file_parent_folder (str): file parent folder
-        
+
         Returns:
             str[]: directories where clang searches for header files
         """

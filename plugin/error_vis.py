@@ -14,7 +14,7 @@ class CompileErrors:
                            + "line\s(?P<row>\d+), "  # row
                            + "column\s(?P<col>\d+)")  # col
     msg_regex = re.compile("b\"(?P<error>.+)\"")
-    error_regex = re.compile("(?P<file>.*):" + 
+    error_regex = re.compile("(?P<file>.*):" +
                              "(?P<row>\d+):(?P<col>\d+): " +
                              ".*error: (?P<error>.*)")
 
@@ -111,7 +111,7 @@ class CompileErrors:
         if view.id() not in self.err_regions:
             return
         current_err_region_dict = self.err_regions[view.id()]
-        if (row in current_err_region_dict):
+        if row in current_err_region_dict:
             errors_dict = current_err_region_dict[row]
             errors_html = CompileErrors._as_html(errors_dict)
             view.show_popup(errors_html)

@@ -5,8 +5,10 @@ Sublime Text 3 plugin that offers auto-completion for C++
 ![Example](autocomplete_show_off.gif)
 
 [![Build Status](https://goo.gl/3KUIVo)](https://goo.gl/nJ2NOU)
-[![Build status](https://goo.gl/FqsNzm)](https://goo.gl/4N6nxe) 
+[![Build status](https://goo.gl/FqsNzm)](https://goo.gl/4N6nxe)
 [![Codacy Badge](https://goo.gl/PDVYTj)](https://goo.gl/h52rHl)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Sublime Text 3](https://img.shields.io/badge/Sublime%20Text-3-green.svg)](https://www.sublimetext.com/3)
 
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++ for Sublime Text 3. It is built to function in an asynchronous way, so that you will not have to wait even when completions take slightly longer to load.
 
@@ -93,22 +95,3 @@ If you are an experienced python developer and find that something in my code su
 
 ## Tests ##
 I have tried to cover most crucial functionality with unit tests using [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin. To check out the current status click on relevant badge on top of the page.
-
-## Licence ##
-![licence](http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-1.png)
-
-Just as the original package by @pl-ca, I decided to adopt the most strict licence we have found:
-
-> DO WHAT THE F*CK YOU WANT TO PUBLIC LICENSE
-> Version 2, December 2004
-> Copyright (C) 2016 Igor Bogoslavskyi
-
->Everyone is permitted to copy and distribute verbatim or modified copies of this license document, and changing it is allowed as long as the name is changed.
-
->DO WHAT THE F*CK YOU WANT TO PUBLIC LICENSE TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-
->0.You just DO WHAT THE F*CK YOU WANT TO.
-
-
-
-

@@ -10,16 +10,12 @@ import re
 import subprocess
 import sublime
 import time
-import platform
 import logging
 import tempfile
 
 from os import path
-from os import listdir
 
-from plugin.error_vis import CompileErrors
 from plugin.error_vis import FORMAT_BINARY
-from plugin.tools import PKG_NAME
 from plugin.completion.base_complete import BaseCompleter
 
 log = logging.getLogger(__name__)
@@ -28,31 +24,31 @@ log = logging.getLogger(__name__)
 class Completer(BaseCompleter):
 
     """Encapsulates completions based on the output from clang_binary
-    
+
     Attributes:
-        
+
         clang_binary (str): e.g. "clang++" or "clang++-3.6"
         flags_dict (dict): compilation flags lists for each view
         init_flags (list): flags that every command needs
         std_flag (TYPE): std flag, e.g. "std=c++11"
-        
+
         completions (list): current completions
         async_completions_ready (bool): turns true if there are completions
                                     that have become ready from an async call
-    
+
         compl_regex (regex): regex to parse raw completion into name and content
         compl_content_regex (regex): regex to parse the content of the completion
         opts_regex (regex): regex to detect optional parameters
-    
+
         group_params (str): string that describes a group to capture function parameters
         group_types (str): string that describes a group to capture type names
         group_opts (str): string that describes a group to capture optional parameters
-        
+
         PARAM_CHARS (str): chars allowed to be part of function or type
         PARAM_TAG (str): function params tag for convenience
         TYPE_TAG (str): type name tag for convenience
         OPTS_TAG (str): optional params tag for convenience
-    
+
     """
     clang_binary = None
 
@@ -61,7 +57,7 @@ class Completer(BaseCompleter):
     std_flag = None
 
     compl_regex = re.compile("COMPLETION:\s(?P<name>.*)\s:\s(?P<content>.*)")
-    
+
     PARAM_TAG = "param"
     TYPE_TAG = "type"
     OPTS_TAG = "opts"
@@ -84,18 +80,18 @@ class Completer(BaseCompleter):
 
     def __init__(self, clang_binary):
         """Initialize the Completer
-        
+
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
-        
+
         """
         # init common completer interface
-        BaseCompleter.__init__(self, clang_binary)
+        super(Completer, self).__init__(clang_binary)
         Completer.clang_binary = clang_binary
 
     def remove(self, view_id):
         """remove compile flags for view
-        
+
         Args:
             view_id (int): current view id
         """
@@ -104,10 +100,10 @@ class Completer(BaseCompleter):
 
     def exists_for_view(self, view_id):
         """check if compile flags exist for view id
-        
+
         Args:
             view_id (int): current view id
-        
+
         Returns:
             bool: compile flags exist for this view
         """
@@ -120,20 +116,17 @@ class Completer(BaseCompleter):
 
     def init(self, view, includes, settings, project_folder):
         """Initialize the completer
-        
+
         Args:
             view (sublime.View): current view
             includes (list): includes from settings
             settings (Settings): plugin settings
             project_folder (str): current project folder
-        
+
         """
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
         file_folder = path.dirname(file_name)
-
-        # initialize unsaved files
-        files = [(file_name, file_body)]
 
         # set std_flag
         self.std_flag = settings.std_flag
@@ -161,12 +154,12 @@ class Completer(BaseCompleter):
         """This function is called asynchronously to create a list of
         autocompletions. It builds up a clang command that is then executed
         as a subprocess. The output is parsed for completions and/or errors
-        
+
         Args:
             view (sublime.View): current view
             cursor_pos (int): sublime provided poistion of the cursor
             show_errors (bool): true if we want to visualize errors
-        
+
         """
         if not view.id() in self.flags_dict:
             log.error(" cannot complete view: %s", view.id())
@@ -198,8 +191,8 @@ class Completer(BaseCompleter):
         log.debug(" started code complete for view %s", view.id())
 
         try:
-            output = subprocess.check_output(complete_cmd, 
-                                             stderr=subprocess.STDOUT, 
+            output = subprocess.check_output(complete_cmd,
+                                             stderr=subprocess.STDOUT,
                                              shell=True)
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
@@ -207,7 +200,7 @@ class Completer(BaseCompleter):
             log.info(" clang process finished with code: \n%s", e.returncode)
             log.info(" clang process output: \n%s", output_text)
             if show_errors:
-                self.error_vis.generate(view, output_text.splitlines(), 
+                self.error_vis.generate(view, output_text.splitlines(),
                                         FORMAT_BINARY)
                 self.error_vis.show_regions(view)
             # we could stop here, but we continue as sometimes there are still
@@ -225,12 +218,12 @@ class Completer(BaseCompleter):
 
     def update(self, view, show_errors):
         """update build for current view
-        
+
         Args:
             view (sublime.View): this view
-            show_errors (TYPE): do we need to show errors? If not this is a 
+            show_errors (TYPE): do we need to show errors? If not this is a
                 dummy function as we gain nothing from building it with binary.
-        
+
         """
         if view.id() not in self.flags_dict:
             log.error(" Cannot update view %s. No build flags.", view.id())
@@ -260,8 +253,8 @@ class Completer(BaseCompleter):
         log.debug(" started rebuilding view %s", view.id())
 
         try:
-            output = subprocess.check_output(complete_cmd, 
-                                             stderr=subprocess.STDOUT, 
+            output = subprocess.check_output(complete_cmd,
+                                             stderr=subprocess.STDOUT,
                                              shell=True)
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
@@ -279,16 +272,16 @@ class Completer(BaseCompleter):
     @staticmethod
     def _parse_completions(complete_results):
         """Create snippet-like structures from a list of completions
-        
+
         Args:
             complete_results (list): raw completions list
-        
+
         Returns:
             list: updated completions
         """
         class Parser:
             """Help class to parse completions with regex
-            
+
             Attributes:
                 place_holders (int): number of place holders in use
             """
@@ -297,10 +290,10 @@ class Completer(BaseCompleter):
 
             def tokenize_params(self, match):
                 """Create tockens from a match. Used as part or re.sub function
-                
+
                 Args:
                     match (re.match): current match
-                
+
                 Returns:
                     str: current match, wrapped in snippet
                 """
@@ -312,13 +305,14 @@ class Completer(BaseCompleter):
                         text=dict_match[Completer.PARAM_TAG])
                 return ''
 
-            def make_pretty(self, match):
+            @staticmethod
+            def make_pretty(match):
                 """Process raw match and remove ugly placeholders. Needed to
                 have a human readable text for each completion.
-                
+
                 Args:
                     match (re.match): current completion
-                
+
                 Returns:
                     str: match stripped from unneeded placeholders
                 """
@@ -345,7 +339,7 @@ class Completer(BaseCompleter):
                               comp_dict['content'])
             contents = re.sub(Completer.opts_regex, '', contents)
             hint = re.sub(Completer.compl_content_regex,
-                          parser.make_pretty,
+                          Parser.make_pretty,
                           comp_dict['content'])
             hint = re.sub(Completer.opts_regex, '', hint)
             completions.append([trigger + "\t" + hint, contents])

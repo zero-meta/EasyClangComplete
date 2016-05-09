@@ -18,7 +18,7 @@ class SublBridge:
             (row, col): tuple of row and col for cursor position
         """
         pos = view.sel()
-        if (len(pos) < 1):
+        if len(pos) < 1:
             # something is wrong
             return None
         (row, col) = view.rowcol(pos[0].a)
@@ -28,7 +28,7 @@ class SublBridge:
 
     @staticmethod
     def next_line(view):
-        (row, col) = SublBridge.cursor_pos(view)
+        (row, _) = SublBridge.cursor_pos(view)
         point_on_next_line = view.text_point(row, 0)
         line = view.line(point_on_next_line)
         return view.substr(line)

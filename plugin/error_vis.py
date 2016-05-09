@@ -23,7 +23,7 @@ class CompileErrors:
 
     err_regions = {}
 
-    def generate(self, view, input, error_format):
+    def generate(self, view, errors, error_format):
         """Generate a dictionary that stores all errors along with their
         positions and descriptions. Needed to show these errors on the screen.
 
@@ -40,13 +40,13 @@ class CompileErrors:
 
         if error_format == FORMAT_LIBCLANG:
             # expect a tu_diagnostics instance
-            self.errors_from_tu_diag(view, input)
+            self.errors_from_tu_diag(view, errors)
         elif error_format == FORMAT_BINARY:
             # expect a list of strings for each line of cmd output
-            self.errors_from_clang_output(view, input)
+            self.errors_from_clang_output(view, errors)
         else:
             logging.critical(
-                " error_format:'%s' should match '%s' or '%s'", 
+                " error_format:'%s' should match '%s' or '%s'",
                 error_format, FORMAT_LIBCLANG, FORMAT_BINARY)
         log.debug(" %s error regions ready", len(self.err_regions))
 
@@ -80,7 +80,7 @@ class CompileErrors:
             col = int(error_dict['col'])
             point = view.text_point(row - 1, col - 1)
             error_dict['region'] = view.word(point)
-            if (row in self.err_regions[view.id()]):
+            if row in self.err_regions[view.id()]:
                 self.err_regions[view.id()][row] += [error_dict]
             else:
                 self.err_regions[view.id()][row] = [error_dict]
@@ -151,7 +151,7 @@ class CompileErrors:
             err_regions_dict (dict): dict of error regions for current view
 
         Returns:
-            list(Region): list of regions to show on sublime view 
+            list(Region): list of regions to show on sublime view
         """
         region_list = []
         for errors_list in err_regions_dict.values():

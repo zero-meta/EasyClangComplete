@@ -4,19 +4,13 @@ Attributes:
     cindex_dict (dict): dict of cindex entries for each version of clang
     log (logging.Logger): logger for this module
 """
-import re
-import subprocess
 import importlib
 import sublime
 import time
-import platform
 import logging
-import sys
 
 from os import path
-from os import listdir
 
-from plugin.error_vis import CompileErrors
 from plugin.error_vis import FORMAT_LIBCLANG
 from plugin.tools import PKG_NAME
 from plugin.completion.base_complete import BaseCompleter
@@ -37,7 +31,7 @@ cindex_dict = {
 class Completer(BaseCompleter):
 
     """Encapsulates completions based on libclang
-    
+
     Attributes:
         tu_module (cindex.TranslationUnit): module for proper cindex
         translation_units (dict): dictionary of tu's for each view id
@@ -50,12 +44,12 @@ class Completer(BaseCompleter):
     def __init__(self, clang_binary):
         """Initialize the Completer from clang binary, reading its version.
         Picks an according cindex for the found version.
-        
+
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
-        
+
         """
-        BaseCompleter.__init__(self, clang_binary)
+        super(Completer, self).__init__(clang_binary)
 
         # initialize cindex
         if self.version_str in cindex_dict:
@@ -80,10 +74,10 @@ class Completer(BaseCompleter):
 
     def remove(self, view_id):
         """Remove tu for this view. Happens when we don't need it anymore.
-        
+
         Args:
             view_id (int): view id
-        
+
         """
         if view_id not in self.translation_units:
             log.error(" no tu for view id: %s, so not removing", view_id)
@@ -93,10 +87,10 @@ class Completer(BaseCompleter):
 
     def exists_for_view(self, view_id):
         """find if there is a completer for the view
-        
+
         Args:
             view_id (int): current view id
-        
+
         Returns:
             bool: has completer
         """
@@ -106,7 +100,7 @@ class Completer(BaseCompleter):
 
     def init(self, view, includes, settings, project_folder):
         """Initialize the completer. Builds the view.
-        
+
         Args:
             view (sublime.View): current view
             includes (list): includes from settings
@@ -154,7 +148,7 @@ class Completer(BaseCompleter):
             log.error(" error while compiling: %s", e)
         if settings.errors_on_save:
             self.error_vis.generate(
-                view, self.translation_units[view.id()].diagnostics, 
+                view, self.translation_units[view.id()].diagnostics,
                 FORMAT_LIBCLANG)
             self.error_vis.show_regions(view)
 
@@ -162,12 +156,12 @@ class Completer(BaseCompleter):
         """This function is called asynchronously to create a list of
         autocompletions. Using the current translation unit it queries libclang
         for the possible completions. It also shows compile errors if needed.
-        
+
         Args:
             view (sublime.View): current view
             cursor_pos (int): sublime provided poistion of the cursor
             show_errors (bool): controls if we need to show errors
-        
+
         """
         file_body = view.substr(sublime.Region(0, view.size()))
         (row, col) = view.rowcol(cursor_pos)
@@ -201,21 +195,21 @@ class Completer(BaseCompleter):
         Completer._reload_completions(view)
         if show_errors:
             self.error_vis.generate(
-                view, self.translation_units[view.id()].diagnostics, 
+                view, self.translation_units[view.id()].diagnostics,
                 FORMAT_LIBCLANG)
             self.error_vis.show_regions(view)
 
     def update(self, view, show_errors):
         """Reparse the translation unit. This speeds up completions
         significantly, so we perform this upon file save.
-        
+
         Args:
             view (sublime.View): current view
             show_errors (bool): if true - highlight compile errors
-        
+
         Returns:
             bool: reparsed successfully
-        
+
         """
         if view.id() in self.translation_units:
             log.debug(" reparsing translation_unit for view %s", view.id())
@@ -225,7 +219,7 @@ class Completer(BaseCompleter):
                       time.time() - start)
             if show_errors:
                 self.error_vis.generate(
-                    view, self.translation_units[view.id()].diagnostics, 
+                    view, self.translation_units[view.id()].diagnostics,
                     FORMAT_LIBCLANG)
                 self.error_vis.show_regions(view)
             return True
@@ -235,10 +229,10 @@ class Completer(BaseCompleter):
     @staticmethod
     def _parse_completions(complete_results):
         """Create snippet-like structures from a list of completions
-        
+
         Args:
             complete_results (list): raw completions list
-        
+
         Returns:
             list: updated completions
         """

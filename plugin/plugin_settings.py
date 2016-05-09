@@ -133,7 +133,7 @@ class Settings:
             return False
         return True
 
-    def populate_include_dirs(self, project_name, project_base_folder, 
+    def populate_include_dirs(self, project_name, project_base_folder,
                               file_current_folder, file_parent_folder):
         """populate the include dirs based on the project
         

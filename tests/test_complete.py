@@ -1,9 +1,8 @@
+"""Summary
+"""
 import sublime
 import sys
-import tempfile
 import time
-import logging
-import platform
 from os import path
 from unittest import TestCase
 
@@ -13,8 +12,15 @@ from plugin.completion.bin_complete import Completer
 
 
 class test_complete_command(TestCase):
+    """Test complete commands
 
+    Attributes:
+        view (sublime.View): view
+    """
     def setUp(self):
+        """Set up the file to autocomplete
+
+        """
         file_name = path.join(path.dirname(__file__), 'test.cpp')
         self.view = sublime.active_window().open_file(file_name)
         while self.view.is_loading():
@@ -24,27 +30,29 @@ class test_complete_command(TestCase):
         s.set("close_windows_when_empty", False)
 
     def tearDown(self):
+        """close the file. Finish test.
+
+        """
         if self.view:
             self.view.set_scratch(True)
             self.view.window().focus_view(self.view)
             self.view.window().run_command("close_file")
 
-    def setText(self, string):
-        self.view.run_command("insert", {"characters": string})
-
-    def appendText(self, string, scroll_to_end=True):
-        self.view.run_command("append", {"characters": string,
-                                         "scroll_to_end": scroll_to_end})
-
-    def move(self, dist, forward=True):
-        for i in range(dist):
-            self.view.run_command(
-                "move", {"by": "characters", "forward": forward})
-
     def getRow(self, row):
+        """Get text of a particular row
+
+        Args:
+            row (int): number of row
+
+        Returns:
+            str: row contents
+        """
         return self.view.substr(self.view.line(self.view.text_point(row, 0)))
 
     def test_setup(self):
+        """Test that the initial setup is valid
+
+        """
         file_name = path.join(path.dirname(__file__), 'test.cpp')
         self.assertEqual(self.view.file_name(), file_name)
         file = open(file_name, 'r')
@@ -57,12 +65,17 @@ class test_complete_command(TestCase):
         file.close()
 
     def test_init(self):
+        """Test that completer version is properly initialized
+
+        """
         completer = Completer("clang++")
         self.assertIsNotNone(completer.version_str)
         print("version is: {}".format(completer.version_str))
 
     def test_init_completer(self):
-        body = self.view.substr(sublime.Region(0, self.view.size()))
+        """Test that completer is properly initialized
+
+        """
         settings = Settings()
         current_folder = path.dirname(self.view.file_name())
         parent_folder = path.dirname(current_folder)
@@ -79,12 +92,14 @@ class test_complete_command(TestCase):
         self.assertTrue(completer.exists_for_view(self.view.id()))
 
     def test_complete(self):
+        """Test autocompletion for user type
+
+        """
         file_name = path.join(path.dirname(__file__), 'test.cpp')
         self.view = sublime.active_window().open_file(file_name)
         while self.view.is_loading():
             time.sleep(0.1)
         # now the file should be ready
-        body = self.view.substr(sublime.Region(0, self.view.size()))
         settings = Settings()
         current_folder = path.dirname(self.view.file_name())
         parent_folder = path.dirname(current_folder)
@@ -115,12 +130,14 @@ class test_complete_command(TestCase):
         self.assertTrue(expected in completer.completions)
 
     def test_complete_vector(self):
+        """Test completion for std::vector
+
+        """
         file_name = path.join(path.dirname(__file__), 'test_vector.cpp')
         self.view = sublime.active_window().open_file(file_name)
         while self.view.is_loading():
             time.sleep(0.1)
         # now the file should be ready
-        body = self.view.substr(sublime.Region(0, self.view.size()))
         settings = Settings()
         current_folder = path.dirname(self.view.file_name())
         parent_folder = path.dirname(current_folder)

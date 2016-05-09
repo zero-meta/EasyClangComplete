@@ -6,9 +6,6 @@ Attributes:
 """
 import re
 import subprocess
-import importlib
-import sublime
-import time
 import platform
 import logging
 
@@ -16,13 +13,12 @@ from os import path
 from os import listdir
 
 from plugin.error_vis import CompileErrors
-from plugin.tools import PKG_NAME
 
 log = logging.getLogger(__name__)
 
 class BaseCompleter:
     """A base class for clang based completions
-    
+
     Attributes:
         async_completions_ready (bool): is true after async completions ready
         completions (list): current list of completions
@@ -40,13 +36,13 @@ class BaseCompleter:
 
     def __init__(self, clang_binary):
         """Initialize the BaseCompleter
-        
+
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
-        
+
         Raises:
             RuntimeError: if clang not defined we throw an error
-        
+
         """
         # check if clang binary is defined
         if not clang_binary:
@@ -67,7 +63,7 @@ class BaseCompleter:
             # but it is a hack, yes
             self.version_str = "3.7"
             info = {"platform": platform.system()}
-            log.warning(" Wrong version reported. Reducing it to %s",
+            log.warning(" Wrong version reported. Reducing it to %s. Info: %s",
                         self.version_str, info)
         log.info(" Found clang version: %s", self.version_str)
         # initialize error visuzlization
@@ -76,10 +72,10 @@ class BaseCompleter:
     def remove(self, view_id):
         """called when completion for this view is not needed anymore.
         For actual implementation see children of this class.
-        
+
         Args:
             view_id (sublime.View): current view
-        
+
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method
         """
@@ -88,10 +84,10 @@ class BaseCompleter:
     def exists_for_view(self, view_id):
         """check if completer for this view is initialized and is ready to
         autocomplete. For real implementation see children.
-        
+
         Args:
             view_id (int): view id
-        
+
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method
         """
@@ -100,13 +96,13 @@ class BaseCompleter:
     def init(self, view, includes, settings, project_folder, show_errors):
         """Initialize the completer for this view. For real implementation see
         children.
-        
+
         Args:
             view (sublime.View): current view
             includes (list): includes from settings
             settings (Settings): plugin settings
             project_folder (str): current project folder
-        
+
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method
         """
@@ -114,12 +110,12 @@ class BaseCompleter:
 
     def complete(self, view, cursor_pos, show_errors):
         """Function to generate completions. See children for implementation.
-        
+
         Args:
             view (sublime.View): current view
             cursor_pos (int): sublime provided poistion of the cursor
             show_errors (bool): true if we want to visualize errors
-        
+
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method
         """
@@ -128,11 +124,11 @@ class BaseCompleter:
     def update(self, view, show_errors):
         """Update the completer for this view. This can increase consequent
         completion speeds or is needed to just show errors.
-        
+
         Args:
             view (sublime.View): this view
             show_errors (bool): controls if we show errors
-        
+
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method
         """
@@ -140,12 +136,12 @@ class BaseCompleter:
 
     @staticmethod
     def _reload_completions(view):
-        """Ask sublime to reload the completions. Needed to update the active 
+        """Ask sublime to reload the completions. Needed to update the active
         completion list when async autocompletion task has finished.
-        
+
         Args:
             view (sublime.View): current_view
-        
+
         """
         log.debug(" reload completion tooltip")
         view.run_command('hide_auto_complete')
@@ -157,11 +153,11 @@ class BaseCompleter:
     @staticmethod
     def _search_clang_complete_file(start_folder, stop_folder):
         """search for .clang_complete file up the tree
-        
+
         Args:
             start_folder (str): path to folder where we start the search
             stop_folder (str): path to folder we should not go beyond
-        
+
         Returns:
             str: path to .clang_complete file or None if not found
         """
@@ -179,10 +175,10 @@ class BaseCompleter:
     @staticmethod
     def _parse_clang_complete_file(file):
         """parse .clang_complete file
-        
+
         Args:
             file (str): path to a file
-        
+
         Returns:
             list(str): parsed list of includes from the file
         """

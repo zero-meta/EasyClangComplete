@@ -121,11 +121,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         if current_char == '>':
             trigger_length = 2
-            if (view.substr(point - trigger_length) != '-'):
+            if view.substr(point - trigger_length) != '-':
                 return False
         if current_char == ':':
             trigger_length = 2
-            if (view.substr(point - trigger_length) != ':'):
+            if view.substr(point - trigger_length) != ':':
                 return False
 
         word_on_the_left = view.substr(view.word(point - trigger_length))
@@ -138,7 +138,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 return True
         return False
 
-    def on_activated_async(self, view):
+    @staticmethod
+    def on_activated_async(view):
         """Called upon activating a view. Execution in a worker thread.
 
         Args:
@@ -171,7 +172,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 settings=settings,
                 project_folder=project_base_folder)
 
-    def on_selection_modified(self, view):
+    @staticmethod
+    def on_selection_modified(view):
         """Called when selection is modified. Executed in gui thread.
 
         Args:
@@ -181,7 +183,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
             (row, _) = SublBridge.cursor_pos(view)
             completer.error_vis.show_popup_if_needed(view, row)
 
-    def on_modified_async(self, view):
+    @staticmethod
+    def on_modified_async(view):
         """Called in a worker thread when view is modified
 
         Args:
@@ -191,7 +194,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if EasyClangComplete.has_valid_extension(view):
             completer.error_vis.clear(view)
 
-    def on_post_save_async(self, view):
+    @staticmethod
+    def on_post_save_async(view):
         """On save. Executed in a worker thread.
 
         Args:
@@ -203,7 +207,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
             completer.error_vis.erase_regions(view)
             completer.update(view, settings.errors_on_save)
 
-    def on_close(self, view):
+    @staticmethod
+    def on_close(view):
         """Called on closing the view.
 
         Args:
@@ -214,7 +219,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if EasyClangComplete.has_valid_extension(view):
             completer.remove(view.id())
 
-    def on_query_completions(self, view, prefix, locations):
+    @staticmethod
+    def on_query_completions(view, prefix, locations):
         """Function that is called when user queries completions in the code
 
         Args:

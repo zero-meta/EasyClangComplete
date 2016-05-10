@@ -125,7 +125,6 @@ class Completer(BaseCompleter):
 
         """
         file_name = view.file_name()
-        file_body = view.substr(sublime.Region(0, view.size()))
         file_folder = path.dirname(file_name)
 
         # set std_flag

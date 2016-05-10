@@ -15,8 +15,8 @@ import tempfile
 
 from os import path
 
-from plugin.error_vis import FORMAT_BINARY
-from plugin.completion.base_complete import BaseCompleter
+from .. import error_vis
+from .base_complete import BaseCompleter
 
 log = logging.getLogger(__name__)
 
@@ -200,7 +200,7 @@ class Completer(BaseCompleter):
             log.info(" clang process output: \n%s", output_text)
             if show_errors:
                 self.error_vis.generate(view, output_text.splitlines(),
-                                        FORMAT_BINARY)
+                                        error_vis.FORMAT_BINARY)
                 self.error_vis.show_regions(view)
             # we could stop here, but we continue as sometimes there are still
             # valid completions even though there were errors encountered

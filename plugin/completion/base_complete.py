@@ -12,7 +12,7 @@ import logging
 from os import path
 from os import listdir
 
-from plugin.error_vis import CompileErrors
+from .. import error_vis
 
 log = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ class BaseCompleter:
                         self.version_str, info)
         log.info(" Found clang version: %s", self.version_str)
         # initialize error visuzlization
-        self.error_vis = CompileErrors()
+        self.error_vis = error_vis.CompileErrors()
 
     def remove(self, view_id):
         """called when completion for this view is not needed anymore.

@@ -11,20 +11,20 @@ import logging
 
 from os import path
 
-from plugin.error_vis import FORMAT_LIBCLANG
-from plugin.tools import PKG_NAME
-from plugin.completion.base_complete import BaseCompleter
+from .. import error_vis
+from .. import tools
+from .base_complete import BaseCompleter
 
 log = logging.getLogger(__name__)
 
 cindex_dict = {
-    '3.2': PKG_NAME + ".clang.cindex32",
-    '3.3': PKG_NAME + ".clang.cindex33",
-    '3.4': PKG_NAME + ".clang.cindex34",
-    '3.5': PKG_NAME + ".clang.cindex35",
-    '3.6': PKG_NAME + ".clang.cindex36",
-    '3.7': PKG_NAME + ".clang.cindex37",
-    '3.8': PKG_NAME + ".clang.cindex38",
+    '3.2': tools.PKG_NAME + ".clang.cindex32",
+    '3.3': tools.PKG_NAME + ".clang.cindex33",
+    '3.4': tools.PKG_NAME + ".clang.cindex34",
+    '3.5': tools.PKG_NAME + ".clang.cindex35",
+    '3.6': tools.PKG_NAME + ".clang.cindex36",
+    '3.7': tools.PKG_NAME + ".clang.cindex37",
+    '3.8': tools.PKG_NAME + ".clang.cindex38",
 }
 
 
@@ -149,7 +149,7 @@ class Completer(BaseCompleter):
         if settings.errors_on_save:
             self.error_vis.generate(
                 view, self.translation_units[view.id()].diagnostics,
-                FORMAT_LIBCLANG)
+                error_vis.FORMAT_LIBCLANG)
             self.error_vis.show_regions(view)
 
     def complete(self, view, cursor_pos, show_errors):
@@ -196,7 +196,7 @@ class Completer(BaseCompleter):
         if show_errors:
             self.error_vis.generate(
                 view, self.translation_units[view.id()].diagnostics,
-                FORMAT_LIBCLANG)
+                error_vis.FORMAT_LIBCLANG)
             self.error_vis.show_regions(view)
 
     def update(self, view, show_errors):
@@ -220,7 +220,7 @@ class Completer(BaseCompleter):
             if show_errors:
                 self.error_vis.generate(
                     view, self.translation_units[view.id()].diagnostics,
-                    FORMAT_LIBCLANG)
+                    error_vis.FORMAT_LIBCLANG)
                 self.error_vis.show_regions(view)
             return True
         log.error(" no translation unit for view id %s")

@@ -1,14 +1,14 @@
 # EasyClangComplete #
 
-Sublime Text 3 plugin that offers auto-completion for C++
+Sublime Text 3 plugin that offers clang-based auto-completion for C++
 
 ![Example](autocomplete_show_off.gif)
 
 [![Build Status](https://goo.gl/3KUIVo)](https://goo.gl/nJ2NOU)
 [![Build status](https://goo.gl/FqsNzm)](https://goo.gl/4N6nxe)
 [![Codacy Badge](https://goo.gl/PDVYTj)](https://goo.gl/h52rHl)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Sublime Text 3](https://img.shields.io/badge/Sublime%20Text-3-green.svg)](https://www.sublimetext.com/3)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++ for Sublime Text 3. It is built to function in an asynchronous way, so that you will not have to wait even when completions take slightly longer to load.
 

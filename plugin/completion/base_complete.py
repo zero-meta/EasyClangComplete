@@ -1,4 +1,4 @@
-"""Summary
+"""Contains base class for completers
 
 Attributes:
     log (logging.Logger): logger for this module

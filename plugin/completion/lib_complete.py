@@ -1,4 +1,4 @@
-"""Summary
+"""This module contains class for libclang based completions
 
 Attributes:
     cindex_dict (dict): dict of cindex entries for each version of clang

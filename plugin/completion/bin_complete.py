@@ -1,4 +1,4 @@
-"""Summary
+"""This module contains a class for clang binary based completion
 
 Attributes:
     log (logging.Logger): logger for this module

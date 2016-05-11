@@ -1,3 +1,10 @@
+"""module for compile error visualization
+
+Attributes:
+    FORMAT_BINARY (str): constant for picking binary parsing strategy
+    FORMAT_LIBCLANG (str): constant for picking library parsing strategy
+    log (logging): this module logger
+"""
 import re
 import logging
 from os import path
@@ -8,7 +15,14 @@ FORMAT_LIBCLANG = "libclang"
 FORMAT_BINARY = "binary"
 
 class CompileErrors:
-    """docstring for CompileErrors"""
+    """Comple errors is a class that encapsulates compile error visualization
+
+    Attributes:
+        err_regions (dict): dictionary of error regions for view ids
+        error_regex (re): regex to find contents of an error
+        msg_regex (re): regex to find error message
+        pos_regex (re): regex to find position of an error
+    """
 
     pos_regex = re.compile("'(?P<file>.+)'.*"  # file
                            + "line\s(?P<row>\d+), "  # row
@@ -29,6 +43,8 @@ class CompileErrors:
 
         Args:
             view (sublime.View): current view
+            errors (list): list of unparsed errors in format @error_format
+            error_format (str): either FORMAT_LIBCLANG or FORMAT_BINARY
         """
         log.debug(" generating error regions for view %s", view.id())
         # first clear old regions
@@ -52,6 +68,12 @@ class CompileErrors:
 
 
     def errors_from_clang_output(self, view, clang_output):
+        """Parse errors received from clang binary output
+
+        Args:
+            view (sublime.View): current view
+            clang_output (list): list of unparsed errors
+        """
         for line in clang_output:
             error_search = CompileErrors.error_regex.search(line)
             if not error_search:
@@ -60,6 +82,13 @@ class CompileErrors:
             self.add_error(view, error_dict)
 
     def errors_from_tu_diag(self, view, tu_diagnostics):
+        """Parse errors received from diagnostics of a translation unit (used
+        with libclang)
+
+        Args:
+            view (sublime.View): current view
+            tu_diagnostics (diagnostics): diagnostics from a translation unit
+        """
         # create new ones
         for diag in tu_diagnostics:
             location = str(diag.location)
@@ -74,6 +103,12 @@ class CompileErrors:
             self.add_error(view, error_dict)
 
     def add_error(self, view, error_dict):
+        """Put new compile error in the dictionary of errors
+
+        Args:
+            view (sublime.View): current view
+            error_dict (dict): current error dict {row, col, file, region}
+        """
         logging.debug(" adding error %s", error_dict)
         if path.basename(error_dict['file']) == path.basename(view.file_name()):
             row = int(error_dict['row'])
@@ -90,7 +125,6 @@ class CompileErrors:
 
         Args:
             view (sublime.View): Current view
-            current_error_dict (dict): error dict for current view
         """
         if view.id() not in self.err_regions:
             # view has no errors for it
@@ -101,6 +135,11 @@ class CompileErrors:
         view.add_regions(CompileErrors._TAG, regions, "string")
 
     def erase_regions(self, view):
+        """erase error regions for view
+
+        Args:
+            view (sublime.View): erase regions for view
+        """
         if view.id() not in self.err_regions:
             # view has no errors for it
             return
@@ -108,6 +147,12 @@ class CompileErrors:
         view.erase_regions(CompileErrors._TAG)
 
     def show_popup_if_needed(self, view, row):
+        """Show a popup if it is needed in this row
+
+        Args:
+            view (sublime.View): current view
+            row (int): number of row
+        """
         if view.id() not in self.err_regions:
             return
         current_err_region_dict = self.err_regions[view.id()]
@@ -119,6 +164,11 @@ class CompileErrors:
             log.debug(" no error regions for row: %s", row)
 
     def clear(self, view):
+        """Clear errors from dict for view
+
+        Args:
+            view (sublime.View): current view
+        """
         if view.id() not in self.err_regions:
             # no errors for this view
             return
@@ -127,6 +177,12 @@ class CompileErrors:
         self.err_regions[view.id()].clear()
 
     def remove_region(self, view_id, row):
+        """remove a region for view_id in row
+
+        Args:
+            view_id (int): view id
+            row (int): row number
+        """
         if view_id not in self.err_regions:
             # no errors for this view
             return
@@ -138,6 +194,11 @@ class CompileErrors:
 
     @staticmethod
     def _as_html(errors_dict):
+        """Show error as html
+
+        Args:
+            errors_dict (dict): Current error
+        """
         errors_html = ""
         for entry in errors_dict:
             errors_html += "<p><tt>" + entry['error'] + "</tt></p>"

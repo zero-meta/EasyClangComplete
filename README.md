@@ -18,6 +18,7 @@ This plugin is intended to be easy to use. It should autocomplete STL out of the
 
 ## How to install ##
 **[PENDING APPROVAL]** 
+
 Use `Package Control` for Sublime Text. Install `EasyClangComplete` plugin from there. Then follow the OS-specific setup below.
 
 If you cannot find it there or have other reasons not to use package control, clone this repository into the folder where the packages of your Sublime Text 3 live. Then follow the OS-specific setup below.
@@ -95,4 +96,6 @@ The trick with multiple `clang.cindex` files is inspired by this repo: https://g
 If you are an experienced python developer and find that something in my code sucks completely - **DO** tell me. Python is not my main language and I am always willing to learn.
 
 ## Tests ##
-I have tried to cover most crucial functionality with unit tests using [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin. To check out the current status click on relevant badge on top of the page.
+I have tried to cover most crucial functionality with unit tests using [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin. Currently tests cover autocompletion of user struct and stl vector using clang binary. To check out the current status click on relevant badge below:
+- [![Build Status](https://goo.gl/3KUIVo)](https://goo.gl/nJ2NOU) - Linux/OSX
+- [![Build status](https://goo.gl/FqsNzm)](https://goo.gl/4N6nxe) - Windows

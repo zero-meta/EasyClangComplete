@@ -1,4 +1,4 @@
-"""Summary
+"""This module contains a class for clang binary based completion
 
 Attributes:
     log (logging.Logger): logger for this module
@@ -15,8 +15,8 @@ import tempfile
 
 from os import path
 
-from plugin.error_vis import FORMAT_BINARY
-from plugin.completion.base_complete import BaseCompleter
+from .. import error_vis
+from .base_complete import BaseCompleter
 
 log = logging.getLogger(__name__)
 
@@ -125,7 +125,6 @@ class Completer(BaseCompleter):
 
         """
         file_name = view.file_name()
-        file_body = view.substr(sublime.Region(0, view.size()))
         file_folder = path.dirname(file_name)
 
         # set std_flag
@@ -201,7 +200,7 @@ class Completer(BaseCompleter):
             log.info(" clang process output: \n%s", output_text)
             if show_errors:
                 self.error_vis.generate(view, output_text.splitlines(),
-                                        FORMAT_BINARY)
+                                        error_vis.FORMAT_BINARY)
                 self.error_vis.show_regions(view)
             # we could stop here, but we continue as sometimes there are still
             # valid completions even though there were errors encountered

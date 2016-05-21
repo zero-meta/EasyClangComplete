@@ -16,19 +16,16 @@ import sublime
 import sublime_plugin
 import os
 import imp
-import sys
 import logging
 import os.path as path
 
 from threading import Thread
 
-sys.path.append(path.dirname(__file__))
-
-from plugin import tools
-from plugin import error_vis
-from plugin import plugin_settings
-from plugin.completion import lib_complete
-from plugin.completion import bin_complete
+from .plugin import tools
+from .plugin import error_vis
+from .plugin import plugin_settings
+from .plugin.completion import lib_complete
+from .plugin.completion import bin_complete
 
 # reload the modules
 imp.reload(tools)

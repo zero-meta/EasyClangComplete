@@ -1,4 +1,4 @@
-"""Summary
+"""This module encapsulates communication with sublime settings
 
 Attributes:
     log (logging.Logger): logger

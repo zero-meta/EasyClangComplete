@@ -17,8 +17,6 @@ The plugin uses `libclang` with its python bindings to provide clang-based autoc
 This plugin is intended to be easy to use. It should autocomplete STL out of the box and you should just add the folders your project uses to `include_dirs` list in the settings to make it autocomplete code all your project. If you experience problems - create an issue. I will try to respond as soon as possible.
 
 ## How to install ##
-**[PENDING APPROVAL]** 
-
 Use `Package Control` for Sublime Text. Install `EasyClangComplete` plugin from there. Then follow the OS-specific setup below.
 
 If you cannot find it there or have other reasons not to use package control, clone this repository into the folder where the packages of your Sublime Text 3 live. Then follow the OS-specific setup below.

@@ -138,15 +138,15 @@ comment. Should they not be clear - create an issue.
 
 ## Credits ##
 The whole work seen here was originally a fork of another repository:
-https://github.com/pl-ca/ClangAutoComplete
+[ClangAutoComplete](https://github.com/pl-ca/ClangAutoComplete)
 
 However, with time this plugin has grown quite different from its origin and
 this is why you see it as a separate package now. Anyway, I encourage you to
-check out what @pl-ca has to offer and come back if you still like this plugin
-more.
+check out what `ClangAutoComplete` has to offer and come back if you still like
+this plugin more.
 
 The trick with multiple `clang.cindex` files is inspired by this repo:
-https://github.com/griebd/clangHelper Thanks for inspiration!
+[clangHelper](https://github.com/griebd/clangHelper). Thanks for inspiration!
 
 If you are an experienced python developer and find that something in my code
 sucks completely - **DO** tell me. Python is not my main language and I am
@@ -157,5 +157,6 @@ I have tried to cover most crucial functionality with unit tests using
 [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin.
 Currently tests cover autocompletion of user struct and stl vector using clang
 binary. To check out the current status click on relevant badge below:
+
 - [![Build Status](https://goo.gl/3KUIVo)](https://goo.gl/nJ2NOU) - Linux/OSX
 - [![Build status](https://goo.gl/FqsNzm)](https://goo.gl/4N6nxe) - Windows

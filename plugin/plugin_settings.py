@@ -12,6 +12,8 @@ import os.path as path
 from .tools import PKG_NAME
 
 log = logging.getLogger(__name__)
+log.debug(" reloading module")
+
 
 class Settings:
 
@@ -23,9 +25,9 @@ class Settings:
         errors_on_save (bool): if true, show errors on save
         include_dirs (string[]): array of directories with headers
         include_file_folder (bool): if true, current location -> 'include_dirs'
-        include_parent_folder (bool): if true, parent is added to 'include_dirs'
-        search_clang_complete (bool): if true will search for '.clang_complete'
-                                                                file up the tree
+        include_parent_folder (bool): if true, parent -> 'include_dirs'
+        search_clang_complete (bool): if true search for '.clang_complete'
+                                        file up the tree
         std_flag (string): flag of the c++ std library, e.g. -std=c++11
         subl_settings (sublime.settings): link to sublime text settings dict
         triggers (string[]): triggers that trigger autocompletion
@@ -71,7 +73,8 @@ class Settings:
         self.complete_all = self.subl_settings.get("autocomplete_all")
         self.include_parent_folder = self.subl_settings.get(
             "include_file_parent_folder")
-        self.include_file_folder = self.subl_settings.get("include_file_folder")
+        self.include_file_folder = self.subl_settings.get(
+            "include_file_folder")
         self.triggers = self.subl_settings.get("triggers")
         self.include_dirs = self.subl_settings.get("include_dirs")
         self.clang_binary = self.subl_settings.get("clang_binary")
@@ -80,13 +83,46 @@ class Settings:
         self.use_libclang = self.subl_settings.get("use_libclang")
         self.search_clang_complete = self.subl_settings.get(
             "search_clang_complete_file")
+        self.project_specific_settings = self.subl_settings.get(
+            "use_project_specific_settings")
 
         self.subl_settings.clear_on_change(PKG_NAME)
         self.subl_settings.add_on_change(PKG_NAME, self.on_settings_changed)
 
+        self.project_base_name = ""
+        self.project_base_folder = ""
+        variables = sublime.active_window().extract_variables()
+        if 'folder' in variables:
+            self.project_base_folder = variables['folder']
+        if 'project_base_name' in variables:
+            self.project_base_name = variables['project_base_name']
+
         if self.std_flag is None:
             self.std_flag = "-std=c++11"
             log.debug(" set std_flag to default: %s", self.std_flag)
+
+    def get_project_clang_flags(self):
+        try:
+            project_data = sublime.active_window().project_data()
+            log.debug(" project data: %s", project_data)
+            project_settings = project_data["settings"]
+            log.debug(" project settings: %s", project_settings)
+            project_flags = project_settings["clang_flags"]
+            log.debug(" project_flags: %s", project_flags)
+            for flag in project_flags:
+                if flag.startswith('-I'):
+                    path_to_add = flag[2:].rstrip()
+                    if path.isabs(path_to_add):
+                        flag = '-I "{}"'.format(path.normpath(path_to_add))
+                    else:
+                        flag = '-I "{}"'.format(
+                            path.join(self.project_base_folder, path_to_add))
+                elif flag.startswith('-std'):
+                    self.std_flag = flag
+            return project_flags
+        except Exception as e:
+            log.error(" failed to read clang flags from project settings.")
+            log.error(" error is: %s.", e)
 
     def is_valid(self):
         """Check settings validity. If any of the settings is None the settings
@@ -131,15 +167,15 @@ class Settings:
         if self.use_libclang is None:
             log.critical(" no use_libclang setting found")
             return False
+        if self.project_specific_settings is None:
+            log.critical(" no use_project_specific_settings setting found")
+            return False
         return True
 
-    def populate_include_dirs(self, project_name, project_base_folder,
-                              file_current_folder, file_parent_folder):
+    def populate_include_dirs(self, file_current_folder, file_parent_folder):
         """populate the include dirs based on the project
 
         Args:
-            project_name (str): project name
-            project_base_folder (str): project folder
             file_current_folder (str): current file folder
             file_parent_folder (str): file parent folder
 
@@ -149,15 +185,16 @@ class Settings:
         # initialize new include_dirs
         include_dirs = list(self.include_dirs)
         log.debug(" populating include dirs with current variables:")
-        log.debug(" project_base_name = %s", project_name)
-        log.debug(" project_base_folder = %s", project_base_folder)
+        log.debug(" project_base_name = %s", self.project_base_name)
+        log.debug(" project_base_folder = %s", self.project_base_folder)
         log.debug(" file_parent_folder = %s", file_parent_folder)
 
         # replace project related variables to real ones
         for i, include_dir in enumerate(include_dirs):
             include_dir = re.sub(
-                "(\$project_base_path)", project_base_folder, include_dir)
-            include_dir = re.sub("(\$project_name)", project_name, include_dir)
+                "(\$project_base_path)", self.project_base_folder, include_dir)
+            include_dir = re.sub("(\$project_name)",
+                                 self.project_base_name, include_dir)
             include_dir = path.abspath(include_dir)
             include_dirs[i] = include_dir
 

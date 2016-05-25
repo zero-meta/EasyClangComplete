@@ -19,7 +19,7 @@ from .. import error_vis
 from .base_complete import BaseCompleter
 
 log = logging.getLogger(__name__)
-
+log.debug(" reloading module")
 
 class Completer(BaseCompleter):
 
@@ -114,14 +114,13 @@ class Completer(BaseCompleter):
             return True
         return False
 
-    def init(self, view, includes, settings, project_folder):
+    def init(self, view, includes, settings):
         """Initialize the completer
 
         Args:
             view (sublime.View): current view
             includes (list): includes from settings
             settings (Settings): plugin settings
-            project_folder (str): current project folder
 
         """
         file_name = view.file_name()
@@ -129,6 +128,13 @@ class Completer(BaseCompleter):
 
         # set std_flag
         self.std_flag = settings.std_flag
+
+         # if we use project-specific settings we ignore everything else
+        if settings.project_specific_settings:
+            log.debug(" overriding all flags by project ones")
+            self.flags_dict[view.id()] = settings.get_project_clang_flags()
+            log.debug(" clang flags are: %s", self.flags_dict[view.id()])
+            return
 
         # init needed variables from settings
         self.flags_dict[view.id()] = []
@@ -138,9 +144,9 @@ class Completer(BaseCompleter):
         # support .clang_complete file with -I "<indlude>" entries
         if settings.search_clang_complete:
             log.debug(" searching for .clang_complete in %s up to %s",
-                      file_folder, project_folder)
+                      file_folder, settings.project_base_folder)
             clang_complete_file = Completer._search_clang_complete_file(
-                file_folder, project_folder)
+                file_folder, settings.project_base_folder)
             if clang_complete_file:
                 log.debug(" found .clang_complete: %s", clang_complete_file)
                 flags = Completer._parse_clang_complete_file(
@@ -177,6 +183,10 @@ class Completer(BaseCompleter):
         complete_at_str = "{complete_flag}={file}:{row}:{col} {file}".format(
             complete_flag="-Xclang -code-completion-at",
             file=temp_file_name, row=row, col=col)
+
+        if not self.flags_dict[view.id()]:
+            log.critical(" no flags for completion! Your setup is wrong!")
+            return
 
         complete_cmd = "{binary} {init} {std} {complete_at} {includes}".format(
             binary=Completer.clang_binary,

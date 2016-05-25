@@ -16,6 +16,7 @@ from .. import tools
 from .base_complete import BaseCompleter
 
 log = logging.getLogger(__name__)
+log.debug(" reloading module")
 
 cindex_dict = {
     '3.2': tools.PKG_NAME + ".clang.cindex32",
@@ -98,14 +99,14 @@ class Completer(BaseCompleter):
             return True
         return False
 
-    def init(self, view, includes, settings, project_folder):
+    def init(self, view, includes, settings):
         """Initialize the completer. Builds the view.
 
         Args:
             view (sublime.View): current view
             includes (list): includes from settings
             settings (Settings): plugin settings
-            project_folder (str): current project folder
+
         """
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
@@ -122,9 +123,9 @@ class Completer(BaseCompleter):
         # support .clang_complete file with -I<indlude> entries
         if settings.search_clang_complete:
             log.debug(" searching for .clang_complete in %s up to %s",
-                      file_folder, project_folder)
+                      file_folder, settings.project_base_folder)
             clang_complete_file = BaseCompleter._search_clang_complete_file(
-                file_folder, project_folder)
+                file_folder, settings.project_base_folder)
             if clang_complete_file:
                 log.debug(" found .clang_complete: %s", clang_complete_file)
                 flags = BaseCompleter._parse_clang_complete_file(

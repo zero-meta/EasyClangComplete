@@ -117,21 +117,33 @@ class Completer(BaseCompleter):
 
         # init needed variables from settings
         clang_flags = [settings.std_flag]
-        for include in includes:
-            clang_flags.append('-I' + include)
 
-        # support .clang_complete file with -I<indlude> entries
-        if settings.search_clang_complete:
-            log.debug(" searching for .clang_complete in %s up to %s",
-                      file_folder, settings.project_base_folder)
-            clang_complete_file = BaseCompleter._search_clang_complete_file(
-                file_folder, settings.project_base_folder)
-            if clang_complete_file:
-                log.debug(" found .clang_complete: %s", clang_complete_file)
-                flags = BaseCompleter._parse_clang_complete_file(
-                    clang_complete_file)
-                clang_flags += flags
-
+        # if we use project-specific settings we ignore everything else
+        if settings.project_specific_settings:
+            log.debug(" overriding all flags by project ones")
+            project_flags = settings.get_project_clang_flags()
+            if project_flags:
+                clang_flags += settings.get_project_clang_flags()
+            else:
+                log.critical(" there are no project-specific settings.")
+                log.info(" falling back to using plugin settings.")
+        if len(clang_flags) < 2:
+            # this means that project specific settings are either not used or
+            # invalid, so we still need to initialize from settings
+            for include in includes:
+                clang_flags.append('-I' + include)
+            # support .clang_complete file with -I<indlude> entries
+            if settings.search_clang_complete:
+                log.debug(" searching for .clang_complete in %s up to %s",
+                          file_folder, settings.project_base_folder)
+                clang_complete_file = BaseCompleter._search_clang_complete_file(
+                    file_folder, settings.project_base_folder)
+                if clang_complete_file:
+                    log.debug(" found .clang_complete: %s", clang_complete_file)
+                    flags = BaseCompleter._parse_clang_complete_file(
+                        clang_complete_file)
+                    clang_flags += flags
+        # now we have the flags and can continue initializing the TU
         log.debug(" clang flags are: %s", clang_flags)
         try:
             TU = Completer.tu_module

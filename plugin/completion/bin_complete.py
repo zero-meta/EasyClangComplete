@@ -123,36 +123,35 @@ class Completer(BaseCompleter):
             settings (Settings): plugin settings
 
         """
+        self.flags_dict[view.id()] = None
         file_name = view.file_name()
         file_folder = path.dirname(file_name)
 
         # set std_flag
         self.std_flag = settings.std_flag
-
-         # if we use project-specific settings we ignore everything else
+        # if we use project-specific settings we ignore everything else
         if settings.project_specific_settings:
             log.debug(" overriding all flags by project ones")
             self.flags_dict[view.id()] = settings.get_project_clang_flags()
-            log.debug(" clang flags are: %s", self.flags_dict[view.id()])
-            return
+        if not self.flags_dict[view.id()]:
+            # init needed variables from plugin settings as project settings are
+            # either not used or invalid
+            self.flags_dict[view.id()] = []
+            for include in includes:
+                self.flags_dict[view.id()].append('-I "{}"'.format(include))
 
-        # init needed variables from settings
-        self.flags_dict[view.id()] = []
-        for include in includes:
-            self.flags_dict[view.id()].append('-I "{}"'.format(include))
-
-        # support .clang_complete file with -I "<indlude>" entries
-        if settings.search_clang_complete:
-            log.debug(" searching for .clang_complete in %s up to %s",
-                      file_folder, settings.project_base_folder)
-            clang_complete_file = Completer._search_clang_complete_file(
-                file_folder, settings.project_base_folder)
-            if clang_complete_file:
-                log.debug(" found .clang_complete: %s", clang_complete_file)
-                flags = Completer._parse_clang_complete_file(
-                    clang_complete_file)
-                self.flags_dict[view.id()] += flags
-
+            # support .clang_complete file with -I "<indlude>" entries
+            if settings.search_clang_complete:
+                log.debug(" searching for .clang_complete in %s up to %s",
+                          file_folder, settings.project_base_folder)
+                clang_complete_file = Completer._search_clang_complete_file(
+                    file_folder, settings.project_base_folder)
+                if clang_complete_file:
+                    log.debug(" found .clang_complete: %s", clang_complete_file)
+                    flags = Completer._parse_clang_complete_file(
+                        clang_complete_file)
+                    self.flags_dict[view.id()] += flags
+        # let's print the flags just to be sure
         log.debug(" clang flags are: %s", self.flags_dict[view.id()])
 
     def complete(self, view, cursor_pos, show_errors):
@@ -270,7 +269,8 @@ class Completer(BaseCompleter):
             output_text = e.output.decode("utf-8")
             log.info(" clang process finished with code: \n%s", e.returncode)
             log.info(" clang process output: \n%s", output_text)
-            self.error_vis.generate(view, output_text.splitlines(), FORMAT_BINARY)
+            self.error_vis.generate(view, output_text.splitlines(),
+                                    error_vis.FORMAT_BINARY)
             self.error_vis.show_regions(view)
             return False
 

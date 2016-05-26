@@ -76,23 +76,16 @@ class test_complete_command(TestCase):
         """Test that completer is properly initialized
 
         """
-        print("blah")
         settings = Settings()
-        print("blah")
         current_folder = path.dirname(self.view.file_name())
-        print("blah")
         parent_folder = path.dirname(current_folder)
-        print("blah")
         include_dirs = settings.populate_include_dirs(
             file_current_folder=current_folder,
             file_parent_folder=parent_folder)
-        print("blah")
         completer = Completer("clang++")
-        print("blah here?")
         completer.init(view=self.view,
                        includes=include_dirs,
                        settings=settings)
-        print("blah")
         self.assertTrue(completer.exists_for_view(self.view.id()))
 
     def test_complete(self):

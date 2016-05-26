@@ -196,7 +196,6 @@ class Settings:
             include_dir = re.sub("(\$project_name)",
                                  self.project_base_name, include_dir)
             include_dir = path.abspath(include_dir)
-            print(include_dir)
             include_dirs[i] = include_dir
 
         if self.include_file_folder:

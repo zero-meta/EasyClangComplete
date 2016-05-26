@@ -130,6 +130,10 @@ lines:
 - `triggers`:
     + defaults are `".", "::", "->"`. The autocompletion does not trigger on
       `>` or `:`. It also ignores float numbers like `3.14`.
+- `use_project_specific_settings`:
+    + when `true` will enforce sublime text to read all flags from project
+      settings. This settings overrides all other settings like `include_dirs`
+      or `std_flag` so should be used with caution. Defaults to `false`.
 
 Please see the default settings file in the repo for more settings
 descriptions. Every setting in [settings file](EasyClangComplete.sublime-settings) should have an understandable

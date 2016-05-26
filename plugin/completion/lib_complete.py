@@ -123,7 +123,7 @@ class Completer(BaseCompleter):
             log.debug(" overriding all flags by project ones")
             project_flags = settings.get_project_clang_flags()
             if project_flags:
-                clang_flags += settings.get_project_clang_flags()
+                clang_flags += project_flags
             else:
                 log.critical(" there are no project-specific settings.")
                 log.info(" falling back to using plugin settings.")

@@ -112,23 +112,40 @@ class Settings:
             log.debug(" project data: %s", project_data)
             project_settings = project_data["settings"]
             log.debug(" project settings: %s", project_settings)
-            project_flags = project_settings["clang_flags"]
-            log.debug(" project_flags: %s", project_flags)
-            for flag in project_flags:
+            project_flags = []
+            for flag in project_settings["clang_flags"]:
                 if flag.startswith('-I'):
-                    path_to_add = flag[2:].rstrip()
-                    if path.isabs(path_to_add):
-                        flag = '-I "{}"'.format(path.normpath(path_to_add))
-                    else:
-                        flag = '-I "{}"'.format(
-                            path.join(self.project_base_folder, path_to_add))
+                    project_flags.append(self.__expand_include(flag))
                 elif flag.startswith('-std'):
                     self.std_flag = flag
+                else:
+                    # we just append everything else
+                    project_flags.append(flag)
+            log.debug(" project_flags: %s", project_flags)
             return project_flags
         except Exception as e:
             log.error(" failed to read clang flags from project settings.")
             log.error(" error is: %s.", e)
             return None
+
+    def __expand_include(self, include):
+        """Expand include. Make sure path is ok given a specific os and add
+        current project path if the include path is relative.
+
+        Args:
+            include (str): include in form -I<include>
+
+        Returns:
+            str: expanded include in form '-I "<include>"'
+        """
+        flag = None
+        path_to_add = include[2:].rstrip()
+        if path.isabs(path_to_add):
+            flag = '-I "{}"'.format(path.normpath(path_to_add))
+        else:
+            flag = '-I "{}"'.format(
+                path.join(self.project_base_folder, path_to_add))
+        return flag
 
     def is_valid(self):
         """Check settings validity. If any of the settings is None the settings

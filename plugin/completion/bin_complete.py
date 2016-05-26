@@ -133,6 +133,9 @@ class Completer(BaseCompleter):
         if settings.project_specific_settings:
             log.debug(" overriding all flags by project ones")
             self.flags_dict[view.id()] = settings.get_project_clang_flags()
+            if not self.flags_dict[view.id()]:
+                log.error(" could not read project specific settings")
+                log.info(" falling back to default plugin ones")
         if not self.flags_dict[view.id()]:
             # init needed variables from plugin settings as project settings are
             # either not used or invalid

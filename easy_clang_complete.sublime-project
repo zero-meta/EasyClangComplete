@@ -19,7 +19,6 @@
 		"FuzzyFilePath":
 		{
 		},
-		"clang_flags":
-		["-std=c++11", "-I/usr/include"]
+		"clang_flags": ["-std=c++11", "-I/usr/include"]
 	}
 }

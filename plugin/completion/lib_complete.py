@@ -116,18 +116,21 @@ class Completer(BaseCompleter):
         files = [(file_name, file_body)]
 
         # init needed variables from settings
-        clang_flags = [settings.std_flag]
+        clang_flags = []
 
         # if we use project-specific settings we ignore everything else
         if settings.project_specific_settings:
             log.debug(" overriding all flags by project ones")
             project_flags = settings.get_project_clang_flags()
             if project_flags:
+                clang_flags.append(settings.std_flag)
                 clang_flags += project_flags
             else:
-                log.critical(" there are no project-specific settings.")
+                log.error(" there are no project-specific settings.")
                 log.info(" falling back to using plugin settings.")
         if len(clang_flags) < 2:
+            # add std flag to all flags
+            clang_flags.append(settings.std_flag)
             # this means that project specific settings are either not used or
             # invalid, so we still need to initialize from settings
             for include in includes:

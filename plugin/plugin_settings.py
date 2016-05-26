@@ -102,7 +102,7 @@ class Settings:
             log.debug(" set std_flag to default: %s", self.std_flag)
 
     def get_project_clang_flags(self):
-        """Get clang flags for the current project 
+        """Get clang flags for the current project
 
         Returns:
             list(str): flags for clang, None if no project found

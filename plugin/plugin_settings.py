@@ -102,6 +102,11 @@ class Settings:
             log.debug(" set std_flag to default: %s", self.std_flag)
 
     def get_project_clang_flags(self):
+        """Get clang flags for the current project 
+
+        Returns:
+            list(str): flags for clang, None if no project found
+        """
         try:
             project_data = sublime.active_window().project_data()
             log.debug(" project data: %s", project_data)
@@ -123,6 +128,7 @@ class Settings:
         except Exception as e:
             log.error(" failed to read clang flags from project settings.")
             log.error(" error is: %s.", e)
+            return None
 
     def is_valid(self):
         """Check settings validity. If any of the settings is None the settings

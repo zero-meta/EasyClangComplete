@@ -42,7 +42,6 @@ class test_settings(TestCase):
         self.assertTrue(settings.is_valid())
         settings.include_file_folder = True
         settings.include_parent_folder = True
-        project_name = settings.project_base_name
         settings.include_dirs = [
             path.realpath("/$project_name/src"),
             path.realpath("/test/test")

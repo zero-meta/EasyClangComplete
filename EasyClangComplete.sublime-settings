@@ -9,7 +9,7 @@
 
 	// override all clang flags by project-specific settings defined under
 	// `settings`->`clang_flags` in `*.sublime-project` file
-	"use_project_specific_settings": true,
+	"use_project_specific_settings": false,
 
 	// set the standard library flag.
 	"std_flag" : "-std=c++11",

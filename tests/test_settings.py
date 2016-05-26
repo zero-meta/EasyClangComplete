@@ -42,15 +42,14 @@ class test_settings(TestCase):
         self.assertTrue(settings.is_valid())
         settings.include_file_folder = True
         settings.include_parent_folder = True
-        project_name = "PROJECT"
+        project_name = settings.project_base_name
 
         settings.include_dirs = [
             path.realpath("$project_name/src"),
             path.realpath("/test/test")
         ]
         initial_dirs = list(settings.include_dirs)
-        dirs = settings.populate_include_dirs(project_name, "",
-                                              path.realpath(__file__),
+        dirs = settings.populate_include_dirs(path.realpath(__file__),
                                               path.abspath(path.curdir))
         self.assertLess(len(initial_dirs), len(dirs))
         self.assertEqual(dirs[0], path.abspath(project_name + "/src"))

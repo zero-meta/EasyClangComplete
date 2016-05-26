@@ -76,19 +76,23 @@ class test_complete_command(TestCase):
         """Test that completer is properly initialized
 
         """
+        print("blah")
         settings = Settings()
+        print("blah")
         current_folder = path.dirname(self.view.file_name())
+        print("blah")
         parent_folder = path.dirname(current_folder)
+        print("blah")
         include_dirs = settings.populate_include_dirs(
-            project_name='test',
-            project_base_folder='',
             file_current_folder=current_folder,
             file_parent_folder=parent_folder)
+        print("blah")
         completer = Completer("clang++")
+        print("blah here?")
         completer.init(view=self.view,
                        includes=include_dirs,
-                       settings=settings,
-                       project_folder='')
+                       settings=settings)
+        print("blah")
         self.assertTrue(completer.exists_for_view(self.view.id()))
 
     def test_complete(self):
@@ -104,15 +108,12 @@ class test_complete_command(TestCase):
         current_folder = path.dirname(self.view.file_name())
         parent_folder = path.dirname(current_folder)
         include_dirs = settings.populate_include_dirs(
-            project_name='test',
-            project_base_folder='',
             file_current_folder=current_folder,
             file_parent_folder=parent_folder)
         completer = Completer("clang++")
         completer.init(view=self.view,
                        includes=include_dirs,
-                       settings=settings,
-                       project_folder='')
+                       settings=settings)
         self.assertTrue(completer.exists_for_view(self.view.id()))
         self.assertEqual(self.getRow(5), "  a.")
         pos = self.view.text_point(5, 4)
@@ -142,15 +143,12 @@ class test_complete_command(TestCase):
         current_folder = path.dirname(self.view.file_name())
         parent_folder = path.dirname(current_folder)
         include_dirs = settings.populate_include_dirs(
-            project_name='test',
-            project_base_folder='',
             file_current_folder=current_folder,
             file_parent_folder=parent_folder)
         completer = Completer("clang++")
         completer.init(view=self.view,
                        includes=include_dirs,
-                       settings=settings,
-                       project_folder='')
+                       settings=settings)
         self.assertTrue(completer.exists_for_view(self.view.id()))
         self.assertEqual(self.getRow(3), "  vec.")
         pos = self.view.text_point(3, 6)

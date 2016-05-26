@@ -134,7 +134,16 @@ lines:
     + when `true` will enforce sublime text to read all flags from project
       settings(`*.sublime-project` -> `settings` -> `clang_flags`). This
       settings overrides all other settings like `include_dirs` or `std_flag`
-      so should be used with caution. Defaults to `false`.
+      so should be used with caution. Defaults to `false`. If the project
+      settings cannot be found, the plugin will fall back to default behavior.
+      An example settings entry looks like this:
+      ```
+      "settings":
+      {
+        "clang_flags":
+        ["-std=c++11", "-I/usr/include"]
+      }
+      ```
 
 Please see the default settings file in the repo for more settings
 descriptions. Every setting in [settings file](EasyClangComplete.sublime-settings) should have an understandable

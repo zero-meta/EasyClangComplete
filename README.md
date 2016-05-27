@@ -137,7 +137,7 @@ I will only cover most important settings here.
       "settings":
       {
         "clang_flags":
-        ["-std=c++11", "-src", "-I/usr/include",]
+        ["-std=c++11", "-Isrc", "-I/usr/include",]
       },
       ```
 

@@ -11,14 +11,76 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++
-for Sublime Text 3. It is built to function in an asynchronous way, so that you
-will not have to wait even when completions take slightly longer to load.
+for Sublime Text 3.
 
-The plugin uses `libclang` with its python bindings to provide clang-based
-autocompletions. In case `libclang` cannot be initialized or found it will use
-completions based on the output of `clang -code-completion-at` run from the
-command line. If you want this as default behavior, set the setting
-`use_libclang` to `false`.
+# Jump right in! #
+Follow all the following steps to ensure the plugin works as expected!
+
+## Install this plugin ##
+- Best is to use [Package Control](https://packagecontrol.io/installation)
+  + <kbd>CTRL</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and install
+    `EasyClangComplete`
+- If you don't have Package Control (you should)
+  + download one of the releases from
+    [here](https://github.com/niosus/EasyClangComplete/releases).
+
+## Install clang ##
+- **Ubuntu**: `sudo apt-get install clang`
+- **Other Linux**: use your package manager or install from `clang`
+  [website](http://llvm.org/releases/download.html)
+- **Windows**: install the latest release from `clang`
+  [website](http://llvm.org/releases/download.html)
+- **OSX**: ships `clang` by default. You are all set!
+
+## Configure your includes ##
+`Clang` will automatically search for headers in the folder that contains the
+file you are working on and its parent. If you have a more sophisticated
+project you will need to help `clang` just a little bit. There are three ways
+to do it. Pick any of the following:
+
+- Set `include_dirs` setting in `User Settings`:
+  + see default [settings](EasyClangComplete.sublime-settings) to get started.
+    These includes will be included in every project you run.
+- Add `.clang_complete` file to the root of your project folder.
+  + this file should contain all includes and macroses you want to use.
+  + See example [file](.clang_complete).
+- Add all the flags to pass to clang to `*.sublime-project` file.
+  + add all settings as a string list under `settings` -> `clang_flags`.
+  + See example [file](easy_clang_complete.sublime-project)
+
+## Correct sublime completion settings ##
+Add this to your `User Settings`:
+```
+"auto_complete_triggers":
+[
+    {
+        "characters": ".:>",
+        "selector": "source.c++ - string - comment - constant.numeric"
+    }
+],
+```
+It will ensure that Sublime Text will try to autocomplete your code when you
+type `.`, `:` or `>`. The plugin will then ensure that completions are
+triggered only when `.`, `::` or `->` are typed.
+## You're good to go! ##
+
+# More on the plugin #
+
+All the essential information to make the plugin run is written above. If you
+are still interested in more details - please read on.
+
+The plugin has two modes:
+
+- one that uses `libclang` with its python bindings. This is the better method
+  as it fully utilizes saving compilation database which makes your completions
+  blazingly fast. Unfortunately it only works for Linux. Please help me to
+  bring it to other platforms if you know more about Windows or OSX than I do.
+  There is an issue for Windows opened
+  [here](https://github.com/niosus/EasyClangComplete/issues/4).
+- `clang -code-completion-at` run from the command line. The plugin parses the
+  output from a process that runs the above command. This is the default method
+  for Windows and OSX. Tested on all platforms (see [Testing](#Tests) part).
+  Slower than method with `libclang`.
 
 This plugin is intended to be easy to use. It should autocomplete STL out of
 the box and you should just add the folders your project uses to `include_dirs`
@@ -26,82 +88,9 @@ list in the settings to make it autocomplete code all your project. If you
 experience problems - create an issue. I will try to respond as soon as
 possible.
 
-## How to install ##
-You have a couple of options
-- Use `Package Control` for Sublime Text. You can find the package here:
-  [EasyClangComplete](https://packagecontrol.io/packages/EasyClangComplete)
-- If you don't want to use Package Control or it is not available download the
-  latest release from
-  [here](https://github.com/niosus/EasyClangComplete/releases) and copy it to
-  `Packages` folder inside your Sublime Text config folder.
-- If you want to modify the plugin, fork it and clone to the `Packages` folder.
-
-*Then follow the OS-specific setup below*
-
-##### Linux #####
-I have tested it on Ubuntu 14.04 and here the setup should be as simple as:
-`sudo apt-get install clang`
-
-You can also install any specific version of clang, e.g. `clang-3.6`. In this
-case don't forget to set the correct binary name in the settings, e.g.:
-```
-"clang_binary" : "clang++-3.6"
-```
-Ubuntu uses full featured `libclang` support which provides the full experience
-with blazingly fast autocompletion even for large code bases thanks to
-`reparse` python bindings function.
-
-##### Windows #####
-Just download the latest clang from the
-[clang website](http://llvm.org/releases/download.html).
-
-This should be enough to trigger simple completions. Additional steps may be
-needed if you want to use STL or third party libraries.
-
-- `Microsoft visual C++` - works out of the box for visual studio 2015. Should
-  also work for older version, but I haven't tested it. Please report back if
-  it works for you on an older version out of the box.
-- `MinGW` - setup should be similar to linux setup and provided all paths are
-  configured correcty should work out of the box. `
-
-*Help needed:* Currently this plugin works for Windows only in a binary mode by
-running a command in the cmd and parsing the output with regex. It works and
-should be fine for general user, but it would be cool to make it work with
-libclang as it is faster and should be more robust. I don't know much about
-Windows and I don't work in it, so if you are an expect in Windows - educate
-me! Fire up the issue with your suggestions! Let's make it work.
-
-##### Mac  #####
-Mac comes with `clang`. The only catch is that its versioning is different from
-`llvm` one. This makes it hard to match `libclang` to it. However, the
-autocompletions should be working out of the box.
-
-*Help needed:* Unfortunately I do not own a mac. The unit tests for completion
-using `clang` binary pass on an `OSX` instance both for completing user-defined
-structures and for STL auto-completion. But there is a hack. I set the version
-of python bindings to `3.7` by hand. There is not simple way of knowing which
-version the internal `OSX` `clang` corresponds to in `LLVM` versioning scheme.
-But do correct me if I am wrong. Help me to make `libclang` work on a Mac!
-
 ## Settings highlights ##
 I will only cover most important settings here.
 
-##### Sublime Settings  #####
-Make sure that sublime will actually autocomplete your code on specific
-characters like `>`, `.` or `:`. To have this behavior you can either modify
-your syntax-specific settings or add to your user preferences the following
-lines:
-```
-    "auto_complete_triggers":
-    [
-        {
-            "characters": ".:>",
-            "selector": "source.c++ - string - comment - constant.numeric"
-        }
-    ],
-```
-
-##### EasyClangComplete Settings  #####
 **PLEASE RESTART SUBLIME TEXT AFTER EACH SETTINGS CHANGE**
 
 - `include_dirs`:
@@ -149,7 +138,8 @@ lines:
       ```
 
 Please see the default settings file in the repo for more settings
-descriptions. Every setting in [settings file](EasyClangComplete.sublime-settings) should have an understandable
+descriptions. Every setting in settings
+[file](EasyClangComplete.sublime-settings) should have an understandable
 comment. Should they not be clear - create an issue.
 
 

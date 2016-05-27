@@ -16,7 +16,9 @@ from .. import error_vis
 
 log = logging.getLogger(__name__)
 
+
 class BaseCompleter:
+
     """A base class for clang based completions
 
     Attributes:
@@ -191,8 +193,10 @@ class BaseCompleter:
                 elif line.startswith('-I'):
                     path_to_add = line[2:].rstrip()
                     if path.isabs(path_to_add):
-                        flags.append('-I' + path.normpath(path_to_add))
+                        flags.append('-I "{}"'.format(
+                            path.normpath(path_to_add)))
                     else:
-                        flags.append('-I' + path.join(folder, path_to_add))
+                        flags.append('-I "{}"'.format(
+                            path.join(folder, path_to_add)))
         log.debug(" .clang_complete contains flags: %s", flags)
         return flags

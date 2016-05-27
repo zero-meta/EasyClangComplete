@@ -21,7 +21,8 @@
 		},
 		"clang_flags": [
 			"-std=c++11",
-			"-I/usr/include",
+			"-Isrc", 					// relative path
+			"-I/usr/include", // absolute path
 			"-I/opt/ros/indigo/include"]
 	}
 }

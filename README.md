@@ -43,15 +43,17 @@ to do it. Pick any of the following:
     These includes will be included in every project you run.
 - Add `.clang_complete` file to the root of your project folder.
   + this file should contain all includes and macroses you want to use.
-  + See example [.clang_complete](.clang_complete) file.
+  + see example [.clang_complete](.clang_complete) file.
+  + absolute paths start with `/`. All the others are treated as relative.
 - Add all the flags to pass to clang to `*.sublime-project` file.
   + add all settings as a string list under `settings` -> `clang_flags`.
   + See example [sublime-project](easy_clang_complete.sublime-project#L22)
     file.
+  + absolute paths start with `/`. All the others are treated as relative.
 
 ## Configure completion triggers ##
 Add this to your `User Settings`:
-```
+```json
 "auto_complete_triggers":
 [
     {
@@ -130,12 +132,12 @@ I will only cover most important settings here.
       so should be used with caution. Defaults to `false`. If the project
       settings cannot be found, the plugin will fall back to default behavior.
       An example settings entry looks like this:
-      ```
+      ```json
       "settings":
       {
         "clang_flags":
-        ["-std=c++11", "-I/usr/include"]
-      }
+        ["-std=c++11", "-src", "-I/usr/include",]
+      },
       ```
 
 Please see the default settings file in the repo for more settings

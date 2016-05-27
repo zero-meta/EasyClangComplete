@@ -24,6 +24,7 @@ to do it. Pick any of the following:
   + this file should contain all includes and macroses you want to use.
   + Example:
   ```
+  -Isrc
   -I/usr/include
   -I/opt/ros/indigo/include
   ```
@@ -33,7 +34,7 @@ to do it. Pick any of the following:
   ```
   "settings":
   {
-    "clang_flags": ["-std=c++11", "-I/usr/include"]
+    "clang_flags": ["-std=c++11", "-Isrc", "-I/usr/include"]
   }
   ```
 

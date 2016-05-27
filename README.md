@@ -43,12 +43,13 @@ to do it. Pick any of the following:
     These includes will be included in every project you run.
 - Add `.clang_complete` file to the root of your project folder.
   + this file should contain all includes and macroses you want to use.
-  + See example [file](.clang_complete).
+  + See example [.clang_complete](.clang_complete) file.
 - Add all the flags to pass to clang to `*.sublime-project` file.
   + add all settings as a string list under `settings` -> `clang_flags`.
-  + See example [file](easy_clang_complete.sublime-project)
+  + See example [sublime-project](easy_clang_complete.sublime-project#L22)
+    file.
 
-## Correct sublime completion settings ##
+## Configure completion triggers ##
 Add this to your `User Settings`:
 ```
 "auto_complete_triggers":

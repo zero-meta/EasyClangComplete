@@ -132,6 +132,7 @@ I will only cover most important settings here.
       so should be used with caution. Defaults to `false`. If the project
       settings cannot be found, the plugin will fall back to default behavior.
       An example settings entry looks like this:
+
       ```json
       "settings":
       {

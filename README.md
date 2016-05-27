@@ -80,7 +80,7 @@ The plugin has two modes:
   [here](https://github.com/niosus/EasyClangComplete/issues/4).
 - `clang -code-completion-at` run from the command line. The plugin parses the
   output from a process that runs the above command. This is the default method
-  for Windows and OSX. Tested on all platforms (see [Testing](#Tests) part).
+  for Windows and OSX. Tested on all platforms (see [Testing](#tests) part).
   Slower than method with `libclang`.
 
 This plugin is intended to be easy to use. It should autocomplete STL out of

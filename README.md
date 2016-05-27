@@ -27,18 +27,21 @@ experience problems - create an issue. I will try to respond as soon as
 possible.
 
 ## How to install ##
-Use `Package Control` for Sublime Text. Install `EasyClangComplete` plugin from
-there. Then follow the OS-specific setup below.
+You have a couple of options
+- Use `Package Control` for Sublime Text. You can find the package here:
+  [EasyClangComplete](https://packagecontrol.io/packages/EasyClangComplete)
+- If you don't want to use Package Control or it is not available download the
+  latest release from
+  [here](https://github.com/niosus/EasyClangComplete/releases) and copy it to
+  `Packages` folder inside your Sublime Text config folder.
+- If you want to modify the plugin, fork it and clone to the `Packages` folder.
 
-If you cannot find it there or have other reasons not to use package control,
-clone this repository into the folder where the packages of your Sublime Text 3
-live. Then follow the OS-specific setup below.
+*Then follow the OS-specific setup below*
 
 ##### Linux #####
 I have tested it on Ubuntu 14.04 and here the setup should be as simple as:
-```bash
-sudo apt-get install clang
-```
+`sudo apt-get install clang`
+
 You can also install any specific version of clang, e.g. `clang-3.6`. In this
 case don't forget to set the correct binary name in the settings, e.g.:
 ```

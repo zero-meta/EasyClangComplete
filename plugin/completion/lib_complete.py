@@ -18,6 +18,8 @@ from .base_complete import BaseCompleter
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
 
+Tools = tools.Tools
+
 cindex_dict = {
     '3.2': tools.PKG_NAME + ".clang.cindex32",
     '3.3': tools.PKG_NAME + ".clang.cindex33",
@@ -144,9 +146,13 @@ class Completer(BaseCompleter):
                 if clang_complete_file:
                     log.debug(" found .clang_complete: %s", clang_complete_file)
                     flags = BaseCompleter._parse_clang_complete_file(
-                        clang_complete_file)
+                        clang_complete_file, separate_includes=False)
                     clang_flags += flags
         # now we have the flags and can continue initializing the TU
+        if Tools.get_view_syntax(view) == "C++":
+            # treat this as c++ even if it is a header
+            log.debug(" This is a C++ file. Adding `-x c++` to flags")
+            clang_flags = ['-x'] + ['c++'] + clang_flags
         log.debug(" clang flags are: %s", clang_flags)
         try:
             TU = Completer.tu_module
@@ -156,7 +162,7 @@ class Completer(BaseCompleter):
                 filename=file_name,
                 args=clang_flags,
                 unsaved_files=files,
-                options=TU.PARSE_PRECOMPILED_PREAMBLE |
+                options= TU.PARSE_PRECOMPILED_PREAMBLE |
                 TU.PARSE_CACHE_COMPLETION_RESULTS)
             end = time.time()
             log.debug(" compilation done in %s seconds", end - start)

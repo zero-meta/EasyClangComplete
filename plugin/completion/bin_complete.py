@@ -152,7 +152,7 @@ class Completer(BaseCompleter):
                 if clang_complete_file:
                     log.debug(" found .clang_complete: %s", clang_complete_file)
                     flags = Completer._parse_clang_complete_file(
-                        clang_complete_file)
+                        clang_complete_file, separate_includes=True)
                     self.flags_dict[view.id()] += flags
         # let's print the flags just to be sure
         log.debug(" clang flags are: %s", self.flags_dict[view.id()])

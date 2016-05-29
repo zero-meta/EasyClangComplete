@@ -36,6 +36,7 @@ class BaseCompleter:
     async_completions_ready = False
     valid = False
 
+
     def __init__(self, clang_binary):
         """Initialize the BaseCompleter
 
@@ -174,17 +175,23 @@ class BaseCompleter:
         return None
 
     @staticmethod
-    def _parse_clang_complete_file(file):
+    def _parse_clang_complete_file(file, separate_includes):
         """parse .clang_complete file
 
         Args:
             file (str): path to a file
+            separate_includes (bool): if True: -I<include> turns to '-I "<include>"'.
+                                      if False: stays -I<include>
+                                      Separation is needed for binary completion
 
         Returns:
             list(str): parsed list of includes from the file
         """
         flags = []
         folder = path.dirname(file)
+        mask = '-I{}'
+        if separate_includes:
+            mask = '-I "{}"'
         with open(file) as f:
             content = f.readlines()
             for line in content:
@@ -193,10 +200,10 @@ class BaseCompleter:
                 elif line.startswith('-I'):
                     path_to_add = line[2:].rstrip()
                     if path.isabs(path_to_add):
-                        flags.append('-I "{}"'.format(
+                        flags.append(mask.format(
                             path.normpath(path_to_add)))
                     else:
-                        flags.append('-I "{}"'.format(
+                        flags.append(mask.format(
                             path.join(folder, path_to_add)))
         log.debug(" .clang_complete contains flags: %s", flags)
         return flags

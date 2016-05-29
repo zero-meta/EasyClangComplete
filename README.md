@@ -81,10 +81,11 @@ The plugin has two modes:
   bring it to other platforms if you know more about Windows or OSX than I do.
   There is an issue for Windows opened
   [here](https://github.com/niosus/EasyClangComplete/issues/4).
-- `clang -code-completion-at` run from the command line. The plugin parses the
-  output from a process that runs the above command. This is the default method
-  for Windows and OSX. Tested on all platforms (see [Testing](#tests) part).
-  Slower than method with `libclang`.
+- `clang -Xclang -code-completion-at` run from the command line. The plugin
+  parses the output from a process that runs the above command. This is the
+  default method for Windows and OSX. Tested on all platforms (see
+  [Testing](#tests) part). Slower than method with `libclang`. Will be
+  deprecated when we solve issue #4.
 
 This plugin is intended to be easy to use. It should autocomplete STL out of
 the box and you should just add the folders your project uses to `include_dirs`
@@ -105,24 +106,22 @@ I will only cover most important settings here.
     + it is absolutely ok to include a folder that does not exist. `clang`
       knows how to deal with it and it will neither break anything nor make
       things slower.
-    + See [my own settings](https://github.com/niosus/config-sublime/blob/master/Packages%2FUser%2FEasyClangComplete.sublime-settings#L4) as an example if you wish.
 - `std_flag`:
     + sets the standard flag that will be used for compilation. Defaults to
       `std=c++11`
 - `use_libclang`:
-    + if `true` use libclang as backend. It is buggy on Windows and until there
-      are good solutions to issue #4 there is a fallback option:
-    + if `false` or if first option failed, use output from `clang -cc1
+    + if `true` use libclang as backend.
+    + if `false` or if first option failed, use output from `clang -Xclang
       -completion-at` command and parse it with regular expressions.
 - `search_clang_complete_file`:
     + seach for `.clang_complete` file up the tree. Project folder is the last
       one to search for the file.
-    + If the file is found, its contents of style `-I<some_local_path>` are
+    + If the file is found, its contents of style `-I<some_local_path>` and
+      `-I/<some_absolute_path>` (mind the `/` at the start of the line) are
       appended to include flags.
 - `errors_on_save`:
-    + if `use_libclang` is `true` the plugin can highlight errors on save. A
-      tooltip with an error message will be shown if the caret goes over a
-      highlighted line.
+    + highlight errors on save. A tooltip with an error message will be shown
+      if the caret goes over a highlighted line.
 - `triggers`:
     + defaults are `".", "::", "->"`. The autocompletion does not trigger on
       `>` or `:`. It also ignores float numbers like `3.14`.

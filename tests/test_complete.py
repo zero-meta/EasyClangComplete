@@ -120,7 +120,7 @@ class test_complete_command(TestCase):
         include_dirs = settings.populate_include_dirs(
             file_current_folder=current_folder,
             file_parent_folder=parent_folder)
-        completer = Completer("clang++")
+        completer = CompleterLib("clang++")
         completer.init(view=self.view,
                        includes=include_dirs,
                        settings=settings)
@@ -178,7 +178,7 @@ class test_complete_command(TestCase):
         include_dirs = settings.populate_include_dirs(
             file_current_folder=current_folder,
             file_parent_folder=parent_folder)
-        completer = Completer("clang++")
+        completer = CompleterLib("clang++")
         completer.init(view=self.view,
                        includes=include_dirs,
                        settings=settings)
@@ -251,7 +251,7 @@ class test_complete_command(TestCase):
         include_dirs = settings.populate_include_dirs(
             file_current_folder=current_folder,
             file_parent_folder=parent_folder)
-        completer = Completer("clang++")
+        completer = CompleterLib("clang++")
         completer.init(view=self.view,
                        includes=include_dirs,
                        settings=settings)

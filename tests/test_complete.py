@@ -9,7 +9,14 @@ from unittest import TestCase
 sys.path.append(path.dirname(path.dirname(__file__)))
 from plugin.plugin_settings import Settings
 from plugin.completion.bin_complete import Completer
+from plugin.completion.lib_complete import Completer as CompleterLib
 
+def has_libclang():
+        if platform.system() == "Darwin":
+            return True
+        if platform.system() == "Linux":
+            return True
+        return False
 
 class test_complete_command(TestCase):
     """Test complete commands
@@ -69,6 +76,17 @@ class test_complete_command(TestCase):
 
         """
         completer = Completer("clang++")
+        self.assertIsNotNone(completer.version_str)
+        print("version is: {}".format(completer.version_str))
+
+    def test_init_lib(self):
+        """Test that completer version is properly initialized
+
+        """
+        if not has_libclang():
+            # we don't check libclang on platforms that lack its support
+            return
+        completer = CompleterLib("clang++")
         self.assertIsNotNone(completer.version_str)
         print("version is: {}".format(completer.version_str))
 

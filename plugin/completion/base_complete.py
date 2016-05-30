@@ -36,7 +36,6 @@ class BaseCompleter:
     async_completions_ready = False
     valid = False
 
-
     def __init__(self, clang_binary):
         """Initialize the BaseCompleter
 
@@ -64,10 +63,12 @@ class BaseCompleter:
         if self.version_str > "3.8" and platform.system() == "Darwin":
             # to the best of my knowledge this is the last one available on macs
             # but it is a hack, yes
-            self.version_str = "3.7"
+            reported_version_str = self.version_str
+            self.version_str = "3.5"
             info = {"platform": platform.system()}
-            log.warning(" Wrong version reported. Reducing it to %s. Info: %s",
-                        self.version_str, info)
+            log.warning(
+                " Wrong version %s reported. Reducing it to %s. Info: %s",
+                reported_version_str, self.version_str, info)
         log.info(" Found clang version: %s", self.version_str)
         # initialize error visuzlization
         self.error_vis = error_vis.CompileErrors()

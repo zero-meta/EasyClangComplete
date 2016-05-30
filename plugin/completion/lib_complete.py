@@ -5,7 +5,10 @@ Attributes:
     log (logging.Logger): logger for this module
 """
 import importlib
+import os
+import platform
 import sublime
+import subprocess
 import time
 import logging
 
@@ -66,6 +69,20 @@ class Completer(BaseCompleter):
                             cindex_dict[self.version_str])
                 cindex = importlib.import_module(
                     cindex_dict[self.version_str])
+
+            if platform.system() == "Darwin":
+                # Try to figure out the base path for this installation of clang.
+                # This will return something like /.../lib/clang/3.x.0
+                get_library_path_cmd = [clang_binary, "-print-file-name="]
+                output = subprocess.check_output(get_library_path_cmd).decode('utf8').strip()
+                if output:
+                    # libclang.dylib can be found in the lib folder of the path
+                    # returned above, so we need to go two levels up.
+                    libclang_dir = os.path.join(output, "..", "..")
+                    if os.path.isdir(libclang_dir):
+                        log.info(" setting libclang library dir to %s" % libclang_dir)
+                        cindex.Config.set_library_path(libclang_dir)
+
             Completer.tu_module = cindex.TranslationUnit
             # check if we can build an index. If not, set valid to false
             try:

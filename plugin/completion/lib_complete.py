@@ -59,6 +59,17 @@ class Completer(BaseCompleter):
 
         # initialize cindex
         if self.version_str in cindex_dict:
+            try:
+                # should work if python bindings are installed
+                cindex = importlib.import_module("clang.cindex")
+            except Exception as e:
+                # should work for other cases
+                log.warning(" cannot get default cindex with error: %s", e)
+                log.warning(" using bundled one: %s",
+                            cindex_dict[self.version_str])
+                cindex = importlib.import_module(
+                    cindex_dict[self.version_str])
+
             if platform.system() == "Darwin":
                 # Try to figure out the base path for this installation of clang.
                 # This will return something like /.../lib/clang/3.x.0
@@ -71,17 +82,6 @@ class Completer(BaseCompleter):
                     if os.path.isdir(libclang_dir):
                         log.info(" setting libclang library dir to %s" % libclang_dir)
                         cindex.Config.set_library_path(libclang_dir)
-            try:
-                # should work if python bindings are installed
-                cindex = importlib.import_module("clang.cindex")
-            except Exception as e:
-                # should work for other cases
-                log.warning(" cannot get default cindex with error: %s", e)
-                log.warning(" using bundled one: %s",
-                            cindex_dict[self.version_str])
-                cindex = importlib.import_module(
-                    cindex_dict[self.version_str])
-
 
             Completer.tu_module = cindex.TranslationUnit
             # check if we can build an index. If not, set valid to false

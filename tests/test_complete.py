@@ -16,7 +16,8 @@ def has_libclang():
         if platform.system() == "Darwin":
             return True
         if platform.system() == "Linux":
-            return True
+            # FIXME: disable linux libclang for now
+            return False
         return False
 
 class test_complete_command(TestCase):
@@ -107,10 +108,65 @@ class test_complete_command(TestCase):
                        settings=settings)
         self.assertTrue(completer.exists_for_view(self.view.id()))
 
+    def test_init_completer_lib(self):
+        """Test that completer is properly initialized
+
+        """
+        if not has_libclang():
+            return
+        settings = Settings()
+        current_folder = path.dirname(self.view.file_name())
+        parent_folder = path.dirname(current_folder)
+        include_dirs = settings.populate_include_dirs(
+            file_current_folder=current_folder,
+            file_parent_folder=parent_folder)
+        completer = Completer("clang++")
+        completer.init(view=self.view,
+                       includes=include_dirs,
+                       settings=settings)
+        self.assertTrue(completer.exists_for_view(self.view.id()))
+
     def test_complete(self):
         """Test autocompletion for user type
 
         """
+        file_name = path.join(path.dirname(__file__), 'test.cpp')
+        self.view = sublime.active_window().open_file(file_name)
+        while self.view.is_loading():
+            time.sleep(0.1)
+        # now the file should be ready
+        settings = Settings()
+        current_folder = path.dirname(self.view.file_name())
+        parent_folder = path.dirname(current_folder)
+        include_dirs = settings.populate_include_dirs(
+            file_current_folder=current_folder,
+            file_parent_folder=parent_folder)
+        completer = Completer("clang++")
+        completer.init(view=self.view,
+                       includes=include_dirs,
+                       settings=settings)
+        self.assertTrue(completer.exists_for_view(self.view.id()))
+        self.assertEqual(self.getRow(5), "  a.")
+        pos = self.view.text_point(5, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
+        completer.complete(self.view, pos, settings.errors_on_save)
+        counter = 0
+        while not completer.async_completions_ready:
+            time.sleep(0.1)
+            counter += 1
+            if counter > 20:
+                break
+        self.assertIsNotNone(completer.completions)
+        expected = ['a\tint a', 'a']
+        self.assertTrue(expected in completer.completions)
+
+    def test_complete_lib(self):
+        """Test autocompletion for user type
+
+        """
+        if not has_libclang():
+            return
         file_name = path.join(path.dirname(__file__), 'test.cpp')
         self.view = sublime.active_window().open_file(file_name)
         while self.view.is_loading():

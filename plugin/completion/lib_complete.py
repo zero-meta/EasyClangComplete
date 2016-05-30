@@ -68,8 +68,10 @@ class Completer(BaseCompleter):
                 cindex = importlib.import_module(
                     cindex_dict[self.version_str])
 
-            if platform.system() == "Darwin":
-                # Try to figure out the base path for this installation of clang.
+            # If we are on OS X and haven't already initialized the clang Python
+            # bindings, try to figure out the base path for this installation of
+            # clang.
+            if platform.system() == "Darwin" and not cindex.Config.loaded:
                 # This will return something like /.../lib/clang/3.x.0
                 get_library_path_cmd = [clang_binary, "-print-file-name="]
                 output = subprocess.check_output(get_library_path_cmd).decode('utf8').strip()

@@ -3,6 +3,7 @@
 import sublime
 import sys
 import time
+import platform
 from os import path
 from unittest import TestCase
 

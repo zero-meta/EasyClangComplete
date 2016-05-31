@@ -16,6 +16,7 @@ import tempfile
 from os import path
 
 from .. import error_vis
+from ..tools import Tools
 from .base_complete import BaseCompleter
 
 log = logging.getLogger(__name__)
@@ -123,6 +124,11 @@ class Completer(BaseCompleter):
             settings (Settings): plugin settings
 
         """
+
+        # Return early if this is an invalid view.
+        if not Tools.is_valid_view(view):
+            return
+
         self.flags_dict[view.id()] = None
         file_name = view.file_name()
         file_folder = path.dirname(file_name)

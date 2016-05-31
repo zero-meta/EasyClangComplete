@@ -129,6 +129,11 @@ class Completer(BaseCompleter):
             settings (Settings): plugin settings
 
         """
+
+        # Return early if this is an invalid view.
+        if not Tools.is_valid_view(view):
+            return
+
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
         file_folder = path.dirname(file_name)

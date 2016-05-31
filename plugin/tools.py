@@ -3,12 +3,25 @@
 Attributes:
     log (TYPE): Description
     PKG_NAME (str): this package name
+    OSX_CLANG_VERSION_DICT (dict): mapping from version number of OSX clang
+        to the one of llvm clang.
+        Taken from here: https://gist.github.com/yamaya/2924292
 """
 import os.path as path
 import logging
 import re
 
 PKG_NAME = path.basename(path.dirname(path.dirname(__file__)))
+
+OSX_CLANG_VERSION_DICT = {
+    '4.2':'3.2',
+    '5.0':'3.3',
+    '5.1':'3.4',
+    '6.0':'3.5',
+    '6.1':'3.6',
+    '7.0':'3.7',
+    '7.3':'3.8'
+}
 
 log = logging.getLogger(__name__)
 

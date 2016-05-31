@@ -61,14 +61,13 @@ class BaseCompleter:
         found = version_regex.search(output_text)
         self.version_str = found.group()
         if self.version_str > "3.8" and platform.system() == "Darwin":
-            # to the best of my knowledge this is the last one available on macs
-            # but it is a hack, yes
-            reported_version_str = self.version_str
-            self.version_str = "3.5"
+            # info from this table: https://gist.github.com/yamaya/2924292
+            osx_version = self.version_str
+            self.version_str = Tools.OSX_CLANG_VERSION_DICT[osx_version]
             info = {"platform": platform.system()}
             log.warning(
-                " Wrong version %s reported. Reducing it to %s. Info: %s",
-                reported_version_str, self.version_str, info)
+                " OSX version %s reported. Reducing it to %s. Info: %s",
+                osx_version, self.version_str, info)
         log.info(" Found clang version: %s", self.version_str)
         # initialize error visuzlization
         self.error_vis = error_vis.CompileErrors()

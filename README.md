@@ -10,6 +10,7 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 [![Sublime Text 3](https://img.shields.io/badge/Sublime%20Text-3-green.svg)](https://www.sublimetext.com/3)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2QLY7J4Q944HS)
+[![Gitter](https://badges.gitter.im/niosus/EasyClangComplete.svg)](https://gitter.im/niosus/EasyClangComplete?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++
 for Sublime Text 3.

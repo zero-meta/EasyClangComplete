@@ -16,8 +16,7 @@ def has_libclang():
         if platform.system() == "Darwin":
             return True
         if platform.system() == "Linux":
-            # FIXME: disable linux libclang for now
-            return False
+            return True
         return False
 
 class base_test_complete(object):

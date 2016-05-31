@@ -3609,11 +3609,10 @@ class Config:
         else:
             # Does the right thing on Linux and MacOS X
             filename = ctypes.util.find_library('clang')
-
             # On Ubuntu, find_library fails and returns None
-            # this will break loading below so replace with libclang.so
+            # this will break loading below so replace with hardcoded
             if filename is None:
-                return 'libclang.so'
+                return 'libclang-3.8.so.1'
 
         if Config.library_path:
             filename = Config.library_path + '/' + filename

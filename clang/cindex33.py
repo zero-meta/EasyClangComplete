@@ -3204,6 +3204,8 @@ class Config:
 
         if name == 'Windows':
             filename = 'libclang.dll'
+        elif name == 'Darwin':
+            filename = 'libclang.dylib'
         else:
             # Does the right thing on Linux and MacOS X
             filename = ctypes.util.find_library('clang')

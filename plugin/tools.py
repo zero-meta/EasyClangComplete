@@ -96,6 +96,20 @@ class Tools:
         return False
 
     @staticmethod
+    def is_valid_view(view):
+        """
+        Check whether the given view is one we can and want to handle.
+
+        Args:
+            view (sublime.View): view to check
+
+        Returns:
+            bool: True if we want to handle this view, False otherwise
+        """
+
+        return Tools.has_valid_syntax(view) and view.file_name()
+
+    @staticmethod
     def has_valid_extension(view):
         """Test if the current file has a valid extension
 

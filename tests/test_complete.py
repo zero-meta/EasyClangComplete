@@ -182,6 +182,24 @@ class base_test_complete(object):
         expected = ['begin\titerator begin()', 'begin()']
         self.assertIn(expected, completer.completions)
 
+    def test_unsaved_views(self):
+        """ Test that we gracefully handle unsaved views. """
+        # Construct an unsaved scratch view.
+        self.view = sublime.active_window().new_file()
+        self.view.set_scratch(True)
+
+        # Manually set up a completer.
+        settings = Settings()
+        clang_binary = settings.clang_binary
+        completer = self.Completer(clang_binary)
+        completer.init(
+            view=self.view,
+            includes=[],
+            settings=settings)
+
+        # Verify that the completer ignores the scratch view.
+        self.assertFalse(completer.exists_for_view(self.view.id()))
+
 # Define the actual test class implementations.
 class test_bin_complete(base_test_complete, TestCase):
     """ Test class for the binary based completer. """

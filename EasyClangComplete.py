@@ -84,7 +84,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         """
         log.debug(" on_activated_async view id %s", view.id())
-        if Tools.has_valid_syntax(view):
+        if Tools.is_valid_view(view):
             if completer.exists_for_view(view.id()):
                 log.debug(" view %s, already has a completer", view.id())
                 return
@@ -106,7 +106,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
-        if Tools.has_valid_syntax(view):
+        if Tools.is_valid_view(view):
             (row, _) = SublBridge.cursor_pos(view)
             completer.error_vis.show_popup_if_needed(view, row)
 
@@ -118,7 +118,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
         """
         log.debug(" on_modified_async view id %s", view.id())
-        if Tools.has_valid_syntax(view):
+        if Tools.is_valid_view(view):
             completer.error_vis.clear(view)
 
     @staticmethod
@@ -130,7 +130,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         """
         log.debug(" saving view: %s", view.id())
-        if Tools.has_valid_syntax(view):
+        if Tools.is_valid_view(view):
             completer.error_vis.erase_regions(view)
             completer.update(view, settings.errors_on_save)
 
@@ -143,7 +143,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         """
         log.debug(" closing view %s", view.id())
-        if Tools.has_valid_syntax(view):
+        if Tools.is_valid_view(view):
             completer.remove(view.id())
 
     @staticmethod
@@ -162,7 +162,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if view.is_scratch():
             return None
 
-        if not Tools.has_valid_syntax(view):
+        if not Tools.is_valid_view(view):
             return None
 
         if completer.async_completions_ready:

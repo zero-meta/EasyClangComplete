@@ -283,6 +283,10 @@ class Completer(BaseCompleter):
             contents = ''
             place_holders = 1
             for chunk in c.string:
+                if not chunk:
+                    continue
+                if not chunk.spelling:
+                    continue
                 hint += chunk.spelling
                 if chunk.isKindTypedText():
                     trigger = chunk.spelling

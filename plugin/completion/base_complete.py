@@ -13,7 +13,7 @@ from os import path
 from os import listdir
 
 from .. import error_vis
-from ..tools import Tools
+from .. import tools
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ class BaseCompleter:
         if self.version_str > "3.8" and platform.system() == "Darwin":
             # info from this table: https://gist.github.com/yamaya/2924292
             osx_version = self.version_str
-            self.version_str = Tools.OSX_CLANG_VERSION_DICT[osx_version]
+            self.version_str = tools.OSX_CLANG_VERSION_DICT[osx_version]
             info = {"platform": platform.system()}
             log.warning(
                 " OSX version %s reported. Reducing it to %s. Info: %s",

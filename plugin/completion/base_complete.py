@@ -13,6 +13,7 @@ from os import path
 from os import listdir
 
 from .. import error_vis
+from ..tools import Tools
 
 log = logging.getLogger(__name__)
 

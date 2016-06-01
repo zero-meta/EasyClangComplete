@@ -11,8 +11,8 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 [![Build status][img-appveyor]][appveyor]
 [![Codacy Badge][img-codacy]][codacy]
 [![MIT licensed][img-mit]](./LICENSE)
-[![Donate][img-donate]][donate-paypal]
 [![Gitter][img-gitter]][gitter]
+[![Donate][img-donate]][donate-paypal]
 
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++
 for Sublime Text 3.

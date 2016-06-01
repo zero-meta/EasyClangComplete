@@ -78,15 +78,15 @@ The plugin has two modes:
 
 - one that uses `libclang` with its python bindings. This is the better method
   as it fully utilizes saving compilation database which makes your completions
-  blazingly fast. Unfortunately it only works for Linux. Please help me to
-  bring it to other platforms if you know more about Windows or OSX than I do.
-  There is an issue for Windows opened
-  [here](https://github.com/niosus/EasyClangComplete/issues/4).
+  blazingly fast. It is a default method for Linux and OSX. It is also unit
+  tested to complete STL functions on both platforms. Please help me to bring
+  it to Windows. Check out this
+  [discussion](https://github.com/niosus/EasyClangComplete/issues/4).
 - `clang -Xclang -code-completion-at` run from the command line. The plugin
   parses the output from a process that runs the above command. This is the
-  default method for Windows and OSX. Tested on all platforms (see
-  [Testing](#tests) part). Slower than method with `libclang`. Will be
-  deprecated when we solve issue #4.
+  default method for Windows. Tested on all platforms (see [Testing](#tests)
+  part). Slower than method with `libclang`. Will be deprecated when we solve
+  issue #4.
 
 This plugin is intended to be easy to use. It should autocomplete STL out of
 the box and you should just add the folders your project uses to `include_dirs`
@@ -163,6 +163,11 @@ The trick with multiple `clang.cindex` files is inspired by this repo:
 If you are an experienced python developer and find that something in my code
 sucks completely - **DO** tell me. Python is not my main language and I am
 always willing to learn.
+
+Some functionality is there only because of the help of the following users:
+
+- @Ventero for fixing `libclang` search on OSX
+- @riazanovskiy for hints on `clang-3.8`
 
 ## Tests ##
 I have tried to cover most crucial functionality with unit tests using

@@ -3112,7 +3112,7 @@ class Config:
             # On Ubuntu, find_library fails and returns None
             # this will break loading below so replace with hardcoded
             if filename is None:
-                return 'libclang-3.2.so.1'
+                return 'libclang.so'
 
         if Config.library_path:
             filename = Config.library_path + '/' + filename

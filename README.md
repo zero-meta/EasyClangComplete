@@ -4,13 +4,15 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 
 ![Example](autocomplete_show_off.gif)
 
-[![Build Status](https://travis-ci.org/niosus/EasyClangComplete.svg?branch=master)](https://travis-ci.org/niosus/EasyClangComplete)
-[![Build status](https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true)](https://ci.appveyor.com/project/niosus/easyclangcomplete/branch/master)
-[![Codacy Badge](https://goo.gl/PDVYTj)](https://goo.gl/h52rHl)
-[![Sublime Text 3](https://img.shields.io/badge/Sublime%20Text-3-green.svg)](https://www.sublimetext.com/3)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2QLY7J4Q944HS)
-[![Gitter](https://badges.gitter.im/niosus/EasyClangComplete.svg)](https://gitter.im/niosus/EasyClangComplete?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Release][img-release]][release]
+[![Downloads][img-downloads]][downloads]
+
+[![Build Status][img-travis]][travis]
+[![Build status][img-appveyor]][appveyor]
+[![Codacy Badge][img-codacy]][codacy]
+[![MIT licensed][img-mit]](./LICENSE)
+[![Donate][img-donate]][donate-paypal]
+[![Gitter][img-gitter]][gitter]
 
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++
 for Sublime Text 3.
@@ -177,3 +179,22 @@ binary. To check out the current status click on relevant badge below:
 
 - [![Build Status](https://travis-ci.org/niosus/EasyClangComplete.svg?branch=master)](https://travis-ci.org/niosus/EasyClangComplete) - Linux/OSX
 - [![Build status](https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true)](https://ci.appveyor.com/project/niosus/easyclangcomplete/branch/master) - Windows
+
+[release]: https://github.com/niosus/EasyClangComplete/releases
+[downloads]: https://packagecontrol.io/packages/EasyClangComplete
+[travis]: https://travis-ci.org/niosus/EasyClangComplete
+[appveyor]: https://ci.appveyor.com/project/niosus/easyclangcomplete/branch/master
+[codacy]: https://goo.gl/h52rHl
+[gitter]: https://gitter.im/niosus/EasyClangComplete?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+[donate-paypal]: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2QLY7J4Q944HS
+
+
+[img-appveyor]: https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true
+[img-travis]: https://travis-ci.org/niosus/EasyClangComplete.svg?branch=master
+[img-codacy]: https://goo.gl/PDVYTj
+[img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?maxAge=3600
+[img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600
+[img-subl]: https://img.shields.io/badge/Sublime%20Text-3-green.svg
+[img-mit]: https://img.shields.io/badge/license-MIT-blue.svg
+[img-donate]: https://img.shields.io/badge/Donate-PayPal-green.svg
+[img-gitter]: https://badges.gitter.im/niosus/EasyClangComplete.svg

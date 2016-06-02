@@ -12,10 +12,11 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 [![Codacy Badge][img-codacy]][codacy]
 [![MIT licensed][img-mit]](./LICENSE)
 [![Gitter][img-gitter]][gitter]
-[![Donate][img-donate]][donate-paypal]
 
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++
-for Sublime Text 3.
+for Sublime Text 3. [Support](#support-it) it if you like it.
+
+
 
 # Jump right in! #
 Follow all the following steps to ensure the plugin works as expected!
@@ -180,6 +181,13 @@ binary. To check out the current status click on relevant badge below:
 - [![Build Status](https://travis-ci.org/niosus/EasyClangComplete.svg?branch=master)](https://travis-ci.org/niosus/EasyClangComplete) - Linux/OSX
 - [![Build status](https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true)](https://ci.appveyor.com/project/niosus/easyclangcomplete/branch/master) - Windows
 
+# Support it! #
+[![Flattr this git repo][img-flattr]][donate-flattr]
+[![Donate][img-paypal]][donate-paypal]
+Current sponsor of this project is my sleep.
+Please buy me a cup of tea if you appreciate the effort.
+
+
 [release]: https://github.com/niosus/EasyClangComplete/releases
 [downloads]: https://packagecontrol.io/packages/EasyClangComplete
 [travis]: https://travis-ci.org/niosus/EasyClangComplete
@@ -187,6 +195,7 @@ binary. To check out the current status click on relevant badge below:
 [codacy]: https://goo.gl/h52rHl
 [gitter]: https://gitter.im/niosus/EasyClangComplete?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
 [donate-paypal]: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2QLY7J4Q944HS
+[donate-flattr]: https://flattr.com/submit/auto?user_id=niosus&url=https://github.com/niosus/EasyClangComplete&title=EasyClangComplete&language=Python&tags=github&category=software
 
 
 [img-appveyor]: https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true
@@ -196,5 +205,6 @@ binary. To check out the current status click on relevant badge below:
 [img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600
 [img-subl]: https://img.shields.io/badge/Sublime%20Text-3-green.svg
 [img-mit]: https://img.shields.io/badge/license-MIT-blue.svg
-[img-donate]: https://img.shields.io/badge/Donate-PayPal-green.svg
+[img-paypal]: https://img.shields.io/badge/Donate-PayPal-blue.svg
+[img-flattr]: https://img.shields.io/badge/Donate-Flattr-blue.svg
 [img-gitter]: https://badges.gitter.im/niosus/EasyClangComplete.svg

@@ -184,6 +184,7 @@ binary. To check out the current status click on relevant badge below:
 # Support it! #
 [![Flattr this git repo][img-flattr]][donate-flattr]
 [![Donate][img-paypal]][donate-paypal]
+
 Current sponsor of this project is my sleep.
 Please buy me a cup of tea if you appreciate the effort.
 

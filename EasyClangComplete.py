@@ -35,6 +35,7 @@ imp.reload(bin_complete)
 
 from .plugin.tools import SublBridge
 from .plugin.tools import Tools
+from .plugin.tools import PosStatus
 
 # unfortunately because of how subl initializes the plugins I cannot move these
 # inside of some class.
@@ -170,8 +171,12 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return (completer.completions, sublime.INHIBIT_WORD_COMPLETIONS)
 
         # Verify that character under the cursor is one allowed trigger
-        if not Tools.needs_autocompletion(locations[0], view, settings):
-            # send None and show completions from other plugins if available
+        pos_status = Tools.get_position_status(locations[0], view, settings)
+        if pos_status == PosStatus.WRONG_TRIGGER:
+            # we are at a wrong trigger, remove all completion from the list
+            return ([], sublime.INHIBIT_WORD_COMPLETIONS)
+        if pos_status == PosStatus.COMPLETION_NOT_NEEDED:
+            # there is no need to comlete, but let's show sublime completions
             return None
 
         log.debug(" starting async auto_complete at pos: %s", locations[0])

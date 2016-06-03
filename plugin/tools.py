@@ -1,4 +1,4 @@
-"""This moducle contains various tools
+"""This module contains various tools
 
 Attributes:
     log (TYPE): Description
@@ -64,17 +64,31 @@ class SublBridge:
         line = view.line(point_on_next_line)
         return view.substr(line)
 
+class PosStatus:
+        """Enum class for position status
+
+        Attributes:
+            COMPLETION_NEEDED (int): completion needed
+            COMPLETION_NOT_NEEDED (int): completion not needed
+            WRONG_TRIGGER (int): trigger is wrong
+        """
+        COMPLETION_NEEDED = 0
+        COMPLETION_NOT_NEEDED = 1
+        WRONG_TRIGGER = 2
+
 class Tools:
     """just a bunch of helpful tools to unclutter main file
 
     Attributes:
         syntax_regex (regex): regex to parse syntax setting
         valid_extensions (list): list of valid extentions for autocompletion
+        valid_syntax (list): list of valid syntax for autocompletion
     """
 
     syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
     valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
+    valid_synax = ["C", "C++"]
 
     @staticmethod
     def get_view_syntax(view):
@@ -103,7 +117,7 @@ class Tools:
             bool: True if valid, False otherwise
         """
         syntax = Tools.get_view_syntax(view)
-        if syntax in ["C", "C++"]:
+        if syntax in Tools.valid_synax:
             log.debug(" file has valid syntax: `%s`", syntax)
             return True
         return False
@@ -140,7 +154,7 @@ class Tools:
         return False
 
     @staticmethod
-    def needs_autocompletion(point, view, settings):
+    def get_position_status(point, view, settings):
         """Check if the cursor focuses a valid trigger
 
         Args:
@@ -149,30 +163,36 @@ class Tools:
             settings (TYPE): Description
 
         Returns:
-            bool: trigger is valid
+            PosStatus: statuf for this position
         """
         if settings.complete_all:
-            return True
-
+            return PosStatus.COMPLETION_NEEDED
         trigger_length = 1
-
-        current_char = view.substr(point - trigger_length)
-
-        if current_char == '>':
-            trigger_length = 2
-            if view.substr(point - trigger_length) != '-':
-                return False
-        if current_char == ':':
-            trigger_length = 2
-            if view.substr(point - trigger_length) != ':':
-                return False
 
         word_on_the_left = view.substr(view.word(point - trigger_length))
         if word_on_the_left.isdigit():
             # don't autocomplete digits
-            return False
+            log.debug(" trying to autocomplete digit, are we? Not allowed.")
+            return PosStatus.WRONG_TRIGGER
 
+        # slightly conterintuitive `substr` returns ONE character to the right
+        # of given point.
+        curr_char = view.substr(point - trigger_length)
+        wrong_trigger_found = False
         for trigger in settings.triggers:
-            if current_char in trigger:
-                return True
-        return False
+            # compare to the last char of a trigger
+            if curr_char == trigger[-1]:
+                trigger_length = len(trigger)
+                prev_char = view.substr(point - trigger_length)
+                if prev_char == trigger[0]:
+                    log.debug( " matched trigger '%s'.", trigger)
+                    return PosStatus.COMPLETION_NEEDED
+                else:
+                    log.debug( " wrong trigger '%s%s'.", prev_char, curr_char)
+                    wrong_trigger_found = True
+        if wrong_trigger_found:
+            log.debug( " wrong trigger fired")
+            return PosStatus.WRONG_TRIGGER
+        # if nothing fired we don't need to do anything
+        log.debug( " no completions needed")
+        return PosStatus.COMPLETION_NOT_NEEDED

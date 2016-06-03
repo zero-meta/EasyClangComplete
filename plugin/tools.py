@@ -1,11 +1,11 @@
 """This module contains various tools
 
 Attributes:
-    log (TYPE): Description
-    PKG_NAME (str): this package name
+    log (logging): logger for this module
     OSX_CLANG_VERSION_DICT (dict): mapping from version number of OSX clang
         to the one of llvm clang.
         Taken from here: https://gist.github.com/yamaya/2924292
+    PKG_NAME (str): this package name
 """
 import os.path as path
 import logging
@@ -14,19 +14,21 @@ import re
 PKG_NAME = path.basename(path.dirname(path.dirname(__file__)))
 
 OSX_CLANG_VERSION_DICT = {
-    '4.2':'3.2',
-    '5.0':'3.3',
-    '5.1':'3.4',
-    '6.0':'3.5',
-    '6.1':'3.6',
-    '7.0':'3.7',
-    '7.3':'3.8'
+    '4.2': '3.2',
+    '5.0': '3.3',
+    '5.1': '3.4',
+    '6.0': '3.5',
+    '6.1': '3.6',
+    '7.0': '3.7',
+    '7.3': '3.8'
 }
 
 log = logging.getLogger(__name__)
 
+
 class SublBridge:
-    """A small help class that bridges with sublime (maybe will grow)
+
+    """ A small help class that bridges with sublime (maybe will grow)
     """
 
     @staticmethod
@@ -64,31 +66,38 @@ class SublBridge:
         line = view.line(point_on_next_line)
         return view.substr(line)
 
-class PosStatus:
-        """Enum class for position status
 
-        Attributes:
-            COMPLETION_NEEDED (int): completion needed
-            COMPLETION_NOT_NEEDED (int): completion not needed
-            WRONG_TRIGGER (int): trigger is wrong
-        """
-        COMPLETION_NEEDED = 0
-        COMPLETION_NOT_NEEDED = 1
-        WRONG_TRIGGER = 2
+class PosStatus:
+
+    """ Enum class for position status
+
+    Attributes:
+        COMPLETION_NEEDED (int): completion needed
+        COMPLETION_NOT_NEEDED (int): completion not needed
+        WRONG_TRIGGER (int): trigger is wrong
+    """
+    COMPLETION_NEEDED = 0
+    COMPLETION_NOT_NEEDED = 1
+    WRONG_TRIGGER = 2
+
 
 class Tools:
-    """just a bunch of helpful tools to unclutter main file
+
+    """ just a bunch of helpful tools to unclutter main file
 
     Attributes:
         syntax_regex (regex): regex to parse syntax setting
         valid_extensions (list): list of valid extentions for autocompletion
+        valid_synax (list): Description
+
+    Deleted Attributes:
         valid_syntax (list): list of valid syntax for autocompletion
     """
 
     syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
     valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
-    valid_synax = ["C", "C++"]
+    valid_syntax = ["C", "C++"]
 
     @staticmethod
     def get_view_syntax(view):
@@ -117,7 +126,7 @@ class Tools:
             bool: True if valid, False otherwise
         """
         syntax = Tools.get_view_syntax(view)
-        if syntax in Tools.valid_synax:
+        if syntax in Tools.valid_syntax:
             log.debug(" file has valid syntax: `%s`", syntax)
             return True
         return False
@@ -185,14 +194,14 @@ class Tools:
                 trigger_length = len(trigger)
                 prev_char = view.substr(point - trigger_length)
                 if prev_char == trigger[0]:
-                    log.debug( " matched trigger '%s'.", trigger)
+                    log.debug(" matched trigger '%s'.", trigger)
                     return PosStatus.COMPLETION_NEEDED
                 else:
-                    log.debug( " wrong trigger '%s%s'.", prev_char, curr_char)
+                    log.debug(" wrong trigger '%s%s'.", prev_char, curr_char)
                     wrong_trigger_found = True
         if wrong_trigger_found:
-            log.debug( " wrong trigger fired")
+            log.debug(" wrong trigger fired")
             return PosStatus.WRONG_TRIGGER
         # if nothing fired we don't need to do anything
-        log.debug( " no completions needed")
+        log.debug(" no completions needed")
         return PosStatus.COMPLETION_NOT_NEEDED

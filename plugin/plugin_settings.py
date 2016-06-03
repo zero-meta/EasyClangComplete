@@ -26,13 +26,20 @@ class Settings:
         include_dirs (string[]): array of directories with headers
         include_file_folder (bool): if true, current location -> 'include_dirs'
         include_parent_folder (bool): if true, parent -> 'include_dirs'
+        project_base_folder (str): root folder of current project
+        project_base_name (str): name of the current project
+        project_specific_settings (TYPE): use project-specific settings
         search_clang_complete (bool): if true search for '.clang_complete'
-                                        file up the tree
+            file up the tree
         std_flag (string): flag of the c++ std library, e.g. -std=c++11
         subl_settings (sublime.settings): link to sublime text settings dict
         triggers (string[]): triggers that trigger autocompletion
-        use_libclang (TYPE): Description
+        use_libclang (bool): use libclang instead of parsing binary output
         verbose (bool): verbose flag
+        autoset_triggers(bool): match sublime autocompletion triggers to the
+            ones defined by this plugin
+
+        SELECTOR (str): selector for completions of this plugin
     """
 
     subl_settings = None
@@ -48,6 +55,9 @@ class Settings:
     search_clang_complete = None
     errors_on_save = None
     use_libclang = None
+    autoset_triggers = None
+
+    SELECTOR = "source.c++, source.c - string - comment - constant.numeric"
 
     def __init__(self):
         """Initialize the class.
@@ -76,6 +86,8 @@ class Settings:
         self.include_file_folder = self.subl_settings.get(
             "include_file_folder")
         self.triggers = self.subl_settings.get("triggers")
+        self.autoset_triggers = self.subl_settings.get(
+            "auto_set_sublime_triggers")
         self.include_dirs = self.subl_settings.get("include_dirs")
         self.clang_binary = self.subl_settings.get("clang_binary")
         self.errors_on_save = self.subl_settings.get("errors_on_save")
@@ -100,6 +112,10 @@ class Settings:
         if self.std_flag is None:
             self.std_flag = "-std=c++11"
             log.debug(" set std_flag to default: %s", self.std_flag)
+
+        if self.autoset_triggers:
+            # update sublime triggers to match ones from this plugin
+            self.set_sublime_triggers()
 
     def get_project_clang_flags(self):
         """Get clang flags for the current project
@@ -193,6 +209,9 @@ class Settings:
         if self.project_specific_settings is None:
             log.critical(" no use_project_specific_settings setting found")
             return False
+        if self.autoset_triggers is None:
+            log.critical(" no auto_set_sublime_triggers setting found")
+            return False
         return True
 
     def populate_include_dirs(self, file_current_folder, file_parent_folder):
@@ -229,3 +248,38 @@ class Settings:
         # print resulting include dirs
         log.debug(" include_dirs = %s", include_dirs)
         return include_dirs
+
+    def set_sublime_triggers(self):
+        """
+        Set triggers for autocompletion into User Preferences. These triggers
+        will match the last characters of triggers defined in this package.
+
+        """
+        trigger_endings = ''
+        for trigger in self.triggers:
+            # add last trigger to string
+            trigger_endings += trigger[-1]
+        log.debug(" all triggers endings: '%s'", trigger_endings)
+        s = sublime.load_settings("Preferences.sublime-settings")
+        existing_triggers = s.get('auto_complete_triggers')
+        log.debug(" existing triggers: %s", existing_triggers)
+        matching_trigger = -1
+        for i, existing_trigger in enumerate(existing_triggers):
+            if existing_trigger['selector'] == Settings.SELECTOR:
+                log.debug(" triggers already present")
+                matching_trigger = i
+                break
+        # construct new triggers
+        new_triggers = {
+            'characters': trigger_endings,
+            'selector': Settings.SELECTOR
+        }
+        if matching_trigger < 0:
+            log.debug(" appending new triggers")
+            existing_triggers.append(new_triggers)
+        else:
+            log.debug(" updating triggers[%s]", matching_trigger)
+            existing_triggers[matching_trigger] = new_triggers
+        log.debug(" new triggers %s", existing_triggers)
+        s.set('auto_complete_triggers', existing_triggers)
+        sublime.save_settings("Preferences.sublime-settings")

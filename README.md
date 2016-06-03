@@ -16,8 +16,6 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++
 for Sublime Text 3. [Support](#support-it) it if you like it.
 
-
-
 # Jump right in! #
 Follow all the following steps to ensure the plugin works as expected!
 
@@ -31,11 +29,11 @@ Follow all the following steps to ensure the plugin works as expected!
 
 ## Install clang ##
 - **Ubuntu**: `sudo apt-get install clang`
-- **Other Linux**: use your package manager or install from `clang`
-  [website](http://llvm.org/releases/download.html)
 - **Windows**: install the latest release from `clang`
   [website](http://llvm.org/releases/download.html)
 - **OSX**: ships `clang` by default. You are all set!
+- on other systems refer to their package managers or install from `clang`
+  [website](http://llvm.org/releases/download.html)
 
 ## Configure your includes ##
 `Clang` will automatically search for headers in the folder that contains the
@@ -56,20 +54,6 @@ to do it. Pick any of the following:
     file.
   + absolute paths start with `/`. All the others are treated as relative.
 
-## Configure completion triggers ##
-Add this to your `User Settings`:
-```json
-"auto_complete_triggers":
-[
-    {
-        "characters": ".:>",
-        "selector": "source.c++ - string - comment - constant.numeric"
-    }
-],
-```
-It will ensure that Sublime Text will try to autocomplete your code when you
-type `.`, `:` or `>`. The plugin will then ensure that completions are
-triggered only when `.`, `::` or `->` are typed.
 ## You're good to go! ##
 
 # More on the plugin #

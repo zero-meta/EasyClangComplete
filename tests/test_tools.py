@@ -6,11 +6,17 @@ Attributes:
 """
 import sublime
 import sys
+import time
+from os import path
 from unittest import TestCase
 
 easy_clang_complete = sys.modules["EasyClangComplete"]
 
+sys.path.append(path.dirname(path.dirname(__file__)))
+Settings = easy_clang_complete.plugin.plugin_settings.Settings
 SublBridge = easy_clang_complete.plugin.tools.SublBridge
+Tools = easy_clang_complete.plugin.tools.Tools
+PosStatus = easy_clang_complete.plugin.tools.PosStatus
 # for testing sublime command
 
 class test_tools_command(TestCase):
@@ -24,13 +30,30 @@ class test_tools_command(TestCase):
         s = sublime.load_settings("Preferences.sublime-settings")
         s.set("close_windows_when_empty", False)
 
-    def tearDown(self):
-        """Destroy testing environment
+    def setUpView(self, filename):
         """
+        Utility method to set up a view for a given file.
+
+        Args:
+            filename (str): The filename to open in a new view.
+        """
+        # Open the view.
+        file_path = path.join(path.dirname(__file__), filename)
+        self.view = sublime.active_window().open_file(file_path)
+
+        # Ensure it's loaded.
+        while self.view.is_loading():
+            time.sleep(0.1)
+
+    def tearDown(self):
+        """ Cleanup method run after every test. """
+
+        # If we have a view, close it.
         if self.view:
             self.view.set_scratch(True)
             self.view.window().focus_view(self.view)
             self.view.window().run_command("close_file")
+            self.view = None
 
     def setText(self, string):
         """Set text to a view
@@ -96,6 +119,46 @@ class test_tools_command(TestCase):
         self.move(10, forward=False)
         next_line = SublBridge.next_line(self.view)
         self.assertEqual(next_line, "world!")
+
+    def test_wrong_triggers(self):
+        """ Test that we don't complete on numbers and wrong triggers. """
+        self.tearDown()
+        self.setUpView('test_wrong_triggers.cpp')
+        # Load the completions.
+        settings = Settings()
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.getRow(2), "  a > 2.")
+
+        # check that '>' does not trigger completions
+        pos = self.view.text_point(2, 5)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, "> ")
+
+        status = Tools.get_position_status(pos, self.view, settings)
+
+        # Verify that we got the expected completions back.
+        self.assertEqual(status, PosStatus.WRONG_TRIGGER)
+
+        # check that ' >' does not trigger completions
+        pos = self.view.text_point(2, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, " >")
+
+        status = Tools.get_position_status(pos, self.view, settings)
+
+        # Verify that we got the expected completions back.
+        self.assertEqual(status, PosStatus.COMPLETION_NOT_NEEDED)
+
+        # check that '2.' does not trigger completions
+        pos = self.view.text_point(2, 8)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
+
+        status = Tools.get_position_status(pos, self.view, settings)
+
+        # Verify that we got the expected completions back.
+        self.assertEqual(status, PosStatus.WRONG_TRIGGER)
 
 
 class test_tools(TestCase):

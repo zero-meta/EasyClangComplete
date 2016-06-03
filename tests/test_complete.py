@@ -1,4 +1,4 @@
-"""Summary
+"""Tests for autocompletion
 """
 import sublime
 import sys
@@ -13,6 +13,11 @@ from plugin.completion.bin_complete import Completer as CompleterBin
 from plugin.completion.lib_complete import Completer as CompleterLib
 
 def has_libclang():
+        """Ensure libclang tests will run only on platforms that support this.
+
+        Returns:
+            str: row contents
+        """
         if platform.system() == "Darwin":
             return True
         if platform.system() == "Linux":

@@ -113,6 +113,20 @@ I will only cover most important settings here.
 - `triggers`:
     + defaults are `".", "::", "->"`. The autocompletion does not trigger on
       `>` or `:`. It also ignores float numbers like `3.14`.
+- `auto_set_sublime_triggers`:
+    + when `true` (default) will set the `auto_complete_triggers` option for
+      `C` and `C++` in User Preferences to match `triggers` defined in this
+      plugin. Default `characters` will be `.:>`.
+    + you can set these settings manually to:
+    ```json
+    "auto_complete_triggers":
+    [
+        {
+            "characters": ".>:",
+            "selector": "source.c++, source.c - string - comment - constant.numeric"
+        }
+    ],
+    ```
 - `use_project_specific_settings`:
     + when `true` will enforce sublime text to read all flags from project
       settings(`*.sublime-project` -> `settings` -> `clang_flags`). This

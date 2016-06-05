@@ -33,7 +33,7 @@
 	"include_file_folder" : true,
 
 	// add parent folder of the current file's one with `-I` flag
-	"include_file_parent_folder" : false,
+	"include_file_parent_folder" : true,
 
 	// pick the clang binary used by the plugin. This is used to determine the
 	// version of the plugin and pick correct libclang bindings.

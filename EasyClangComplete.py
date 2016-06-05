@@ -161,32 +161,38 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         log.debug(" on_query_completions view id %s", view.id())
         if view.is_scratch():
-            return None
+            return Tools.SHOW_DEFAULT_COMPLETIONS
 
         if not Tools.is_valid_view(view):
-            return None
+            return Tools.SHOW_DEFAULT_COMPLETIONS
 
         if completer.async_completions_ready:
             completer.async_completions_ready = False
-            return (completer.completions, sublime.INHIBIT_WORD_COMPLETIONS)
+            return (completer.completions, sublime.INHIBIT_WORD_COMPLETIONS |
+                    sublime.INHIBIT_EXPLICIT_COMPLETIONS)
 
         # Verify that character under the cursor is one allowed trigger
         pos_status = Tools.get_position_status(locations[0], view, settings)
         if pos_status == PosStatus.WRONG_TRIGGER:
-            # we are at a wrong trigger, remove all completion from the list
-            return ([], sublime.INHIBIT_WORD_COMPLETIONS)
+            # we are at a wrong trigger, remove all completions from the list
+            return Tools.HIDE_DEFAULT_COMPLETIONS
         if pos_status == PosStatus.COMPLETION_NOT_NEEDED:
-            # there is no need to comlete, but let's show sublime completions
-            return None
-
-        log.debug(" starting async auto_complete at pos: %s", locations[0])
+            # show default completions for now if allowed
+            if settings.hide_default_completions:
+                log.debug(" hiding default completions")
+                return Tools.HIDE_DEFAULT_COMPLETIONS
+            return Tools.SHOW_DEFAULT_COMPLETIONS
 
         # create a daemon thread to update the completions
+        log.debug(" starting async auto_complete at pos: %s", locations[0])
         completion_thread = Thread(
             target=completer.complete,
             args=[view, locations[0], settings.errors_on_save])
         completion_thread.deamon = True
         completion_thread.start()
 
-        # show default completions for now
-        return None
+        # show default completions for now if allowed
+        if settings.hide_default_completions:
+            log.debug(" hiding default completions")
+            return Tools.HIDE_DEFAULT_COMPLETIONS
+        return Tools.SHOW_DEFAULT_COMPLETIONS

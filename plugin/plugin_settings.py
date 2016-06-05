@@ -14,7 +14,6 @@ from .tools import PKG_NAME
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
 
-
 class Settings:
 
     """class that encapsulates sublime settings
@@ -56,6 +55,7 @@ class Settings:
     errors_on_save = None
     use_libclang = None
     autoset_triggers = None
+    hide_default_completions = None
 
     SELECTOR = "source.c++, source.c - string - comment - constant.numeric"
 
@@ -97,6 +97,8 @@ class Settings:
             "search_clang_complete_file")
         self.project_specific_settings = self.subl_settings.get(
             "use_project_specific_settings")
+        self.hide_default_completions = self.subl_settings.get(
+            "hide_default_completions")
 
         self.subl_settings.clear_on_change(PKG_NAME)
         self.subl_settings.add_on_change(PKG_NAME, self.on_settings_changed)
@@ -211,6 +213,9 @@ class Settings:
             return False
         if self.autoset_triggers is None:
             log.critical(" no auto_set_sublime_triggers setting found")
+            return False
+        if self.hide_default_completions is None:
+            log.critical(" no hide_default_completions setting found")
             return False
         return True
 

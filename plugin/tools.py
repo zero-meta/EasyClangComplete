@@ -8,6 +8,7 @@ Attributes:
     PKG_NAME (str): this package name
 """
 import os.path as path
+import sublime
 import logging
 import re
 
@@ -88,16 +89,22 @@ class Tools:
     Attributes:
         syntax_regex (regex): regex to parse syntax setting
         valid_extensions (list): list of valid extentions for autocompletion
-        valid_synax (list): Description
+        valid_synax (list): list of valid syntaxes for this plugin
+        SHOW_DEFAULT_COMPLETIONS: `None` to return from `on_query_completions`.
+            This guarantees that sublime text will show default completions.
+        HIDE_DEFAULT_COMPLETIONS: a valud to return from `on_query_completions`.
+            Ensures nothing will be shown apart from the output of this plugin
 
-    Deleted Attributes:
-        valid_syntax (list): list of valid syntax for autocompletion
     """
 
     syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
     valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
     valid_syntax = ["C", "C++"]
+
+    SHOW_DEFAULT_COMPLETIONS = None
+    HIDE_DEFAULT_COMPLETIONS = ([], sublime.INHIBIT_WORD_COMPLETIONS |
+                                sublime.INHIBIT_EXPLICIT_COMPLETIONS)
 
     @staticmethod
     def get_view_syntax(view):

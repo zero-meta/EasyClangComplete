@@ -181,8 +181,6 @@ class Tools:
         Returns:
             PosStatus: statuf for this position
         """
-        if settings.complete_all:
-            return PosStatus.COMPLETION_NEEDED
         trigger_length = 1
 
         word_on_the_left = view.substr(view.word(point - trigger_length))
@@ -191,8 +189,8 @@ class Tools:
             log.debug(" trying to autocomplete digit, are we? Not allowed.")
             return PosStatus.WRONG_TRIGGER
 
-        # slightly conterintuitive `substr` returns ONE character to the right
-        # of given point.
+        # slightly counterintuitive `view.substr` returns ONE character
+        # to the right of given point.
         curr_char = view.substr(point - trigger_length)
         wrong_trigger_found = False
         for trigger in settings.triggers:
@@ -207,8 +205,13 @@ class Tools:
                     log.debug(" wrong trigger '%s%s'.", prev_char, curr_char)
                     wrong_trigger_found = True
         if wrong_trigger_found:
+            # no correct trigger found, vut a wrong one fired instead
             log.debug(" wrong trigger fired")
             return PosStatus.WRONG_TRIGGER
+
+        if settings.complete_all:
+            return PosStatus.COMPLETION_NEEDED
+
         # if nothing fired we don't need to do anything
         log.debug(" no completions needed")
         return PosStatus.COMPLETION_NOT_NEEDED

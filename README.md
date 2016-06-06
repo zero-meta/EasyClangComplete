@@ -176,8 +176,9 @@ I have tried to cover most crucial functionality with unit tests using
 Currently tests cover autocompletion of user struct and stl vector using clang
 binary. To check out the current status click on relevant badge below:
 
-- [![Build Status](https://travis-ci.org/niosus/EasyClangComplete.svg?branch=master)](https://travis-ci.org/niosus/EasyClangComplete) - Linux/OSX
-- [![Build status](https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true)](https://ci.appveyor.com/project/niosus/easyclangcomplete/branch/master) - Windows
+|           Linux / OSX           |               Windows               |
+|:-------------------------------:|:-----------------------------------:|
+| [![Status][img-travis]][travis] | [![Status][img-appveyor]][appveyor] |
 
 # Support it! #
 [![Flattr this git repo][img-flattr]][donate-flattr]

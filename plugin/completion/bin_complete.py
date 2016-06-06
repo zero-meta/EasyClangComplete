@@ -14,9 +14,11 @@ import logging
 import tempfile
 
 from os import path
+from os import makedirs
 
 from .. import error_vis
 from ..tools import Tools
+from ..tools import PKG_NAME
 from .base_complete import BaseCompleter
 
 log = logging.getLogger(__name__)
@@ -183,7 +185,7 @@ class Completer(BaseCompleter):
         row += 1
         col += 1
 
-        tempdir = tempfile.gettempdir()
+        tempdir = Completer.get_temp_dir()
         temp_file_name = path.join(tempdir, path.basename(view.file_name()))
         with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
             tmp_file.write(file_body)
@@ -253,7 +255,7 @@ class Completer(BaseCompleter):
 
         file_body = view.substr(sublime.Region(0, view.size()))
 
-        tempdir = tempfile.gettempdir()
+        tempdir = Completer.get_temp_dir()
         temp_file_name = path.join(tempdir, path.basename(view.file_name()))
         with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
             tmp_file.write(file_body)
@@ -286,6 +288,14 @@ class Completer(BaseCompleter):
         end = time.time()
         log.debug(" rebuilding done in %s seconds", end - start)
         return True
+
+    @staticmethod
+    def get_temp_dir():
+        """ Create a temporary folder if needed and return it """
+        tempdir = path.join(tempfile.gettempdir(), PKG_NAME)
+        if not path.exists(tempdir):
+            makedirs(tempdir)
+        return tempdir
 
     @staticmethod
     def _parse_completions(complete_results):

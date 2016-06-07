@@ -34,6 +34,8 @@ cindex_dict = {
     '3.8': tools.PKG_NAME + ".clang.cindex38",
 }
 
+clang_utils_module_name = tools.PKG_NAME + ".clang.utils"
+
 
 class Completer(BaseCompleter):
 
@@ -66,10 +68,11 @@ class Completer(BaseCompleter):
             log.debug(
                 " using bundled cindex: %s", cindex_dict[self.version_str])
             cindex = importlib.import_module(cindex_dict[self.version_str])
-
-            # If we are on OS X and haven't already initialized the clang Python
-            # bindings, try to figure out the base path for this installation of
-            # clang.
+            # load clang helper class
+            clang_utils = importlib.import_module(clang_utils_module_name)
+            ClangUtils = clang_utils.ClangUtils
+            # If we haven't already initialized the clang Python bindings, try
+            # to figure out the path libclang.
             if not cindex.Config.loaded:
                 # This will return something like /.../lib/clang/3.x.0
                 libclang_dir = ClangUtils.find_libclang_dir(clang_binary)

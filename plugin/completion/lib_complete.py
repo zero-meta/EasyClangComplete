@@ -172,7 +172,7 @@ class Completer(BaseCompleter):
                         clang_complete_file, separate_includes=False)
                     clang_flags += flags
         # now we have the flags and can continue initializing the TU
-        if Tools.get_view_syntax(view) == "C++":
+        if Tools.get_view_syntax(view) != "C":
             # treat this as c++ even if it is a header
             log.debug(" This is a C++ file. Adding `-x c++` to flags")
             clang_flags = ['-x'] + ['c++'] + clang_flags

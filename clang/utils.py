@@ -25,6 +25,17 @@ class ClangUtils:
         return None
 
     @staticmethod
+    def dir_from_output(output):
+        if platform.system() == "Windows":
+            return path.dirname(output)
+        if platform.system() == "Linux":
+            return path.dirname(output)
+        if platform.system() == "Darwin":
+            # [HACK] uh... I'm not sure why it happens like this...
+            return path.join(path.dirname(output), '..', '..')
+        return None
+
+    @staticmethod
     def find_libclang_dir(clang_binary):
         for suffix in ClangUtils.get_suffixes():
             file = None
@@ -38,7 +49,7 @@ class ClangUtils:
                 get_library_path_cmd).decode('utf8').strip()
             log.debug(" libclang search output = '%s'", output)
             if output:
-                libclang_dir = path.dirname(output)
+                libclang_dir = ClangUtils.dir_from_output(output)
                 if path.isdir(libclang_dir):
                     log.info(" found libclang dir: '%s'", libclang_dir)
                     log.info(" found library file: '%s'", file)

@@ -17,6 +17,7 @@ from os import path
 from .. import error_vis
 from .. import tools
 from .base_complete import BaseCompleter
+from ...clang.utils import ClangUtils
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -69,19 +70,11 @@ class Completer(BaseCompleter):
             # If we are on OS X and haven't already initialized the clang Python
             # bindings, try to figure out the base path for this installation of
             # clang.
-            if platform.system() == "Darwin" and not cindex.Config.loaded:
+            if not cindex.Config.loaded:
                 # This will return something like /.../lib/clang/3.x.0
-                get_library_path_cmd = [clang_binary, "-print-file-name="]
-                output = subprocess.check_output(
-                    get_library_path_cmd).decode('utf8').strip()
-                if output:
-                    # libclang.dylib can be found in the lib folder of the path
-                    # returned above, so we need to go two levels up.
-                    libclang_dir = os.path.join(output, "..", "..")
-                    if os.path.isdir(libclang_dir):
-                        log.info(" setting libclang library dir to %s",
-                                 libclang_dir)
-                        cindex.Config.set_library_path(libclang_dir)
+                libclang_dir = ClangUtils.find_libclang_dir(clang_binary)
+                if libclang_dir:
+                    cindex.Config.set_library_path(libclang_dir)
 
             Completer.tu_module = cindex.TranslationUnit
             # check if we can build an index. If not, set valid to false

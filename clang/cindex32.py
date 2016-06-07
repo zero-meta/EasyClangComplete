@@ -3098,24 +3098,12 @@ class Config:
         if Config.library_file:
             return Config.library_file
 
-        import platform
-        import ctypes.util
-        name = platform.system()
-
-        if name == 'Windows':
-            filename = 'libclang.dll'
-        elif name == 'Darwin':
-            filename = 'libclang.dylib'
-        else:
-            # Does the right thing on Linux and MacOS X
-            filename = ctypes.util.find_library('clang')
-            # On Ubuntu, find_library fails and returns None
-            # this will break loading below so replace with hardcoded
-            if filename is None:
-                return 'libclang.so'
+        from .utils import ClangUtils
+        from os import path
+        filename = ClangUtils.libclang_name
 
         if Config.library_path:
-            filename = Config.library_path + '/' + filename
+            filename = path.join(Config.library_path, filename)
 
         return filename
 

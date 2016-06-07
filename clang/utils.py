@@ -38,16 +38,19 @@ class ClangUtils:
     @staticmethod
     def find_libclang_dir(clang_binary):
         for suffix in ClangUtils.get_suffixes():
-            file = None
             # pick a name for a file
-            log.debug(" we are on '%s'", platform.system())
+            log.info(" we are on '%s'", platform.system())
             file = "libclang{}".format(suffix)
-            log.debug(" searching for: '%s'", file)
+            log.info(" searching for: '%s'", file)
             # let's find the library
-            get_library_path_cmd = [clang_binary, "-print-file-name={}".format(file)]
+            if platform.system() == "Darwin":
+                # [HACK]: wtf??? why does it not find libclang.dylib?
+                get_library_path_cmd = [clang_binary, "-print-file-name="]
+            else:
+                get_library_path_cmd = [clang_binary, "-print-file-name={}".format(file)]
             output = subprocess.check_output(
                 get_library_path_cmd).decode('utf8').strip()
-            log.debug(" libclang search output = '%s'", output)
+            log.info(" libclang search output = '%s'", output)
             if output:
                 libclang_dir = ClangUtils.dir_from_output(output)
                 if path.isdir(libclang_dir):

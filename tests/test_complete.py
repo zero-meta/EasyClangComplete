@@ -11,7 +11,7 @@ sys.path.append(path.dirname(path.dirname(__file__)))
 from plugin.plugin_settings import Settings
 from plugin.completion.bin_complete import Completer as CompleterBin
 from plugin.completion.lib_complete import Completer as CompleterLib
-from tools import PKG_NAME
+from plugin.tools import PKG_NAME
 
 def has_libclang():
     """

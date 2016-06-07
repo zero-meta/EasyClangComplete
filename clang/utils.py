@@ -32,7 +32,7 @@ class ClangUtils:
             return path.dirname(output)
         if platform.system() == "Darwin":
             # [HACK] uh... I'm not sure why it happens like this...
-            return path.join(path.dirname(output), '..', '..')
+            return path.join(output, '..', '..')
         return None
 
     @staticmethod

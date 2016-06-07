@@ -11,6 +11,7 @@ sys.path.append(path.dirname(path.dirname(__file__)))
 from plugin.plugin_settings import Settings
 from plugin.completion.bin_complete import Completer as CompleterBin
 from plugin.completion.lib_complete import Completer as CompleterLib
+from tools import PKG_NAME
 
 def has_libclang():
     """
@@ -39,6 +40,8 @@ class base_test_complete(object):
         # Ensure we have a window to work with.
         s = sublime.load_settings("Preferences.sublime-settings")
         s.set("close_windows_when_empty", False)
+        s = sublime.load_settings(PKG_NAME + ".sublime-settings")
+        s.set("verbose", True)
 
         self.view = None
 

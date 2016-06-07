@@ -59,16 +59,12 @@ class Completer(BaseCompleter):
 
         # initialize cindex
         if self.version_str in cindex_dict:
-            try:
-                # should work if python bindings are installed
-                cindex = importlib.import_module("clang.cindex")
-            except Exception as e:
-                # should work for other cases
-                log.warning(" cannot get default cindex with error: %s", e)
-                log.warning(" using bundled one: %s",
-                            cindex_dict[self.version_str])
-                cindex = importlib.import_module(
-                    cindex_dict[self.version_str])
+            # import cindex bundled with this plugin. We cannot use the default
+            # one because sublime uses python 3, but there are no python
+            # bindings for python 3
+            log.debug(
+                " using bundled cindex: %s", cindex_dict[self.version_str])
+            cindex = importlib.import_module(cindex_dict[self.version_str])
 
             # If we are on OS X and haven't already initialized the clang Python
             # bindings, try to figure out the base path for this installation of
@@ -76,13 +72,15 @@ class Completer(BaseCompleter):
             if platform.system() == "Darwin" and not cindex.Config.loaded:
                 # This will return something like /.../lib/clang/3.x.0
                 get_library_path_cmd = [clang_binary, "-print-file-name="]
-                output = subprocess.check_output(get_library_path_cmd).decode('utf8').strip()
+                output = subprocess.check_output(
+                    get_library_path_cmd).decode('utf8').strip()
                 if output:
                     # libclang.dylib can be found in the lib folder of the path
                     # returned above, so we need to go two levels up.
                     libclang_dir = os.path.join(output, "..", "..")
                     if os.path.isdir(libclang_dir):
-                        log.info(" setting libclang library dir to %s" % libclang_dir)
+                        log.info(" setting libclang library dir to %s",
+                                 libclang_dir)
                         cindex.Config.set_library_path(libclang_dir)
 
             Completer.tu_module = cindex.TranslationUnit
@@ -168,7 +166,8 @@ class Completer(BaseCompleter):
                 clang_complete_file = BaseCompleter._search_clang_complete_file(
                     file_folder, settings.project_base_folder)
                 if clang_complete_file:
-                    log.debug(" found .clang_complete: %s", clang_complete_file)
+                    log.debug(" found .clang_complete: %s",
+                              clang_complete_file)
                     flags = BaseCompleter._parse_clang_complete_file(
                         clang_complete_file, separate_includes=False)
                     clang_flags += flags
@@ -181,12 +180,12 @@ class Completer(BaseCompleter):
         try:
             TU = Completer.tu_module
             start = time.time()
-            log.debug(" compilation started for view id: %s", view.id())
-            self.translation_units[view.id()] = TU.from_source(
+            log.debug(" compilation started for view id: %s", view.buffer_id())
+            self.translation_units[view.buffer_id()] = TU.from_source(
                 filename=file_name,
                 args=clang_flags,
                 unsaved_files=files,
-                options= TU.PARSE_PRECOMPILED_PREAMBLE |
+                options=TU.PARSE_PRECOMPILED_PREAMBLE |
                 TU.PARSE_CACHE_COMPLETION_RESULTS)
             end = time.time()
             log.debug(" compilation done in %s seconds", end - start)
@@ -194,7 +193,7 @@ class Completer(BaseCompleter):
             log.error(" error while compiling: %s", e)
         if settings.errors_on_save:
             self.error_vis.generate(
-                view, self.translation_units[view.id()].diagnostics,
+                view, self.translation_units[view.buffer_id()].diagnostics,
                 error_vis.FORMAT_LIBCLANG)
             self.error_vis.show_regions(view)
 
@@ -218,14 +217,14 @@ class Completer(BaseCompleter):
         files = [(view.file_name(), file_body)]
 
         # do nothing if there in no translation_unit present
-        if not view.id() in self.translation_units:
-            log.debug(" cannot complete. No translation unit for view %s",
-                      view.id())
+        if not view.buffer_id() in self.translation_units:
+            log.error(" cannot complete. No translation unit for view %s",
+                      view.buffer_id())
             return None
         # execute clang code completion
         start = time.time()
-        log.debug(" started code complete for view %s", view.id())
-        complete_obj = self.translation_units[view.id()].codeComplete(
+        log.debug(" started code complete for view %s", view.buffer_id())
+        complete_obj = self.translation_units[view.buffer_id()].codeComplete(
             view.file_name(),
             row, col,
             unsaved_files=files)
@@ -241,7 +240,7 @@ class Completer(BaseCompleter):
         Completer._reload_completions(view)
         if show_errors:
             self.error_vis.generate(
-                view, self.translation_units[view.id()].diagnostics,
+                view, self.translation_units[view.buffer_id()].diagnostics,
                 error_vis.FORMAT_LIBCLANG)
             self.error_vis.show_regions(view)
 
@@ -257,19 +256,21 @@ class Completer(BaseCompleter):
             bool: reparsed successfully
 
         """
-        if view.id() in self.translation_units:
-            log.debug(" reparsing translation_unit for view %s", view.id())
+        log.debug(" view is %s", view.buffer_id())
+        if view.buffer_id() in self.translation_units:
+            log.debug(
+                " reparsing translation_unit for view %s", view.buffer_id())
             start = time.time()
-            self.translation_units[view.id()].reparse()
+            self.translation_units[view.buffer_id()].reparse()
             log.debug(" reparsed translation unit in %s seconds",
                       time.time() - start)
             if show_errors:
                 self.error_vis.generate(
-                    view, self.translation_units[view.id()].diagnostics,
+                    view, self.translation_units[view.buffer_id()].diagnostics,
                     error_vis.FORMAT_LIBCLANG)
                 self.error_vis.show_regions(view)
             return True
-        log.error(" no translation unit for view id %s")
+        log.error(" no translation unit for view id %s", view.buffer_id())
         return False
 
     @staticmethod

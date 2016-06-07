@@ -17,7 +17,6 @@ from os import path
 from .. import error_vis
 from .. import tools
 from .base_complete import BaseCompleter
-from ...clang.utils import ClangUtils
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")

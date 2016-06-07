@@ -131,7 +131,7 @@ class Completer(BaseCompleter):
         if not Tools.is_valid_view(view):
             return
 
-        self.flags_dict[view.id()] = None
+        self.flags_dict[view.buffer_id()] = None
         file_name = view.file_name()
         file_folder = path.dirname(file_name)
 
@@ -140,16 +140,16 @@ class Completer(BaseCompleter):
         # if we use project-specific settings we ignore everything else
         if settings.project_specific_settings:
             log.debug(" overriding all flags by project ones")
-            self.flags_dict[view.id()] = settings.get_project_clang_flags()
-            if not self.flags_dict[view.id()]:
+            self.flags_dict[view.buffer_id()] = settings.get_project_clang_flags()
+            if not self.flags_dict[view.buffer_id()]:
                 log.error(" could not read project specific settings")
                 log.info(" falling back to default plugin ones")
-        if not self.flags_dict[view.id()]:
+        if not self.flags_dict[view.buffer_id()]:
             # init needed variables from plugin settings as project settings are
             # either not used or invalid
-            self.flags_dict[view.id()] = []
+            self.flags_dict[view.buffer_id()] = []
             for include in includes:
-                self.flags_dict[view.id()].append('-I "{}"'.format(include))
+                self.flags_dict[view.buffer_id()].append('-I "{}"'.format(include))
 
             # support .clang_complete file with -I "<indlude>" entries
             if settings.search_clang_complete:
@@ -161,9 +161,9 @@ class Completer(BaseCompleter):
                     log.debug(" found .clang_complete: %s", clang_complete_file)
                     flags = Completer._parse_clang_complete_file(
                         clang_complete_file, separate_includes=True)
-                    self.flags_dict[view.id()] += flags
+                    self.flags_dict[view.buffer_id()] += flags
         # let's print the flags just to be sure
-        log.debug(" clang flags are: %s", self.flags_dict[view.id()])
+        log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])
 
     def complete(self, view, cursor_pos, show_errors):
         """This function is called asynchronously to create a list of
@@ -176,8 +176,8 @@ class Completer(BaseCompleter):
             show_errors (bool): true if we want to visualize errors
 
         """
-        if not view.id() in self.flags_dict:
-            log.error(" cannot complete view: %s", view.id())
+        if not view.buffer_id() in self.flags_dict:
+            log.error(" cannot complete view: %s", view.buffer_id())
             return None
 
         file_body = view.substr(sublime.Region(0, view.size()))
@@ -194,7 +194,7 @@ class Completer(BaseCompleter):
             complete_flag="-Xclang -code-completion-at",
             file=temp_file_name, row=row, col=col)
 
-        if not self.flags_dict[view.id()]:
+        if not self.flags_dict[view.buffer_id()]:
             log.critical(" no flags for completion! Your setup is wrong!")
             return
 
@@ -203,11 +203,11 @@ class Completer(BaseCompleter):
             init=" ".join(Completer.init_flags),
             std=self.std_flag,
             complete_at=complete_at_str,
-            includes=" ".join(self.flags_dict[view.id()]))
+            includes=" ".join(self.flags_dict[view.buffer_id()]))
         log.debug(" clang command: \n%s", complete_cmd)
         # execute clang code completion
         start = time.time()
-        log.debug(" started code complete for view %s", view.id())
+        log.debug(" started code complete for view %s", view.buffer_id())
 
         try:
             output = subprocess.check_output(complete_cmd,
@@ -244,8 +244,8 @@ class Completer(BaseCompleter):
                 dummy function as we gain nothing from building it with binary.
 
         """
-        if view.id() not in self.flags_dict:
-            log.error(" Cannot update view %s. No build flags.", view.id())
+        if view.buffer_id() not in self.flags_dict:
+            log.error(" Cannot update view %s. No build flags.", view.buffer_id())
             return False
 
         if not show_errors:
@@ -265,11 +265,11 @@ class Completer(BaseCompleter):
             init=" ".join(Completer.init_flags),
             std=self.std_flag,
             file=temp_file_name,
-            includes=" ".join(self.flags_dict[view.id()]))
+            includes=" ".join(self.flags_dict[view.buffer_id()]))
         log.debug(" clang command: \n%s", complete_cmd)
         # execute clang code completion
         start = time.time()
-        log.debug(" started rebuilding view %s", view.id())
+        log.debug(" started rebuilding view %s", view.buffer_id())
 
         try:
             output = subprocess.check_output(complete_cmd,

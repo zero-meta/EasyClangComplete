@@ -46,13 +46,13 @@ class CompileErrors:
             errors (list): list of unparsed errors in format @error_format
             error_format (str): either FORMAT_LIBCLANG or FORMAT_BINARY
         """
-        log.debug(" generating error regions for view %s", view.id())
+        log.debug(" generating error regions for view %s", view.buffer_id())
         # first clear old regions
-        if view.id() in self.err_regions:
+        if view.buffer_id() in self.err_regions:
             log.debug(" removing old error regions")
-            del self.err_regions[view.id()]
+            del self.err_regions[view.buffer_id()]
         # create an empty region dict for view id
-        self.err_regions[view.id()] = {}
+        self.err_regions[view.buffer_id()] = {}
 
         if error_format == FORMAT_LIBCLANG:
             # expect a tu_diagnostics instance
@@ -115,10 +115,10 @@ class CompileErrors:
             col = int(error_dict['col'])
             point = view.text_point(row - 1, col - 1)
             error_dict['region'] = view.word(point)
-            if row in self.err_regions[view.id()]:
-                self.err_regions[view.id()][row] += [error_dict]
+            if row in self.err_regions[view.buffer_id()]:
+                self.err_regions[view.buffer_id()][row] += [error_dict]
             else:
-                self.err_regions[view.id()][row] = [error_dict]
+                self.err_regions[view.buffer_id()][row] = [error_dict]
 
     def show_regions(self, view):
         """Show current error regions
@@ -126,10 +126,10 @@ class CompileErrors:
         Args:
             view (sublime.View): Current view
         """
-        if view.id() not in self.err_regions:
+        if view.buffer_id() not in self.err_regions:
             # view has no errors for it
             return
-        current_error_dict = self.err_regions[view.id()]
+        current_error_dict = self.err_regions[view.buffer_id()]
         regions = CompileErrors._as_region_list(current_error_dict)
         log.debug(" showing error regions: %s", regions)
         view.add_regions(CompileErrors._TAG, regions, "string")
@@ -140,10 +140,10 @@ class CompileErrors:
         Args:
             view (sublime.View): erase regions for view
         """
-        if view.id() not in self.err_regions:
+        if view.buffer_id() not in self.err_regions:
             # view has no errors for it
             return
-        log.debug(" erasing error regions for view %s", view.id())
+        log.debug(" erasing error regions for view %s", view.buffer_id())
         view.erase_regions(CompileErrors._TAG)
 
     def show_popup_if_needed(self, view, row):
@@ -153,9 +153,9 @@ class CompileErrors:
             view (sublime.View): current view
             row (int): number of row
         """
-        if view.id() not in self.err_regions:
+        if view.buffer_id() not in self.err_regions:
             return
-        current_err_region_dict = self.err_regions[view.id()]
+        current_err_region_dict = self.err_regions[view.buffer_id()]
         if row in current_err_region_dict:
             errors_dict = current_err_region_dict[row]
             errors_html = CompileErrors._as_html(errors_dict)
@@ -169,12 +169,12 @@ class CompileErrors:
         Args:
             view (sublime.View): current view
         """
-        if view.id() not in self.err_regions:
+        if view.buffer_id() not in self.err_regions:
             # no errors for this view
             return
         view.hide_popup()
         self.erase_regions(view)
-        self.err_regions[view.id()].clear()
+        self.err_regions[view.buffer_id()].clear()
 
     def remove_region(self, view_id, row):
         """remove a region for view_id in row

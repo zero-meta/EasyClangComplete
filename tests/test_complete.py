@@ -124,7 +124,7 @@ class base_test_complete(object):
         self.setUpView('test.cpp')
         completer = self.setUpCompleter()
 
-        self.assertTrue(completer.exists_for_view(self.view.id()))
+        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
         self.assertIsNotNone(completer.version_str)
 
     def test_complete(self):
@@ -132,7 +132,7 @@ class base_test_complete(object):
         self.setUpView('test.cpp')
 
         completer = self.setUpCompleter()
-        self.assertTrue(completer.exists_for_view(self.view.id()))
+        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
 
         # Check the current cursor position is completable.
         self.assertEqual(self.getRow(5), "  a.")
@@ -162,7 +162,7 @@ class base_test_complete(object):
         self.setUpView('test_vector.cpp')
 
         completer = self.setUpCompleter()
-        self.assertTrue(completer.exists_for_view(self.view.id()))
+        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
 
         # Check the current cursor position is completable.
         self.assertEqual(self.getRow(3), "  vec.")
@@ -203,7 +203,7 @@ class base_test_complete(object):
             settings=settings)
 
         # Verify that the completer ignores the scratch view.
-        self.assertFalse(completer.exists_for_view(self.view.id()))
+        self.assertFalse(completer.exists_for_view(self.view.buffer_id()))
 
 # Define the actual test class implementations.
 class test_bin_complete(base_test_complete, TestCase):

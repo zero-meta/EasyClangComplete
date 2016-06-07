@@ -84,12 +84,12 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
-        log.debug(" on_activated_async view id %s", view.id())
+        log.debug(" on_activated_async view id %s", view.buffer_id())
         if Tools.is_valid_view(view):
-            if completer.exists_for_view(view.id()):
-                log.debug(" view %s, already has a completer", view.id())
+            if completer.exists_for_view(view.buffer_id()):
+                log.debug(" view %s, already has a completer", view.buffer_id())
                 return
-            log.debug("init completer for view id: %s", view.id())
+            log.debug("init completer for view id: %s", view.buffer_id())
             current_folder = path.dirname(view.file_name())
             parent_folder = path.dirname(current_folder)
             include_dirs = settings.populate_include_dirs(
@@ -118,7 +118,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
-        log.debug(" on_modified_async view id %s", view.id())
+        log.debug(" on_modified_async view id %s", view.buffer_id())
         if Tools.is_valid_view(view):
             completer.error_vis.clear(view)
 
@@ -130,7 +130,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
-        log.debug(" saving view: %s", view.id())
+        log.debug(" saving view: %s", view.buffer_id())
         if Tools.is_valid_view(view):
             completer.error_vis.erase_regions(view)
             completer.update(view, settings.errors_on_save)
@@ -143,9 +143,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
-        log.debug(" closing view %s", view.id())
+        log.debug(" closing view %s", view.buffer_id())
         if Tools.is_valid_view(view):
-            completer.remove(view.id())
+            completer.remove(view.buffer_id())
 
     @staticmethod
     def on_query_completions(view, prefix, locations):
@@ -159,7 +159,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Returns:
             sublime.Completions: completions with a flag
         """
-        log.debug(" on_query_completions view id %s", view.id())
+        log.debug(" on_query_completions view id %s", view.buffer_id())
         if view.is_scratch():
             return Tools.SHOW_DEFAULT_COMPLETIONS
 

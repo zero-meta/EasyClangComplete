@@ -87,7 +87,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         log.debug(" on_activated_async view id %s", view.buffer_id())
         if Tools.is_valid_view(view):
             if completer.exists_for_view(view.buffer_id()):
-                log.debug(" view %s, already has a completer", view.buffer_id())
+                log.debug(
+                    " view %s, already has a completer", view.buffer_id())
                 return
             log.debug("init completer for view id: %s", view.buffer_id())
             current_folder = path.dirname(view.file_name())

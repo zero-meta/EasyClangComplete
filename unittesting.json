@@ -4,6 +4,5 @@
     "async": true,
     "deferred": false,
     "verbosity": 5,
-    "output": "<panel>",
-    "capture_console": true
+    "output": "<panel>"
 }

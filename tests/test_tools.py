@@ -125,7 +125,7 @@ class test_tools_command(TestCase):
         self.tearDown()
         self.setUpView('test_wrong_triggers.cpp')
         # Load the completions.
-        settings = Settings()
+        settings = Settings(with_gui=False)
 
         # Check the current cursor position is completable.
         self.assertEqual(self.getRow(2), "  a > 2.")

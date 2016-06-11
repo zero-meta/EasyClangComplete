@@ -40,6 +40,8 @@ class Settings:
             ones defined by this plugin
 
         SELECTOR (str): selector for completions of this plugin
+        NEW_TRIGGERS_MSG(str): message for asking user if he wants the plugin
+            to set sublime completion triggers automatically
     """
 
     subl_settings = None
@@ -57,15 +59,17 @@ class Settings:
     use_libclang = None
     autoset_triggers = None
     hide_default_completions = None
+    with_gui = None
 
     SELECTOR = "source.c++, source.c - string - comment - constant.numeric"
     NEW_TRIGGERS_MSG = "your triggers are not configured for optimal" \
         " experience with EasyClangComplete. Do you want to set the triggers" \
         " to '{triggers}' for C and C++?"
 
-    def __init__(self):
+    def __init__(self, with_gui=True):
         """Initialize the class.
         """
+        self.with_gui = with_gui
         self.load_settings()
         if not self.is_valid():
             log.critical(" Could not load settings!")
@@ -284,9 +288,14 @@ class Settings:
             'selector': Settings.SELECTOR
         }
         if matching_trigger < 0:
-            res = sublime.yes_no_cancel_dialog(
-                Settings.NEW_TRIGGERS_MSG.format(triggers=trigger_endings),
-                "Sure!", "No! Don't ask again!")
+            if self.with_gui:
+                # gui is there, we can ask the user what he wants
+                res = sublime.yes_no_cancel_dialog(
+                    Settings.NEW_TRIGGERS_MSG.format(triggers=trigger_endings),
+                    "Sure!", "No! Don't ask again!")
+            else:
+                # we do not have a gui, so don't ask the user
+                res = sublime.DIALOG_YES
             if res == sublime.DIALOG_YES:
                 log.debug(" appending new triggers")
                 existing_triggers.append(new_triggers)

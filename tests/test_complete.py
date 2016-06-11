@@ -79,7 +79,7 @@ class base_test_complete(object):
             BaseCompleter: completer for the current view.
         """
 
-        settings = Settings()
+        settings = Settings(with_gui=False)
         current_folder = path.dirname(self.view.file_name())
         parent_folder = path.dirname(current_folder)
         include_dirs = settings.populate_include_dirs(
@@ -144,7 +144,7 @@ class base_test_complete(object):
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        settings = Settings()
+        settings = Settings(with_gui=False)
         completer.complete(self.view, pos, settings.errors_on_save)
 
         # Wait 2 seconds for them to load.
@@ -174,7 +174,7 @@ class base_test_complete(object):
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        settings = Settings()
+        settings = Settings(with_gui=False)
         completer.complete(self.view, pos, settings.errors_on_save)
 
         # Wait 2 seconds for them to load.
@@ -197,7 +197,7 @@ class base_test_complete(object):
         self.view.set_scratch(True)
 
         # Manually set up a completer.
-        settings = Settings()
+        settings = Settings(with_gui=False)
         clang_binary = settings.clang_binary
         completer = self.Completer(clang_binary)
         completer.init(

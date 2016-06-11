@@ -14,6 +14,7 @@ from .tools import PKG_NAME
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
 
+
 class Settings:
 
     """class that encapsulates sublime settings
@@ -58,6 +59,9 @@ class Settings:
     hide_default_completions = None
 
     SELECTOR = "source.c++, source.c - string - comment - constant.numeric"
+    NEW_TRIGGERS_MSG = "your triggers are not configured for optimal" \
+        " experience with EasyClangComplete. Do you want to set the triggers" \
+        " to '{triggers}' for C and C++?"
 
     def __init__(self):
         """Initialize the class.
@@ -280,8 +284,23 @@ class Settings:
             'selector': Settings.SELECTOR
         }
         if matching_trigger < 0:
-            log.debug(" appending new triggers")
-            existing_triggers.append(new_triggers)
+            res = sublime.yes_no_cancel_dialog(
+                Settings.NEW_TRIGGERS_MSG.format(triggers=trigger_endings),
+                "Sure!", "No! Don't ask again!")
+            if res == sublime.DIALOG_YES:
+                log.debug(" appending new triggers")
+                existing_triggers.append(new_triggers)
+            elif res == sublime.DIALOG_NO:
+                log.debug(" skipping trigger config forever.")
+                user_settings = sublime.load_settings(
+                    PKG_NAME + ".sublime-settings")
+                user_settings.set('auto_set_sublime_triggers', False)
+                sublime.save_settings(PKG_NAME + ".sublime-settings")
+                self.autoset_triggers = False
+                return
+            else:
+                log.debug(" skipping trigger config now. Will ask again.")
+                return
         else:
             log.debug(" updating triggers[%s]", matching_trigger)
             existing_triggers[matching_trigger] = new_triggers

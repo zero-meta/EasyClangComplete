@@ -59,12 +59,11 @@ class Completer(BaseCompleter):
     flags_dict = {}
     std_flag = None
 
-    compl_regex = re.compile("COMPLETION:\s(?P<name>.*)\s:\s(?P<content>.*)")
 
     PARAM_TAG = "param"
     TYPE_TAG = "type"
     OPTS_TAG = "opts"
-    PARAM_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}!"
+    PARAM_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}! "
     group_params = "(?P<{param_tag}>[{param_chars}]+)".format(
         param_chars=PARAM_CHARS,
         param_tag=PARAM_TAG)
@@ -75,6 +74,7 @@ class Completer(BaseCompleter):
         opts_tag=OPTS_TAG,
         opts_chars=PARAM_CHARS)
 
+    compl_regex = re.compile("COMPLETION:\s(?P<name>.*)\s:\s(?P<content>.*)")
     compl_content_regex = re.compile(
         "\<#{group_params}#\>|\[#{group_types}#\]".format(
             group_params=group_params, group_types=group_types))
@@ -355,7 +355,7 @@ class Completer(BaseCompleter):
         for completion in complete_results:
             pos_search = Completer.compl_regex.search(completion)
             if not pos_search:
-                log.warning(" completion %s did not match pattern %s",
+                log.debug(" completion %s did not match pattern %s",
                             completion, Completer.compl_regex)
                 continue
             comp_dict = pos_search.groupdict()

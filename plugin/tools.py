@@ -150,8 +150,13 @@ class Tools:
         Returns:
             bool: True if we want to handle this view, False otherwise
         """
-
-        return Tools.has_valid_syntax(view) and view.file_name()
+        if not view:
+            return False
+        if not view.file_name():
+            return False
+        if not Tools.has_valid_syntax(view):
+            return False
+        return True
 
     @staticmethod
     def has_valid_extension(view):

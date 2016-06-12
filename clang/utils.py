@@ -6,13 +6,16 @@ from os import path
 
 log = logging.getLogger(__name__)
 
+
 class ClangUtils:
     """docstring for ClangUtils"""
     libclang_name = None
 
     linux_suffixes = ['.so', '.so.1']
     osx_suffixes = ['.dylib']
-    windows_suffixes = ['.dll']
+    windows_suffixes = ['.dll', '.lib']
+
+    hack_systems = ["Darwin", "Windows"]
 
     @staticmethod
     def get_suffixes():
@@ -26,17 +29,23 @@ class ClangUtils:
 
     @staticmethod
     def dir_from_output(output):
-        if platform.system() == "Windows":
-            return path.dirname(output)
-        if platform.system() == "Linux":
-            return path.dirname(output)
+        log.debug(" real output: %s", output)
         if platform.system() == "Darwin":
             # [HACK] uh... I'm not sure why it happens like this...
-            return path.join(output, '..', '..')
+            folder_to_search = path.join(output, '..', '..')
+            log.debug(" folder to search: %s", folder_to_search)
+            return folder_to_search
+        elif platform.system() == "Windows":
+            log.debug(" architecture: %s", platform.architecture())
+            return path.normpath(output)
+        elif platform.system() == "Linux":
+            return path.dirname(output)
         return None
 
     @staticmethod
     def find_libclang_dir(clang_binary):
+        log.debug(" platform: %s", platform.architecture())
+        log.debug(" python version: %s", platform.python_version())
         for suffix in ClangUtils.get_suffixes():
             # pick a name for a file
             log.info(" we are on '%s'", platform.system())
@@ -46,6 +55,9 @@ class ClangUtils:
             if platform.system() == "Darwin":
                 # [HACK]: wtf??? why does it not find libclang.dylib?
                 get_library_path_cmd = [clang_binary, "-print-file-name="]
+            elif platform.system() == "Windows":
+                # [HACK]: wtf??? why does it not find libclang.dylib?
+                get_library_path_cmd = [clang_binary, "-print-prog-name="]
             else:
                 get_library_path_cmd = [clang_binary, "-print-file-name={}".format(file)]
             output = subprocess.check_output(
@@ -53,7 +65,7 @@ class ClangUtils:
             log.info(" libclang search output = '%s'", output)
             if output:
                 libclang_dir = ClangUtils.dir_from_output(output)
-                if path.isdir(libclang_dir):
+                if path.isdir(libclang_dir) and path.exists(path.join(libclang_dir, file)):
                     log.info(" found libclang dir: '%s'", libclang_dir)
                     log.info(" found library file: '%s'", file)
                     ClangUtils.libclang_name = file

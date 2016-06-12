@@ -70,6 +70,8 @@ class Settings:
         """Initialize the class.
         """
         self.with_gui = with_gui
+        if self.with_gui is None:
+            return
         self.load_settings()
         if not self.is_valid():
             log.critical(" Could not load settings!")
@@ -123,8 +125,10 @@ class Settings:
             self.std_flag = "-std=c++11"
             log.debug(" set std_flag to default: %s", self.std_flag)
 
+        log.info("AAAAAAAAAAAAAAAA")
         if self.autoset_triggers:
             # update sublime triggers to match ones from this plugin
+            log.info("AAAAAAAAAAAAAAAA")
             self.set_sublime_triggers()
 
     def get_project_clang_flags(self):
@@ -287,15 +291,16 @@ class Settings:
             'characters': trigger_endings,
             'selector': Settings.SELECTOR
         }
+        log.info(" is gui on? -> %s", self.with_gui)
         if matching_trigger < 0:
-            # if self.with_gui:
-            #     # gui is there, we can ask the user what he wants
-            #     res = sublime.yes_no_cancel_dialog(
-            #         Settings.NEW_TRIGGERS_MSG.format(triggers=trigger_endings),
-            #         "Sure!", "No! Don't ask again!")
-            # else:
-            #     # we do not have a gui, so don't ask the user
-            res = sublime.DIALOG_YES
+            if self.with_gui:
+                # gui is there, we can ask the user what he wants
+                res = sublime.yes_no_cancel_dialog(
+                    Settings.NEW_TRIGGERS_MSG.format(triggers=trigger_endings),
+                    "Sure!", "No! Don't ask again!")
+            else:
+                # we do not have a gui, so don't ask the user
+                res = sublime.DIALOG_YES
             if res == sublime.DIALOG_YES:
                 log.debug(" appending new triggers")
                 existing_triggers.append(new_triggers)

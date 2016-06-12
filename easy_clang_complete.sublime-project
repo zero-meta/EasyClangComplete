@@ -5,7 +5,7 @@
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "Anaconda Python Builder",
 			"selector": "source.python",
-			"shell_cmd": "\"python\" -u \"$file\""
+			"shell_cmd": "\"py\" -u \"$file\""
 		}
 	],
 	"folders":
@@ -19,10 +19,12 @@
 		"FuzzyFilePath":
 		{
 		},
-		"clang_flags": [
+		"clang_flags":
+		[
 			"-std=c++11",
-			"-Isrc", 					// relative path
-			"-I/usr/include", // absolute path
-			"-I/opt/ros/indigo/include"]
+			"-Isrc",
+			"-I/usr/include",
+			"-I/opt/ros/indigo/include"
+		]
 	}
 }

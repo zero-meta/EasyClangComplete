@@ -51,7 +51,7 @@ def plugin_loaded():
     properly init them after sublime api is available."""
     global settings
     global completer
-    settings = plugin_settings.Settings()
+    settings = plugin_settings.Settings(with_gui=True)
     # init the loggers
     if settings.verbose:
         logging.basicConfig(level=logging.DEBUG)

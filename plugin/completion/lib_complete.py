@@ -5,10 +5,7 @@ Attributes:
     log (logging.Logger): logger for this module
 """
 import importlib
-import os
-import platform
 import sublime
-import subprocess
 import time
 import logging
 

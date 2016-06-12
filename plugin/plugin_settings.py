@@ -82,6 +82,7 @@ class Settings:
         log.info(" settings changed and reloaded")
 
     def set_with_gui(self, value):
+        """ Will we show the gui like a dialog window to the user? """
         self.with_gui = value
 
     def load_settings(self):

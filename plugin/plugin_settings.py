@@ -125,10 +125,6 @@ class Settings:
             self.std_flag = "-std=c++11"
             log.debug(" set std_flag to default: %s", self.std_flag)
 
-        if self.autoset_triggers:
-            # update sublime triggers to match ones from this plugin
-            self.set_sublime_triggers()
-
     def get_project_clang_flags(self):
         """Get clang flags for the current project
 

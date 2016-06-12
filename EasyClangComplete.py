@@ -51,7 +51,8 @@ def plugin_loaded():
     properly init them after sublime api is available."""
     global settings
     global completer
-    settings = plugin_settings.Settings(with_gui=True)
+    settings = plugin_settings.Settings()
+    settings.set_with_gui(True)
     # init the loggers
     if settings.verbose:
         logging.basicConfig(level=logging.DEBUG)
@@ -86,6 +87,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         log.debug(" on_activated_async view id %s", view.buffer_id())
         if Tools.is_valid_view(view):
+            log.debug(" autoset triggers? -> %s", settings.autoset_triggers)
+            if settings.autoset_triggers:
+                log.debug(" check if triggers are ok")
+                settings.set_sublime_triggers()
             if completer.exists_for_view(view.buffer_id()):
                 log.debug(
                     " view %s, already has a completer", view.buffer_id())

@@ -15,7 +15,7 @@ class test_settings(TestCase):
         """Test that settings are correctly initialized
 
         """
-        settings = Settings(with_gui=False)
+        settings = Settings()
         self.assertIsNotNone(settings.subl_settings)
         # test other settings
         self.assertIsNotNone(settings.verbose)
@@ -32,13 +32,13 @@ class test_settings(TestCase):
         """Test validity
 
         """
-        settings = Settings(with_gui=False)
+        settings = Settings()
         self.assertTrue(settings.is_valid())
 
     def test_populate_includes(self):
         """Testing include population
         """
-        settings = Settings(with_gui=False)
+        settings = Settings()
         self.assertTrue(settings.is_valid())
         settings.include_file_folder = True
         settings.include_parent_folder = True

@@ -59,19 +59,16 @@ class Settings:
     use_libclang = None
     autoset_triggers = None
     hide_default_completions = None
-    with_gui = None
+    with_gui = False
 
     SELECTOR = "source.c++, source.c - string - comment - constant.numeric"
     NEW_TRIGGERS_MSG = "your triggers are not configured for optimal" \
         " experience with EasyClangComplete. Do you want to set the triggers" \
         " to '{triggers}' for C and C++?"
 
-    def __init__(self, with_gui):
+    def __init__(self):
         """Initialize the class.
         """
-        self.with_gui = with_gui
-        if self.with_gui is None:
-            return
         self.load_settings()
         if not self.is_valid():
             log.critical(" Could not load settings!")
@@ -83,6 +80,9 @@ class Settings:
         """
         self.load_settings()
         log.info(" settings changed and reloaded")
+
+    def set_with_gui(self, value):
+        self.with_gui = value
 
     def load_settings(self):
         """Load settings from sublime dictionary to internal variables
@@ -125,10 +125,8 @@ class Settings:
             self.std_flag = "-std=c++11"
             log.debug(" set std_flag to default: %s", self.std_flag)
 
-        log.info("AAAAAAAAAAAAAAAA")
         if self.autoset_triggers:
             # update sublime triggers to match ones from this plugin
-            log.info("AAAAAAAAAAAAAAAA")
             self.set_sublime_triggers()
 
     def get_project_clang_flags(self):
@@ -300,7 +298,7 @@ class Settings:
                     "Sure!", "No! Don't ask again!")
             else:
                 # we do not have a gui, so don't ask the user
-                res = sublime.DIALOG_YES
+                res = sublime.DIALOG_CANCEL
             if res == sublime.DIALOG_YES:
                 log.debug(" appending new triggers")
                 existing_triggers.append(new_triggers)

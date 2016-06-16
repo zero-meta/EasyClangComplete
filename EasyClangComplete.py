@@ -86,6 +86,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         log.debug(" on_activated_async view id %s", view.buffer_id())
         if Tools.is_valid_view(view):
+            if not completer:
+                return
             if completer.exists_for_view(view.buffer_id()):
                 log.debug(
                     " view %s, already has a completer", view.buffer_id())
@@ -110,6 +112,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         if Tools.is_valid_view(view):
             (row, _) = SublBridge.cursor_pos(view)
+            if not completer:
+                return
             completer.error_vis.show_popup_if_needed(view, row)
 
     @staticmethod
@@ -119,8 +123,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
-        log.debug(" on_modified_async view id %s", view.buffer_id())
         if Tools.is_valid_view(view):
+            log.debug(" on_modified_async view id %s", view.buffer_id())
+            if not completer:
+                return
             completer.error_vis.clear(view)
 
     @staticmethod
@@ -131,8 +137,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
-        log.debug(" saving view: %s", view.buffer_id())
         if Tools.is_valid_view(view):
+            log.debug(" saving view: %s", view.buffer_id())
+            if not completer:
+                return
             completer.error_vis.erase_regions(view)
             completer.update(view, settings.errors_on_save)
 
@@ -144,8 +152,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
-        log.debug(" closing view %s", view.buffer_id())
         if Tools.is_valid_view(view):
+            log.debug(" closing view %s", view.buffer_id())
+            if not completer:
+                return
             completer.remove(view.buffer_id())
 
     @staticmethod
@@ -161,10 +171,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
             sublime.Completions: completions with a flag
         """
         log.debug(" on_query_completions view id %s", view.buffer_id())
-        if view.is_scratch():
-            return Tools.SHOW_DEFAULT_COMPLETIONS
 
         if not Tools.is_valid_view(view):
+            return Tools.SHOW_DEFAULT_COMPLETIONS
+
+        if not completer:
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
         if completer.async_completions_ready:

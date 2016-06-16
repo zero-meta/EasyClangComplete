@@ -156,6 +156,8 @@ class Tools:
             return False
         if not Tools.has_valid_syntax(view):
             return False
+        if view.is_scratch():
+            return False
         return True
 
     @staticmethod

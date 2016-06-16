@@ -1,3 +1,8 @@
+""" Utilities for clang
+
+Attributes:
+    log (logging.log): logger for this module
+"""
 import platform
 import logging
 import subprocess
@@ -8,17 +13,24 @@ log = logging.getLogger(__name__)
 
 
 class ClangUtils:
-    """docstring for ClangUtils"""
+    """
+    Utils to help handling liblclang, e.g. searching for it
+
+    Attributes:
+        libclang_name (str): name of the libclang library file
+        linux_suffixes (list): suffixes for linux
+        osx_suffixes (list): suffixes for osx
+        windows_suffixes (list): suffixes for windows
+    """
     libclang_name = None
 
     linux_suffixes = ['.so', '.so.1']
     osx_suffixes = ['.dylib']
     windows_suffixes = ['.dll', '.lib']
 
-    hack_systems = ["Darwin", "Windows"]
-
     @staticmethod
     def get_suffixes():
+        """ get suffixes for current system """
         if platform.system() == "Windows":
             return ClangUtils.windows_suffixes
         if platform.system() == "Linux":
@@ -29,6 +41,14 @@ class ClangUtils:
 
     @staticmethod
     def dir_from_output(output):
+        """ Get library directory based on the output of clang
+
+        Args:
+            output (str): raw output from clang
+
+        Returns:
+            str: path to folder with libclang
+        """
         log.debug(" real output: %s", output)
         if platform.system() == "Darwin":
             # [HACK] uh... I'm not sure why it happens like this...
@@ -44,6 +64,14 @@ class ClangUtils:
 
     @staticmethod
     def find_libclang_dir(clang_binary):
+        """ Find directory with libclang
+
+        Args:
+            clang_binary (str): clang binary to call
+
+        Returns:
+            str: folder with libclang
+        """
         log.debug(" platform: %s", platform.architecture())
         log.debug(" python version: %s", platform.python_version())
         for suffix in ClangUtils.get_suffixes():

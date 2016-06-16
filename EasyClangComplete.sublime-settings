@@ -19,11 +19,8 @@
 	// triggers for auto-completion
 	"triggers" : [ ".", "->", "::"],
 
-	// set sublime triggers for auto-completion for C and C++ to match ones of
-	// this package. In the default case it will be: '.>:'
-	"auto_set_sublime_triggers" : true,
-
-	// use libclang. If set to false will use clang_binary -cc1 output instead
+	// use libclang. If set to false will use clang_binary and parse the output of
+	// `clang_binary -Xclang -code-complete-at...` instead.
 	"use_libclang" : true,
 
 	// make plugin verbose

@@ -73,8 +73,7 @@ The plugin has two modes:
   as it fully utilizes saving compilation database which makes your completions
   blazingly fast. It is a default method for Linux and OSX. It is also unit
   tested to complete STL functions on both platforms. Please help me to bring
-  it to Windows. Check out this
-  [discussion][libclang-issue].
+  it to Windows. Check out this [discussion][libclang-issue].
 - one that parses the output from `clang -Xclang -code-completion-at` run from
   the command line. This is the default method for Windows. Tested on all
   platforms (see [Testing](#tests) part). Slower than method with `libclang`.

@@ -4,11 +4,12 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 
 ![Example](autocomplete_show_off.gif)
 
+|           Linux / OSX           |               Windows               |
+|:-------------------------------:|:-----------------------------------:|
+| [![Status][img-travis]][travis] | [![Status][img-appveyor]][appveyor] |
+
 [![Release][img-release]][release]
 [![Downloads][img-downloads]][downloads]
-
-[![Build Status][img-travis]][travis]
-[![Build status][img-appveyor]][appveyor]
 [![Codacy Badge][img-codacy]][codacy]
 [![MIT licensed][img-mit]](./LICENSE)
 [![Gitter][img-gitter]][gitter]
@@ -62,10 +63,10 @@ to do it. Pick any of the following:
 ## You're good to go! ##
 
 # More on the plugin #
-
 All the essential information to make the plugin run is written above. If you
 are still interested in more details - please read on.
 
+## General info ##
 The plugin has two modes:
 
 - one that uses `libclang` with its python bindings. This is the better method
@@ -73,18 +74,28 @@ The plugin has two modes:
   blazingly fast. It is a default method for Linux and OSX. It is also unit
   tested to complete STL functions on both platforms. Please help me to bring
   it to Windows. Check out this
-  [discussion](https://github.com/niosus/EasyClangComplete/issues/4).
-- `clang -Xclang -code-completion-at` run from the command line. The plugin
-  parses the output from a process that runs the above command. This is the
-  default method for Windows. Tested on all platforms (see [Testing](#tests)
-  part). Slower than method with `libclang`. Will be deprecated when we solve
-  issue #4.
+  [discussion][libclang-issue].
+- one that parses the output from `clang -Xclang -code-completion-at` run from
+  the command line. This is the default method for Windows. Tested on all
+  platforms (see [Testing](#tests) part). Slower than method with `libclang`.
+  Will be deprecated when we solve [issue #4][libclang-issue].
 
 This plugin is intended to be easy to use. It should autocomplete STL out of
 the box and you should just add the folders your project uses to `include_dirs`
 list in the settings to make it autocomplete code all your project. If you
 experience problems - create an issue. I will try to respond as soon as
 possible.
+
+## Commands ##
+Here are some highlights for the commands. You can see all commands in command
+pallet. Open it by pressing:
+
+- Windows/Linux: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>
+- OSX: <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>
+
+All the commands of this plugin start with `EasyClangComplete:` and should be
+self explanatory. Open an issue if they are not.
+
 
 ## Settings highlights ##
 I will only cover most important settings here.
@@ -118,20 +129,11 @@ I will only cover most important settings here.
 - `triggers`:
     + defaults are `".", "::", "->"`. The autocompletion does not trigger on
       `>` or `:`. It also ignores float numbers like `3.14`.
-- `auto_set_sublime_triggers`:
-    + when `true` (default) will set the `auto_complete_triggers` option for
-      `C` and `C++` in User Preferences to match `triggers` defined in this
-      plugin. Default `characters` will be `.:>`.
-    + you can set these settings manually to:
-    ```json
-    "auto_complete_triggers":
-    [
-        {
-            "characters": ".>:",
-            "selector": "source.c++, source.c - string - comment - constant.numeric"
-        }
-    ],
-    ```
+    + For them to work, the Sublime Text completion triggers have to be
+      configured too. These are already set to match triggers by default. You
+      can also set these settings manually by copying the default ones defined
+      [here](Preferences.sublime-settings) to your User Preferences and
+      modifying them there.
 - `use_project_specific_settings`:
     + when `true` will enforce sublime text to read all flags from project
       settings(`*.sublime-project` -> `settings` -> `clang_flags`). This
@@ -141,18 +143,19 @@ I will only cover most important settings here.
       An example settings entry looks like this:
 
       ```json
-      "settings":
       {
-        "clang_flags":
-        ["-std=c++11", "-Isrc", "-I/usr/include",]
-      },
+        "settings":
+        {
+          "clang_flags":
+          ["-std=c++11", "-Isrc", "-I/usr/include",]
+        }
+      }
       ```
 
 Please see the default settings file in the repo for more settings
 descriptions. Every setting in settings
 [file](EasyClangComplete.sublime-settings) should have an understandable
 comment. Should they not be clear - create an issue.
-
 
 ## Credits ##
 The whole work seen here was originally a fork of another repository:
@@ -201,6 +204,7 @@ Please buy me a cup of tea if you appreciate the effort.
 [gitter]: https://gitter.im/niosus/EasyClangComplete?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
 [donate-paypal]: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2QLY7J4Q944HS
 [donate-flattr]: https://flattr.com/submit/auto?user_id=niosus&url=https://github.com/niosus/EasyClangComplete&title=EasyClangComplete&language=Python&tags=github&category=software
+[libclang-issue]: https://github.com/niosus/EasyClangComplete/issues/4
 
 
 [img-appveyor]: https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true

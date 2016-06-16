@@ -14,6 +14,7 @@ from .tools import PKG_NAME
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
 
+
 class Settings:
 
     """class that encapsulates sublime settings
@@ -35,10 +36,6 @@ class Settings:
         triggers (string[]): triggers that trigger autocompletion
         use_libclang (bool): use libclang instead of parsing binary output
         verbose (bool): verbose flag
-        autoset_triggers(bool): match sublime autocompletion triggers to the
-            ones defined by this plugin
-
-        SELECTOR (str): selector for completions of this plugin
     """
 
     subl_settings = None
@@ -55,8 +52,6 @@ class Settings:
     errors_on_save = None
     use_libclang = None
     hide_default_completions = None
-
-    SELECTOR = "source.c++, source.c - string - comment - constant.numeric"
 
     def __init__(self):
         """Initialize the class.

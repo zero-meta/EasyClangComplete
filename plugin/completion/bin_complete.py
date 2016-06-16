@@ -24,6 +24,7 @@ from .base_complete import BaseCompleter
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
 
+
 class Completer(BaseCompleter):
 
     """Encapsulates completions based on the output from clang_binary
@@ -39,18 +40,18 @@ class Completer(BaseCompleter):
         async_completions_ready (bool): turns true if there are completions
                                     that have become ready from an async call
 
-        compl_regex (regex): regex to parse raw completion into name and content
-        compl_content_regex (regex): regex to parse the content of the completion
-        opts_regex (regex): regex to detect optional parameters
+        compl_regex (regex): regex to parse raw completion for name and content
+        compl_content_regex (regex): regex to parse the content of the
+        completion opts_regex (regex): regex to detect optional parameters
+        triggers
 
-        group_params (str): string that describes a group to capture function parameters
-        group_types (str): string that describes a group to capture type names
-        group_opts (str): string that describes a group to capture optional parameters
+        group_params (str): string for a group to capture function parameters
+        group_types (str): string for a group to capture type names
+        group_opts (str): string for a group to capture optional parameters
 
         PARAM_CHARS (str): chars allowed to be part of function or type
         PARAM_TAG (str): function params tag for convenience
         TYPE_TAG (str): type name tag for convenience
-        OPTS_TAG (str): optional params tag for convenience
 
     """
     clang_binary = None
@@ -59,27 +60,22 @@ class Completer(BaseCompleter):
     flags_dict = {}
     std_flag = None
 
-
     PARAM_TAG = "param"
     TYPE_TAG = "type"
-    OPTS_TAG = "opts"
-    PARAM_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}! "
+    PARAM_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}!"
     group_params = "(?P<{param_tag}>[{param_chars}]+)".format(
         param_chars=PARAM_CHARS,
         param_tag=PARAM_TAG)
     group_types = "(?P<{type_tag}>[{type_chars}]+)".format(
         type_tag=TYPE_TAG,
         type_chars=PARAM_CHARS)
-    group_opts = "(?P<{opts_tag}>[{opts_chars}]+)".format(
-        opts_tag=OPTS_TAG,
-        opts_chars=PARAM_CHARS)
 
     compl_regex = re.compile("COMPLETION:\s(?P<name>.*)\s:\s(?P<content>.*)")
     compl_content_regex = re.compile(
         "\<#{group_params}#\>|\[#{group_types}#\]".format(
             group_params=group_params, group_types=group_types))
 
-    opts_regex = re.compile("{{#{}#}}".format(group_opts))
+    opts_regex = re.compile("{#|#}")
 
     def __init__(self, clang_binary):
         """Initialize the Completer
@@ -140,16 +136,18 @@ class Completer(BaseCompleter):
         # if we use project-specific settings we ignore everything else
         if settings.project_specific_settings:
             log.debug(" overriding all flags by project ones")
-            self.flags_dict[view.buffer_id()] = settings.get_project_clang_flags()
+            self.flags_dict[
+                view.buffer_id()] = settings.get_project_clang_flags()
             if not self.flags_dict[view.buffer_id()]:
                 log.error(" could not read project specific settings")
                 log.info(" falling back to default plugin ones")
         if not self.flags_dict[view.buffer_id()]:
-            # init needed variables from plugin settings as project settings are
-            # either not used or invalid
+            # init needed variables from plugin settings as project settings
+            # are either not used or invalid
             self.flags_dict[view.buffer_id()] = []
             for include in includes:
-                self.flags_dict[view.buffer_id()].append('-I "{}"'.format(include))
+                self.flags_dict[view.buffer_id()].append('-I "{}"'.format(
+                    include))
 
             # support .clang_complete file with -I "<indlude>" entries
             if settings.search_clang_complete:
@@ -158,7 +156,8 @@ class Completer(BaseCompleter):
                 clang_complete_file = Completer._search_clang_complete_file(
                     file_folder, settings.project_base_folder)
                 if clang_complete_file:
-                    log.debug(" found .clang_complete: %s", clang_complete_file)
+                    log.debug(
+                        " found .clang_complete: %s", clang_complete_file)
                     flags = Completer._parse_clang_complete_file(
                         clang_complete_file, separate_includes=True)
                     self.flags_dict[view.buffer_id()] += flags
@@ -245,7 +244,8 @@ class Completer(BaseCompleter):
 
         """
         if view.buffer_id() not in self.flags_dict:
-            log.error(" Cannot update view %s. No build flags.", view.buffer_id())
+            log.error(
+                " Cannot update view %s. No build flags.", view.buffer_id())
             return False
 
         if not show_errors:
@@ -308,11 +308,13 @@ class Completer(BaseCompleter):
             list: updated completions
         """
         class Parser:
+
             """Help class to parse completions with regex
 
             Attributes:
                 place_holders (int): number of place holders in use
             """
+
             def __init__(self):
                 self.place_holders = 0
 
@@ -355,20 +357,24 @@ class Completer(BaseCompleter):
         for completion in complete_results:
             pos_search = Completer.compl_regex.search(completion)
             if not pos_search:
-                log.debug(" completion %s did not match pattern %s",
-                            completion, Completer.compl_regex)
+                log.debug(
+                    " completion %s did not match pattern %s",
+                    completion, Completer.compl_regex)
                 continue
             comp_dict = pos_search.groupdict()
             log.debug("completions parsed: %s", comp_dict)
             trigger = comp_dict['name']
             parser = Parser()
+            # remove optional parameters triggers
+            comp_dict['content'] = re.sub(
+                Completer.opts_regex, '', comp_dict['content'])
+            # tokenize parameters
             contents = re.sub(Completer.compl_content_regex,
                               parser.tokenize_params,
                               comp_dict['content'])
-            contents = re.sub(Completer.opts_regex, '', contents)
+            # make the hint look pretty
             hint = re.sub(Completer.compl_content_regex,
                           Parser.make_pretty,
                           comp_dict['content'])
-            hint = re.sub(Completer.opts_regex, '', hint)
             completions.append([trigger + "\t" + hint, contents])
         return completions

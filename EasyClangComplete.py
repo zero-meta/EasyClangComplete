@@ -180,7 +180,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         if completer.async_completions_ready:
             completer.async_completions_ready = False
-            if settings.HIDE_DEFAULT_COMPLETIONS:
+            if settings.hide_default_completions:
                 return (completer.completions, sublime.INHIBIT_WORD_COMPLETIONS |
                         sublime.INHIBIT_EXPLICIT_COMPLETIONS)
             else:

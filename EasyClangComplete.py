@@ -180,8 +180,12 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         if completer.async_completions_ready:
             completer.async_completions_ready = False
-            return (completer.completions, sublime.INHIBIT_WORD_COMPLETIONS |
-                    sublime.INHIBIT_EXPLICIT_COMPLETIONS)
+            if settings.HIDE_DEFAULT_COMPLETIONS:
+                return (completer.completions, sublime.INHIBIT_WORD_COMPLETIONS |
+                        sublime.INHIBIT_EXPLICIT_COMPLETIONS)
+            else:
+                # show completions alongside default ones
+                return completer.completions
 
         # Verify that character under the cursor is one allowed trigger
         pos_status = Tools.get_position_status(locations[0], view, settings)

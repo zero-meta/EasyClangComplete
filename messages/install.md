@@ -5,11 +5,11 @@ Follow the following steps to make sure everything runs smoothly!
 
 ## Install clang ##
 - **Ubuntu**: `sudo apt-get install clang`
-- **Other Linux**: use your package manager or install from `clang`
-  [website](http://llvm.org/releases/download.html)
 - **Windows**: install the latest release from `clang`
   [website](http://llvm.org/releases/download.html)
 - **OSX**: ships `clang` by default. You are all set!
+- **Other Systems**: use your bundled package manager or install from `clang`
+  [website](http://llvm.org/releases/download.html)
 
 ## Configure your includes ##
 `Clang` will automatically search for headers in the folder that contains the
@@ -38,20 +38,6 @@ to do it. Pick any of the following:
   }
   ```
 
-## Check sublime completion settings ##
-Add this to your `User Settings`:
-```
-"auto_complete_triggers":
-[
-    {
-        "characters": ".:>",
-        "selector": "source.c++ - string - comment - constant.numeric"
-    }
-],
-```
-It will ensure that Sublime Text will try to autocomplete your code when you
-type `.`, `:` or `>`. The plugin will then ensure that completions are
-triggered only when `.`, `::` or `->` are typed.
 ## You're good to go! ##
 
 ## More info here ##
@@ -60,3 +46,11 @@ https://github.com/niosus/EasyClangComplete/blob/master/README.md
 
 You can find all the relevant settings you can set here:
 https://github.com/niosus/EasyClangComplete/blob/master/README.md#settings-highlights
+
+## Thanks ##
+It is really important for me that you are using the plugin. If you have
+problems - submit issues and we will eventually solve them together.
+
+If you like the plugin, consider supporting the development! It takes me quite
+some time to implement everything as good as I can. Find ways to support the
+plugin here: https://github.com/niosus/EasyClangComplete#support-it

@@ -14,6 +14,8 @@ from os import path
 from .. import error_vis
 from .. import tools
 from .base_complete import BaseCompleter
+from .flags_file import FlagsFile
+
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -156,21 +158,18 @@ class Completer(BaseCompleter):
                 clang_flags.append('-I' + include)
             # support .clang_complete file with -I<indlude> entries
             if settings.search_clang_complete:
-                log.debug(" searching for .clang_complete in %s up to %s",
-                          file_folder, settings.project_base_folder)
-                clang_complete_file = BaseCompleter._search_clang_complete_file(
-                    file_folder, settings.project_base_folder)
-                if clang_complete_file:
-                    log.debug(" found .clang_complete: %s",
-                              clang_complete_file)
-                    flags = BaseCompleter._parse_clang_complete_file(
-                        clang_complete_file, separate_includes=False)
-                    clang_flags += flags
+                if not self.flags_file:
+                    self.flags_file = FlagsFile(
+                        from_folder=file_folder,
+                        to_folder=settings.project_base_folder)
+                    self.clang_complete_file_flags = self.flags_file.get_flags(
+                        separate_includes=False)
         # now we have the flags and can continue initializing the TU
         if Tools.get_view_syntax(view) != "C":
             # treat this as c++ even if it is a header
             log.debug(" This is a C++ file. Adding `-x c++` to flags")
             clang_flags = ['-x'] + ['c++'] + clang_flags
+            clang_flags += self.clang_complete_file_flags
         log.debug(" clang flags are: %s", clang_flags)
         try:
             TU = Completer.tu_module

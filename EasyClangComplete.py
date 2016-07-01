@@ -25,6 +25,7 @@ from .plugin import error_vis
 from .plugin import plugin_settings
 from .plugin.completion import lib_complete
 from .plugin.completion import bin_complete
+from .plugin.completion import flags_file
 
 # reload the modules
 imp.reload(tools)
@@ -32,6 +33,7 @@ imp.reload(plugin_settings)
 imp.reload(error_vis)
 imp.reload(lib_complete)
 imp.reload(bin_complete)
+imp.reload(flags_file)
 
 from .plugin.tools import SublBridge
 from .plugin.tools import Tools
@@ -88,9 +90,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if Tools.is_valid_view(view):
             if not completer:
                 return
-            if completer.exists_for_view(view.buffer_id()):
-                log.debug(
-                    " view %s, already has a completer", view.buffer_id())
+            if not completer.needs_init(view):
                 return
             log.debug("init completer for view id: %s", view.buffer_id())
             completer.init(view, settings)

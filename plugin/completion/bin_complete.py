@@ -20,6 +20,7 @@ from .. import error_vis
 from ..tools import Tools
 from ..tools import PKG_NAME
 from .base_complete import BaseCompleter
+from .flags_file import FlagsFile
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -154,16 +155,12 @@ class Completer(BaseCompleter):
 
             # support .clang_complete file with -I "<indlude>" entries
             if settings.search_clang_complete:
-                log.debug(" searching for .clang_complete in %s up to %s",
-                          file_folder, settings.project_base_folder)
-                clang_complete_file = BaseCompleter._search_clang_complete_file(
-                    file_folder, settings.project_base_folder)
-                if clang_complete_file:
-                    log.debug(
-                        " found .clang_complete: %s", clang_complete_file)
-                    flags = Completer._parse_clang_complete_file(
-                        clang_complete_file, separate_includes=True)
-                    self.flags_dict[view.buffer_id()] += flags
+                if not self.flags_file:
+                    self.flags_file = FlagsFile(
+                        from_folder=file_folder,
+                        to_folder=settings.project_base_folder)
+                    self.clang_complete_file_flags = self.flags_file.get_flags(
+                        separate_includes=True)
         # let's print the flags just to be sure
         log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])
 
@@ -182,53 +179,8 @@ class Completer(BaseCompleter):
             log.error(" cannot complete view: %s", view.buffer_id())
             return None
 
-        file_body = view.substr(sublime.Region(0, view.size()))
-        (row, col) = view.rowcol(cursor_pos)
-        row += 1
-        col += 1
-
-        tempdir = Completer.get_temp_dir()
-        temp_file_name = path.join(tempdir, path.basename(view.file_name()))
-        with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
-            tmp_file.write(file_body)
-
-        complete_at_str = "{complete_flag}={file}:{row}:{col} {file}".format(
-            complete_flag="-Xclang -code-completion-at",
-            file=temp_file_name, row=row, col=col)
-
-        if not self.flags_dict[view.buffer_id()]:
-            log.critical(" no flags for completion! Your setup is wrong!")
-            return
-
-        complete_cmd = "{binary} {init} {std} {complete_at} {includes}".format(
-            binary=Completer.clang_binary,
-            init=" ".join(Completer.init_flags),
-            std=self.std_flag,
-            complete_at=complete_at_str,
-            includes=" ".join(self.flags_dict[view.buffer_id()]))
-        log.debug(" clang command: \n%s", complete_cmd)
-        # execute clang code completion
         start = time.time()
-        log.debug(" started code complete for view %s", view.buffer_id())
-
-        try:
-            output = subprocess.check_output(complete_cmd,
-                                             stderr=subprocess.STDOUT,
-                                             shell=True)
-            output_text = ''.join(map(chr, output))
-        except subprocess.CalledProcessError as e:
-            output_text = e.output.decode("utf-8")
-            log.info(" clang process finished with code: \n%s", e.returncode)
-            log.info(" clang process output: \n%s", output_text)
-            if show_errors:
-                self.error_vis.generate(view, output_text.splitlines(),
-                                        error_vis.FORMAT_BINARY)
-                self.error_vis.show_regions(view)
-            # we could stop here, but we continue as sometimes there are still
-            # valid completions even though there were errors encountered
-
-        # Process clang output, find COMPLETION lines and return them with a
-        # little formating
+        output_text = self.run_clang_command(view, "complete", cursor_pos)
         raw_complete = output_text.splitlines()
         end = time.time()
         log.debug(" code complete done in %s seconds", end - start)
@@ -236,6 +188,9 @@ class Completer(BaseCompleter):
         self.completions = Completer._parse_completions(raw_complete)
         self.async_completions_ready = True
         Completer._reload_completions(view)
+
+        if show_errors:
+            self.show_errors(view, output_text)
 
     def update(self, view, show_errors):
         """update build for current view
@@ -256,6 +211,15 @@ class Completer(BaseCompleter):
             # benefits. We only want to do it if we need to show errors.
             return False
 
+        start = time.time()
+        output_text = self.run_clang_command(view, "update");
+        end = time.time()
+        log.debug(" rebuilding done in %s seconds", end - start)
+
+        if show_errors:
+            self.show_errors(view, output_text)
+
+    def run_clang_command(self, view, task_type, cursor_pos = 0):
         file_body = view.substr(sublime.Region(0, view.size()))
 
         tempdir = Completer.get_temp_dir()
@@ -263,34 +227,42 @@ class Completer(BaseCompleter):
         with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
             tmp_file.write(file_body)
 
-        complete_cmd = "{binary} {init} {std} {file} {includes}".format(
-            binary=Completer.clang_binary,
-            init=" ".join(Completer.init_flags),
-            std=self.std_flag,
-            file=temp_file_name,
-            includes=" ".join(self.flags_dict[view.buffer_id()]))
+        # update flags from .clang_complete file if needed
+        flags = self.flags_dict[view.buffer_id()]
+        if self.flags_file.was_modified():
+            self.clang_complete_file_flags = self.flags_file.get_flags(
+                separate_includes=True)
+        flags += self.clang_complete_file_flags
+
+        if task_type == "update":
+            # we construct command for update task
+            complete_cmd = "{binary} {init} {std} {file} {flags}".format(
+                binary=Completer.clang_binary,
+                init=" ".join(Completer.init_flags),
+                std=self.std_flag,
+                file=temp_file_name,
+                flags=" ".join(flags))
+        elif task_type == "complete":
+            # we construct command for complete task
+            (row, col) = view.rowcol(cursor_pos)
+            row += 1
+            col += 1
+            complete_at_str = "{complete_flag}={file}:{row}:{col} {file}".format(
+                complete_flag="-Xclang -code-completion-at",
+                file=temp_file_name, row=row, col=col)
+            complete_cmd = "{binary} {init} {std} {complete_at} {flags}".format(
+                binary=Completer.clang_binary,
+                init=" ".join(Completer.init_flags),
+                std=self.std_flag,
+                complete_at=complete_at_str,
+                flags=" ".join(flags))
+        else:
+            log.critical(" unknown type of cmd command wanted.")
+            return None
+        # now run this command
         log.debug(" clang command: \n%s", complete_cmd)
-        # execute clang code completion
-        start = time.time()
-        log.debug(" started rebuilding view %s", view.buffer_id())
 
-        try:
-            output = subprocess.check_output(complete_cmd,
-                                             stderr=subprocess.STDOUT,
-                                             shell=True)
-            output_text = ''.join(map(chr, output))
-        except subprocess.CalledProcessError as e:
-            output_text = e.output.decode("utf-8")
-            log.info(" clang process finished with code: \n%s", e.returncode)
-            log.info(" clang process output: \n%s", output_text)
-            self.error_vis.generate(view, output_text.splitlines(),
-                                    error_vis.FORMAT_BINARY)
-            self.error_vis.show_regions(view)
-            return False
-
-        end = time.time()
-        log.debug(" rebuilding done in %s seconds", end - start)
-        return True
+        return BaseCompleter.run_command(complete_cmd)
 
     @staticmethod
     def get_temp_dir():
@@ -299,6 +271,11 @@ class Completer(BaseCompleter):
         if not path.exists(tempdir):
             makedirs(tempdir)
         return tempdir
+
+    def show_errors(self, view, output_text):
+        self.error_vis.generate(view, output_text.splitlines(),
+                                error_vis.FORMAT_BINARY)
+        self.error_vis.show_regions(view)
 
     @staticmethod
     def _parse_completions(complete_results):

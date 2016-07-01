@@ -32,6 +32,9 @@ class BaseCompleter:
     version_str = None
     error_vis = None
 
+    flags_file = None
+    clang_complete_file_flags = []
+
     completions = []
 
     async_completions_ready = False
@@ -72,6 +75,21 @@ class BaseCompleter:
         log.info(" Found clang version: %s", self.version_str)
         # initialize error visuzlization
         self.error_vis = error_vis.CompileErrors()
+
+    def needs_init(self, view):
+        # TODO: test this approach. Call it in main file
+        if not self.flags_file:
+            log.debug(" .clang_complete file handler not initialized.")
+            return True
+        if self.flags_file.was_modified():
+            log.debug(" .clang_complete file was modified. Need to reinit.")
+            return True
+        if self.exists_for_view(view.buffer_id()):
+            log.debug(" view %s, already has a completer", view.buffer_id())
+            return False
+        log.debug(" need to init view '%s'", view.buffer_id())
+        return True
+
 
     def remove(self, view_id):
         """called when completion for this view is not needed anymore.
@@ -153,57 +171,15 @@ class BaseCompleter:
             'next_competion_if_showing': True, })
 
     @staticmethod
-    def _search_clang_complete_file(start_folder, stop_folder):
-        """search for .clang_complete file up the tree
+    def run_command(command):
+        try:
+            output = subprocess.check_output(command,
+                                             stderr=subprocess.STDOUT,
+                                             shell=True)
+            output_text = ''.join(map(chr, output))
+        except subprocess.CalledProcessError as e:
+            output_text = e.output.decode("utf-8")
+            log.info(" clang process finished with code: \n%s", e.returncode)
+            log.info(" clang process output: \n%s", output_text)
+        return output_text
 
-        Args:
-            start_folder (str): path to folder where we start the search
-            stop_folder (str): path to folder we should not go beyond
-
-        Returns:
-            str: path to .clang_complete file or None if not found
-        """
-        current_folder = start_folder
-        one_past_stop_folder = path.dirname(stop_folder)
-        while current_folder != one_past_stop_folder:
-            for file in listdir(current_folder):
-                if file == ".clang_complete":
-                    return path.join(current_folder, file)
-            if current_folder == path.dirname(current_folder):
-                break
-            current_folder = path.dirname(current_folder)
-        return None
-
-    @staticmethod
-    def _parse_clang_complete_file(file, separate_includes):
-        """parse .clang_complete file
-
-        Args:
-            file (str): path to a file
-            separate_includes (bool): if True: -I<include> turns to '-I "<include>"'.
-                                      if False: stays -I<include>
-                                      Separation is needed for binary completion
-
-        Returns:
-            list(str): parsed list of includes from the file
-        """
-        flags = []
-        folder = path.dirname(file)
-        mask = '-I{}'
-        if separate_includes:
-            mask = '-I "{}"'
-        with open(file) as f:
-            content = f.readlines()
-            for line in content:
-                if line.startswith('-D'):
-                    flags.append(line)
-                elif line.startswith('-I'):
-                    path_to_add = line[2:].rstrip()
-                    if path.isabs(path_to_add):
-                        flags.append(mask.format(
-                            path.normpath(path_to_add)))
-                    else:
-                        flags.append(mask.format(
-                            path.join(folder, path_to_add)))
-        log.debug(" .clang_complete contains flags: %s", flags)
-        return flags

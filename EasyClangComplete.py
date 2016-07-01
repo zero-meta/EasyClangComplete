@@ -37,8 +37,8 @@ from .plugin.tools import SublBridge
 from .plugin.tools import Tools
 from .plugin.tools import PosStatus
 
-# unfortunately because of how subl initializes the plugins I cannot move these
-# inside of some class.
+# unfortunately because of how sublime text initializes the plugins I cannot
+# move these inside of some class.
 settings = None
 completer = None
 

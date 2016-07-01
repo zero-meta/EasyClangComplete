@@ -21,7 +21,7 @@ OSX_CLANG_VERSION_DICT = {
     '6.0': '3.5',
     '6.1': '3.6',
     '7.0': '3.7',
-    '7.3': '3.8'
+    '7.3': '3.7'
 }
 
 log = logging.getLogger(__name__)

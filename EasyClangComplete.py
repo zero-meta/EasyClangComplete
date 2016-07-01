@@ -93,15 +93,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                     " view %s, already has a completer", view.buffer_id())
                 return
             log.debug("init completer for view id: %s", view.buffer_id())
-            current_folder = path.dirname(view.file_name())
-            parent_folder = path.dirname(current_folder)
-            include_dirs = settings.populate_include_dirs(
-                file_current_folder=current_folder,
-                file_parent_folder=parent_folder)
-            completer.init(
-                view=view,
-                includes=include_dirs,
-                settings=settings)
+            completer.init(view, settings)
 
     @staticmethod
     def on_selection_modified(view):

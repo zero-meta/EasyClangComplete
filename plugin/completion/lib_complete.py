@@ -110,12 +110,11 @@ class Completer(BaseCompleter):
             return True
         return False
 
-    def init(self, view, includes, settings):
+    def init(self, view, settings):
         """Initialize the completer. Builds the view.
 
         Args:
             view (sublime.View): current view
-            includes (list): includes from settings
             settings (Settings): plugin settings
 
         """
@@ -136,7 +135,7 @@ class Completer(BaseCompleter):
 
         # if we use project-specific settings we ignore everything else
         if settings.project_specific_settings:
-            log.debug(" overriding all flags by project ones")
+            log.info(" overriding all flags by project ones")
             project_flags = settings.get_project_clang_flags()
             if project_flags:
                 clang_flags.append(settings.std_flag)
@@ -149,6 +148,10 @@ class Completer(BaseCompleter):
             clang_flags.append(settings.std_flag)
             # this means that project specific settings are either not used or
             # invalid, so we still need to initialize from settings
+
+            # init includes to start with from settings
+            includes = settings.populate_include_dirs(view)
+
             for include in includes:
                 clang_flags.append('-I' + include)
             # support .clang_complete file with -I<indlude> entries

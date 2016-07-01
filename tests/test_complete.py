@@ -80,17 +80,11 @@ class base_test_complete(object):
         """
 
         settings = Settings()
-        current_folder = path.dirname(self.view.file_name())
-        parent_folder = path.dirname(current_folder)
-        include_dirs = settings.populate_include_dirs(
-            file_current_folder=current_folder,
-            file_parent_folder=parent_folder)
 
         clang_binary = settings.clang_binary
         completer = self.Completer(clang_binary)
         completer.init(
             view=self.view,
-            includes=include_dirs,
             settings=settings)
 
         return completer
@@ -202,7 +196,6 @@ class base_test_complete(object):
         completer = self.Completer(clang_binary)
         completer.init(
             view=self.view,
-            includes=[],
             settings=settings)
 
         # Verify that the completer ignores the scratch view.

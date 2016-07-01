@@ -204,16 +204,20 @@ class Settings:
             return False
         return True
 
-    def populate_include_dirs(self, file_current_folder, file_parent_folder):
+    def populate_include_dirs(self, view):
         """populate the include dirs based on the project
 
         Args:
-            file_current_folder (str): current file folder
-            file_parent_folder (str): file parent folder
+            view (sublime.View): current view
 
         Returns:
             str[]: directories where clang searches for header files
+
         """
+        # init folders needed:
+        file_current_folder = path.dirname(view.file_name())
+        file_parent_folder = path.dirname(file_current_folder)
+
         # initialize new include_dirs
         include_dirs = list(self.include_dirs)
         log.debug(" populating include dirs with current variables:")

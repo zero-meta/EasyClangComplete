@@ -97,13 +97,12 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def init(self, view, includes, settings):
+    def init(self, view, settings):
         """Initialize the completer for this view. For real implementation see
         children.
 
         Args:
             view (sublime.View): current view
-            includes (list): includes from settings
             settings (Settings): plugin settings
 
         Raises:

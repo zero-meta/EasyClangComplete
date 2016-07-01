@@ -113,12 +113,11 @@ class Completer(BaseCompleter):
             return True
         return False
 
-    def init(self, view, includes, settings):
+    def init(self, view, settings):
         """Initialize the completer
 
         Args:
             view (sublime.View): current view
-            includes (list): includes from settings
             settings (Settings): plugin settings
 
         """
@@ -145,6 +144,10 @@ class Completer(BaseCompleter):
             # init needed variables from plugin settings as project settings
             # are either not used or invalid
             self.flags_dict[view.buffer_id()] = []
+
+            # init includes to start with from settings
+            includes = settings.populate_include_dirs(view)
+
             for include in includes:
                 self.flags_dict[view.buffer_id()].append('-I "{}"'.format(
                     include))
@@ -153,7 +156,7 @@ class Completer(BaseCompleter):
             if settings.search_clang_complete:
                 log.debug(" searching for .clang_complete in %s up to %s",
                           file_folder, settings.project_base_folder)
-                clang_complete_file = Completer._search_clang_complete_file(
+                clang_complete_file = BaseCompleter._search_clang_complete_file(
                     file_folder, settings.project_base_folder)
                 if clang_complete_file:
                     log.debug(

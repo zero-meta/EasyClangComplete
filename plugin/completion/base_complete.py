@@ -9,9 +9,6 @@ import subprocess
 import platform
 import logging
 
-from os import path
-from os import listdir
-
 from .. import error_vis
 from .. import tools
 
@@ -33,7 +30,7 @@ class BaseCompleter:
     error_vis = None
 
     flags_file = None
-    clang_complete_file_flags = []
+    custom_flags = []
 
     completions = []
 
@@ -89,7 +86,6 @@ class BaseCompleter:
             return False
         log.debug(" need to init view '%s'", view.buffer_id())
         return True
-
 
     def remove(self, view_id):
         """called when completion for this view is not needed anymore.
@@ -172,6 +168,14 @@ class BaseCompleter:
 
     @staticmethod
     def run_command(command):
+        """ Run a generic command in a subprocess
+
+        Args:
+            command (str): command to run
+
+        Returns:
+            str: raw command output
+        """
         try:
             output = subprocess.check_output(command,
                                              stderr=subprocess.STDOUT,
@@ -182,4 +186,3 @@ class BaseCompleter:
             log.info(" clang process finished with code: \n%s", e.returncode)
             log.info(" clang process output: \n%s", output_text)
         return output_text
-

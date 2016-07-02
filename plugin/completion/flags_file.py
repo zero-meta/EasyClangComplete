@@ -1,3 +1,8 @@
+""" Module with a class for .clang_complete file
+
+Attributes:
+    log (logging.log): logger for this module
+"""
 import logging
 
 from os import path
@@ -8,7 +13,9 @@ log = logging.getLogger(__name__)
 
 class FlagsFile:
 
-    """docstring for ClangCompleteFile"""
+    """
+    A class that incapsulates operations with .clang_complete file
+    """
 
     _clang_complete_file = None
     _last_modification_time = 0
@@ -39,6 +46,12 @@ class FlagsFile:
             current_folder = path.dirname(current_folder)
 
     def was_modified(self):
+        """ checks if .clang_complete file has been modified since it was
+        last seen by the plugin
+
+        Returns:
+            bool: True if modified, False if not
+        """
         if not self._clang_complete_file:
             # it was not even found yet
             return False
@@ -53,13 +66,15 @@ class FlagsFile:
         """parse .clang_complete file
 
         Args:
-            file (str): path to a file
             separate_includes (bool): if True: -I<include> turns to '-I "<include>"'.
                                       if False: stays -I<include>
                                       Separation is needed for binary completion
 
         Returns:
             list(str): parsed list of includes from the file
+
+        Deleted Parameters:
+            file (str): path to a file
         """
         file = self._clang_complete_file
         if not file:

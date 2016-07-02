@@ -7,7 +7,6 @@ Deleted Attributes:
     cindex_dict (dict): dict of cindex entries for each version of clang
 """
 import re
-import subprocess
 import sublime
 import time
 import logging
@@ -71,6 +70,11 @@ class Completer(BaseCompleter):
         type_tag=TYPE_TAG,
         type_chars=PARAM_CHARS)
 
+    compl_str_mask = "{complete_flag}={file}:{row}:{col} {file}"
+
+    completion_mask = "{binary} {init} {std} {complete_at} {flags}"
+    update_mask = "{binary} {init} {std} {file} {flags}"
+
     compl_regex = re.compile("COMPLETION:\s(?P<name>.*)\s:\s(?P<content>.*)")
     compl_content_regex = re.compile(
         "\<#{group_params}#\>|\[#{group_types}#\]".format(
@@ -122,50 +126,52 @@ class Completer(BaseCompleter):
             settings (Settings): plugin settings
 
         """
-
         # Return early if this is an invalid view.
         if not Tools.is_valid_view(view):
             return
 
+        # init current flags empty
         self.flags_dict[view.buffer_id()] = None
-        file_name = view.file_name()
-        file_folder = path.dirname(file_name)
+        clang_flags = None
 
         # set std_flag
         self.std_flag = settings.std_flag
         # if we use project-specific settings we ignore everything else
         if settings.project_specific_settings:
             log.debug(" overriding all flags by project ones")
-            self.flags_dict[
-                view.buffer_id()] = settings.get_project_clang_flags()
-            if not self.flags_dict[view.buffer_id()]:
+            clang_flags = settings.get_project_clang_flags()
+            if not clang_flags:
                 log.error(" could not read project specific settings")
                 log.info(" falling back to default plugin ones")
-        if not self.flags_dict[view.buffer_id()]:
+        if not clang_flags:
             # init needed variables from plugin settings as project settings
             # are either not used or invalid
-            self.flags_dict[view.buffer_id()] = []
+            clang_flags = []
 
             # init includes to start with from settings
             includes = settings.populate_include_dirs(view)
 
             for include in includes:
-                self.flags_dict[view.buffer_id()].append('-I "{}"'.format(
+                clang_flags.append('-I "{}"'.format(
                     include))
 
             # support .clang_complete file with -I "<indlude>" entries
             if settings.search_clang_complete:
+                file_name = view.file_name()
+                file_folder = path.dirname(file_name)
                 if not self.flags_file:
                     self.flags_file = FlagsFile(
                         from_folder=file_folder,
                         to_folder=settings.project_base_folder)
-                    self.clang_complete_file_flags = self.flags_file.get_flags(
+                    self.custom_flags = self.flags_file.get_flags(
                         separate_includes=True)
+                    clang_flags += self.custom_flags
         # let's print the flags just to be sure
+        self.flags_dict[view.buffer_id()] = clang_flags
         log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])
 
     def complete(self, view, cursor_pos, show_errors):
-        """This function is called asynchronously to create a list of
+        """ This function is called asynchronously to create a list of
         autocompletions. It builds up a clang command that is then executed
         as a subprocess. The output is parsed for completions and/or errors
 
@@ -212,14 +218,25 @@ class Completer(BaseCompleter):
             return False
 
         start = time.time()
-        output_text = self.run_clang_command(view, "update");
+        output_text = self.run_clang_command(view, "update")
         end = time.time()
         log.debug(" rebuilding done in %s seconds", end - start)
 
         if show_errors:
             self.show_errors(view, output_text)
 
-    def run_clang_command(self, view, task_type, cursor_pos = 0):
+    def run_clang_command(self, view, task_type, cursor_pos=0):
+        """
+        Construct and run clang command based on task
+
+        Args:
+            view (sublime.View): current view
+            task_type (str): one of: {"complete", "update"}
+            cursor_pos (int, optional): cursor position (used in completion)
+
+        Returns:
+            str: Output from command
+        """
         file_body = view.substr(sublime.Region(0, view.size()))
 
         tempdir = Completer.get_temp_dir()
@@ -230,13 +247,13 @@ class Completer(BaseCompleter):
         # update flags from .clang_complete file if needed
         flags = self.flags_dict[view.buffer_id()]
         if self.flags_file.was_modified():
-            self.clang_complete_file_flags = self.flags_file.get_flags(
+            self.custom_flags = self.flags_file.get_flags(
                 separate_includes=True)
-        flags += self.clang_complete_file_flags
+        flags += self.custom_flags
 
         if task_type == "update":
             # we construct command for update task
-            complete_cmd = "{binary} {init} {std} {file} {flags}".format(
+            complete_cmd = Completer.update_mask.format(
                 binary=Completer.clang_binary,
                 init=" ".join(Completer.init_flags),
                 std=self.std_flag,
@@ -247,10 +264,10 @@ class Completer(BaseCompleter):
             (row, col) = view.rowcol(cursor_pos)
             row += 1
             col += 1
-            complete_at_str = "{complete_flag}={file}:{row}:{col} {file}".format(
+            complete_at_str = Completer.compl_str_mask.format(
                 complete_flag="-Xclang -code-completion-at",
                 file=temp_file_name, row=row, col=col)
-            complete_cmd = "{binary} {init} {std} {complete_at} {flags}".format(
+            complete_cmd = Completer.completion_mask.format(
                 binary=Completer.clang_binary,
                 init=" ".join(Completer.init_flags),
                 std=self.std_flag,
@@ -273,6 +290,12 @@ class Completer(BaseCompleter):
         return tempdir
 
     def show_errors(self, view, output_text):
+        """ Show current complie errors
+
+        Args:
+            view (sublime.View): Current view
+            output_text (str): raw clang command output to be parsed
+        """
         self.error_vis.generate(view, output_text.splitlines(),
                                 error_vis.FORMAT_BINARY)
         self.error_vis.show_regions(view)

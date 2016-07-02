@@ -5,8 +5,8 @@ import sys
 import time
 from os import path
 from unittest import TestCase
-
 sys.path.append(path.dirname(path.dirname(__file__)))
+
 from plugin.plugin_settings import Settings
 
 
@@ -88,8 +88,8 @@ class test_settings(TestCase):
         initial_dirs = list(settings.include_dirs)
         dirs = settings.populate_include_dirs(self.view)
 
-        current_folder = path.dirname(self.view.file_name());
-        parent_folder = path.dirname(current_folder);
+        current_folder = path.dirname(self.view.file_name())
+        parent_folder = path.dirname(current_folder)
         self.assertLess(len(initial_dirs), len(dirs))
         self.assertNotEqual(dirs[0], initial_dirs[0])
         self.assertEqual(dirs[1], initial_dirs[1])

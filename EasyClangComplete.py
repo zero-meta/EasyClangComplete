@@ -16,7 +16,6 @@ import sublime
 import sublime_plugin
 import imp
 import logging
-import os.path as path
 
 from threading import Thread
 
@@ -173,7 +172,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if completer.async_completions_ready:
             completer.async_completions_ready = False
             if settings.hide_default_completions:
-                return (completer.completions, sublime.INHIBIT_WORD_COMPLETIONS |
+                return (completer.completions,
+                        sublime.INHIBIT_WORD_COMPLETIONS |
                         sublime.INHIBIT_EXPLICIT_COMPLETIONS)
             else:
                 # show completions alongside default ones

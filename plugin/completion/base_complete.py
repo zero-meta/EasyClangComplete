@@ -157,6 +157,14 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
+    def get_completions(self, hide_default_completions):
+        if hide_default_completions:
+            log.debug(" hiding default completions")
+            return (self.completions, tools.SublBridge.NO_DEFAULT_COMPLETIONS)
+        else:
+            log.debug(" adding clang completions to default ones")
+            return self.completions
+
     @staticmethod
     def _reload_completions(view):
         """Ask sublime to reload the completions. Needed to update the active

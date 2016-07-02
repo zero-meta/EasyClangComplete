@@ -194,7 +194,7 @@ class Completer(BaseCompleter):
             self.error_vis.show_regions(view)
 
     def complete(self, view, cursor_pos, show_errors):
-        """This function is called asynchronously to create a list of
+        """ This function is called asynchronously to create a list of
         autocompletions. Using the current translation unit it queries libclang
         for the possible completions. It also shows compile errors if needed.
 
@@ -202,7 +202,6 @@ class Completer(BaseCompleter):
             view (sublime.View): current view
             cursor_pos (int): sublime provided poistion of the cursor
             show_errors (bool): controls if we need to show errors
-
         """
         file_body = view.substr(sublime.Region(0, view.size()))
         (row, col) = view.rowcol(cursor_pos)

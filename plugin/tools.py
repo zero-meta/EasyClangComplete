@@ -32,6 +32,9 @@ class SublBridge:
     """ A small help class that bridges with sublime (maybe will grow)
     """
 
+    NO_DEFAULT_COMPLETIONS = sublime.INHIBIT_WORD_COMPLETIONS \
+        | sublime.INHIBIT_EXPLICIT_COMPLETIONS
+
     @staticmethod
     def cursor_pos(view):
         """Get current cursor position. Returns position of the first cursor if
@@ -66,6 +69,7 @@ class SublBridge:
         point_on_next_line = view.text_point(row, 0)
         line = view.line(point_on_next_line)
         return view.substr(line)
+
 
 
 class PosStatus:

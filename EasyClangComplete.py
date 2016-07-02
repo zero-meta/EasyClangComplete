@@ -12,7 +12,6 @@ Attributes:
     settings (plugin_settings.Settings): class that encapsulates settings
 """
 
-import sublime
 import sublime_plugin
 import imp
 import logging
@@ -171,13 +170,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         if completer.async_completions_ready:
             completer.async_completions_ready = False
-            if settings.hide_default_completions:
-                return (completer.completions,
-                        sublime.INHIBIT_WORD_COMPLETIONS |
-                        sublime.INHIBIT_EXPLICIT_COMPLETIONS)
-            else:
-                # show completions alongside default ones
-                return completer.completions
+            return completer.get_completions(settings.hide_default_completions)
 
         # Verify that character under the cursor is one allowed trigger
         pos_status = Tools.get_position_status(locations[0], view, settings)
@@ -189,6 +182,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             if settings.hide_default_completions:
                 log.debug(" hiding default completions")
                 return Tools.HIDE_DEFAULT_COMPLETIONS
+            log.debug(" showing default completions")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
         # create a daemon thread to update the completions
@@ -203,4 +197,5 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if settings.hide_default_completions:
             log.debug(" hiding default completions")
             return Tools.HIDE_DEFAULT_COMPLETIONS
+        log.debug(" showing default completions")
         return Tools.SHOW_DEFAULT_COMPLETIONS

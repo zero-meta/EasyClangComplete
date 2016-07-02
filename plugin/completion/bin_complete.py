@@ -163,9 +163,11 @@ class Completer(BaseCompleter):
                     self.flags_file = FlagsFile(
                         from_folder=file_folder,
                         to_folder=settings.project_base_folder)
-                    self.custom_flags = self.flags_file.get_flags(
+                if self.flags_file.was_modified():
+                    custom_flags = []
+                    custom_flags = self.flags_file.get_flags(
                         separate_includes=True)
-                    clang_flags += self.custom_flags
+                    clang_flags += custom_flags
         # let's print the flags just to be sure
         self.flags_dict[view.buffer_id()] = clang_flags
         log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])
@@ -244,13 +246,7 @@ class Completer(BaseCompleter):
         with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
             tmp_file.write(file_body)
 
-        # update flags from .clang_complete file if needed
         flags = self.flags_dict[view.buffer_id()]
-        if self.flags_file.was_modified():
-            self.custom_flags = self.flags_file.get_flags(
-                separate_includes=True)
-        flags += self.custom_flags
-
         if task_type == "update":
             # we construct command for update task
             complete_cmd = Completer.update_mask.format(

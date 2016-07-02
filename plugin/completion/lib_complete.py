@@ -162,9 +162,11 @@ class Completer(BaseCompleter):
                     self.flags_file = FlagsFile(
                         from_folder=file_folder,
                         to_folder=settings.project_base_folder)
-                    self.custom_flags = self.flags_file.get_flags(
+                if self.flags_file.was_modified():
+                    custom_flags = []
+                    custom_flags = self.flags_file.get_flags(
                         separate_includes=False)
-                    clang_flags += self.custom_flags
+                    clang_flags += custom_flags
         # now we have the flags and can continue initializing the TU
         if Tools.get_view_syntax(view) != "C":
             # treat this as c++ even if it is a header

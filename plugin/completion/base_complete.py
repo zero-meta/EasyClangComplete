@@ -30,7 +30,6 @@ class BaseCompleter:
     error_vis = None
 
     flags_file = None
-    custom_flags = []
 
     completions = []
 

@@ -73,6 +73,14 @@ class BaseCompleter:
         self.error_vis = error_vis.CompileErrors()
 
     def needs_init(self, view):
+        """ Check if the completer needs init.
+
+        Args:
+            view (sublime.View): current view
+
+        Returns:
+            bool: True if init needed, False if not
+        """
         # TODO: test this approach. Call it in main file
         if not self.flags_file:
             log.debug(" .clang_complete file handler not initialized.")

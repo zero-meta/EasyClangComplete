@@ -157,6 +157,9 @@ class Completer(BaseCompleter):
 
             # support .clang_complete file with -I "<indlude>" entries
             if settings.search_clang_complete:
+                # let's try to generate it from cmake:
+                FlagsFile.generate_from_cmake(settings.project_base_folder)
+
                 file_name = view.file_name()
                 file_folder = path.dirname(file_name)
                 if not self.flags_file:

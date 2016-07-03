@@ -158,6 +158,9 @@ class Completer(BaseCompleter):
                 clang_flags.append('-I' + include)
             # support .clang_complete file with -I<indlude> entries
             if settings.search_clang_complete:
+                # let's try to generate it from cmake:
+                FlagsFile.generate_from_cmake(settings.project_base_folder)
+                # now let's search for .clang_complete file
                 if not self.flags_file:
                     self.flags_file = FlagsFile(
                         from_folder=file_folder,

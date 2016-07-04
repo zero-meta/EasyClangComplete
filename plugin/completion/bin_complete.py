@@ -10,14 +10,11 @@ import re
 import sublime
 import time
 import logging
-import tempfile
 
 from os import path
-from os import makedirs
 
 from .. import error_vis
 from ..tools import Tools
-from ..tools import PKG_NAME
 from .base_complete import BaseCompleter
 from .flags_file import FlagsFile
 
@@ -158,7 +155,10 @@ class Completer(BaseCompleter):
             # support .clang_complete file with -I "<indlude>" entries
             if settings.search_clang_complete:
                 # let's try to generate it from cmake:
-                FlagsFile.generate_from_cmake(settings.project_base_folder)
+                flags_file_generated = FlagsFile.generate_from_cmake(
+                                settings.project_base_folder)
+                if flags_file_generated:
+                    log.debug(" new .clang_complete generated from cmake")
 
                 file_name = view.file_name()
                 file_folder = path.dirname(file_name)
@@ -166,7 +166,7 @@ class Completer(BaseCompleter):
                     self.flags_file = FlagsFile(
                         from_folder=file_folder,
                         to_folder=settings.project_base_folder)
-                if self.flags_file.was_modified():
+                if flags_file_generated or self.flags_file.was_modified():
                     custom_flags = []
                     custom_flags = self.flags_file.get_flags(
                         separate_includes=True)
@@ -244,7 +244,7 @@ class Completer(BaseCompleter):
         """
         file_body = view.substr(sublime.Region(0, view.size()))
 
-        tempdir = Completer.get_temp_dir()
+        tempdir = Tools.get_temp_dir()
         temp_file_name = path.join(tempdir, path.basename(view.file_name()))
         with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
             tmp_file.write(file_body)
@@ -279,14 +279,6 @@ class Completer(BaseCompleter):
         log.debug(" clang command: \n%s", complete_cmd)
 
         return BaseCompleter.run_command(complete_cmd)
-
-    @staticmethod
-    def get_temp_dir():
-        """ Create a temporary folder if needed and return it """
-        tempdir = path.join(tempfile.gettempdir(), PKG_NAME)
-        if not path.exists(tempdir):
-            makedirs(tempdir)
-        return tempdir
 
     def show_errors(self, view, output_text):
         """ Show current complie errors

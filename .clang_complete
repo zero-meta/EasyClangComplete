@@ -1,4 +1,1 @@
--isystem /usr/include/vtk-5.8
--isystem /usr/include/eigen3
--isystem /usr/include/ni
--isystem /usr/include/pcl-1.7
+

@@ -7,9 +7,13 @@ Attributes:
         Taken from here: https://gist.github.com/yamaya/2924292
     PKG_NAME (str): this package name
 """
-import os.path as path
+from os import path
+from os import makedirs
+
 import sublime
 import logging
+import tempfile
+
 import re
 
 PKG_NAME = path.basename(path.dirname(path.dirname(__file__)))
@@ -71,7 +75,6 @@ class SublBridge:
         return view.substr(line)
 
 
-
 class PosStatus:
 
     """ Enum class for position status
@@ -96,7 +99,7 @@ class Tools:
         valid_synax (list): list of valid syntaxes for this plugin
         SHOW_DEFAULT_COMPLETIONS: `None` to return from `on_query_completions`.
             This guarantees that sublime text will show default completions.
-        HIDE_DEFAULT_COMPLETIONS: a valud to return from `on_query_completions`.
+        HIDE_DEFAULT_COMPLETIONS: a valud to return from `on_query_completions`
             Ensures nothing will be shown apart from the output of this plugin
 
     """
@@ -109,6 +112,14 @@ class Tools:
     SHOW_DEFAULT_COMPLETIONS = None
     HIDE_DEFAULT_COMPLETIONS = ([], sublime.INHIBIT_WORD_COMPLETIONS |
                                 sublime.INHIBIT_EXPLICIT_COMPLETIONS)
+
+    @staticmethod
+    def get_temp_dir():
+        """ Create a temporary folder if needed and return it """
+        tempdir = path.join(tempfile.gettempdir(), PKG_NAME)
+        if not path.exists(tempdir):
+            makedirs(tempdir)
+        return tempdir
 
     @staticmethod
     def get_view_syntax(view):

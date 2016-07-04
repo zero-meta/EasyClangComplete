@@ -9,6 +9,8 @@ import subprocess
 from os import path
 from os import listdir
 
+from ..tools import Tools
+
 log = logging.getLogger(__name__)
 
 
@@ -76,7 +78,7 @@ class FlagsFile:
             return False
         cmake_dir = path.abspath(path.dirname(cmake_file))
         cmake_cmd = "cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON " + cmake_dir
-        tempdir = "/tmp/build"
+        tempdir = path.join(Tools.get_temp_dir(), 'build')
         if not path.exists(tempdir):
             os.makedirs(tempdir)
         try:

@@ -31,6 +31,8 @@ class FlagsFile:
         Returns:
             str: path to .clang_complete file or None if not found
         """
+        log.debug(" searching .clang_complete from '%s' to '%s'",
+                  from_folder, to_folder)
         current_folder = from_folder
         one_past_stop_folder = path.dirname(to_folder)
         while current_folder != one_past_stop_folder:
@@ -63,6 +65,9 @@ class FlagsFile:
 
     @staticmethod
     def generate_from_cmake(project_path):
+        if project_path == '':
+            log.debug(" no project, so not generating from cmake")
+            return False
         import os
         cmake_file = FlagsFile.find_cmake_file(project_path)
         if not cmake_file:
@@ -141,6 +146,8 @@ class FlagsFile:
             log.info(" .clang_complete was modified.")
             self._last_modification_time = actual_modification_time
             return True
+        log.debug(" .clang_complete was NOT modified since %s",
+                  self._last_modification_time)
         return False
 
     def get_flags(self, separate_includes):
@@ -181,7 +188,6 @@ class FlagsFile:
                         flags.append(mask.format(
                             '-I', path.join(folder, path_to_add)))
                 elif line.startswith('-isystem'):
-                    log.debug(" line: %s", line)
                     path_to_add = line[8:].rstrip().strip()
                     if path.isabs(path_to_add):
                         flags.append(mask.format(

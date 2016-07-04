@@ -27,11 +27,11 @@ from .plugin.completion import flags_file
 
 # reload the modules
 imp.reload(tools)
+imp.reload(flags_file)
 imp.reload(plugin_settings)
 imp.reload(error_vis)
 imp.reload(lib_complete)
 imp.reload(bin_complete)
-imp.reload(flags_file)
 
 from .plugin.tools import SublBridge
 from .plugin.tools import Tools

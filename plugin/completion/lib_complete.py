@@ -159,13 +159,16 @@ class Completer(BaseCompleter):
             # support .clang_complete file with -I<indlude> entries
             if settings.search_clang_complete:
                 # let's try to generate it from cmake:
-                FlagsFile.generate_from_cmake(settings.project_base_folder)
+                flags_file_generated = FlagsFile.generate_from_cmake(
+                                settings.project_base_folder)
+                if flags_file_generated:
+                    log.debug(" new .clang_complete generated from cmake")
                 # now let's search for .clang_complete file
                 if not self.flags_file:
                     self.flags_file = FlagsFile(
                         from_folder=file_folder,
                         to_folder=settings.project_base_folder)
-                if self.flags_file.was_modified():
+                if flags_file_generated or self.flags_file.was_modified():
                     custom_flags = []
                     custom_flags = self.flags_file.get_flags(
                         separate_includes=False)

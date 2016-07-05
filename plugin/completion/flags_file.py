@@ -18,6 +18,7 @@ class FlagsFile:
     """
 
     _clang_complete_file = None
+    _custom_flags = None
     _last_modification_time = 0
 
     def __init__(self, from_folder, to_folder):
@@ -76,11 +77,19 @@ class FlagsFile:
         Deleted Parameters:
             file (str): path to a file
         """
-        file = self._clang_complete_file
+        if not self._custom_flags or self.was_modified():
+            # only parse file if it hasn't been done before or if it has been
+            # modified at some point of time since last parsing
+            self._custom_flags = FlagsFile.parse_flags(
+                self._clang_complete_file, separate_includes)
+        return self._custom_flags
+
+    @staticmethod
+    def parse_flags(file, separate_includes):
         if not file:
             log.error(" cannot get flags from clang_complete_file. No file.")
             return []
-
+        # file is valid, let's parse it
         flags = []
         folder = path.dirname(file)
         mask = '-I{}'

@@ -163,11 +163,9 @@ class Completer(BaseCompleter):
                     self.flags_file = FlagsFile(
                         from_folder=file_folder,
                         to_folder=settings.project_base_folder)
-                if self.flags_file.was_modified():
-                    custom_flags = []
-                    custom_flags = self.flags_file.get_flags(
-                        separate_includes=True)
-                    clang_flags += custom_flags
+                # add custom flags to general ones
+                clang_flags += self.flags_file.get_flags(
+                                separate_includes=True)
         # let's print the flags just to be sure
         self.flags_dict[view.buffer_id()] = clang_flags
         log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])

@@ -23,11 +23,11 @@ from .plugin import error_vis
 from .plugin import plugin_settings
 from .plugin.completion import lib_complete
 from .plugin.completion import bin_complete
-from .plugin.completion import flags_file
+from .plugin.completion import flags_manager
 
 # reload the modules
 imp.reload(tools)
-imp.reload(flags_file)
+imp.reload(flags_manager)
 imp.reload(plugin_settings)
 imp.reload(error_vis)
 imp.reload(lib_complete)

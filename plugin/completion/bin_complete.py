@@ -16,7 +16,7 @@ from os import path
 from .. import error_vis
 from ..tools import Tools
 from .base_complete import BaseCompleter
-from .flags_file import FlagsFile
+from .flags_manager import FlagsManager
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -123,9 +123,13 @@ class Completer(BaseCompleter):
             settings (Settings): plugin settings
 
         """
+
         # Return early if this is an invalid view.
         if not Tools.is_valid_view(view):
             return
+
+        # init procedure from super class
+        super(Completer, self).init(view, settings)
 
         # init current flags empty
         self.flags_dict[view.buffer_id()] = None
@@ -152,25 +156,11 @@ class Completer(BaseCompleter):
                 clang_flags.append('-I "{}"'.format(
                     include))
 
-            # support .clang_complete file with -I "<indlude>" entries
-            if settings.search_clang_complete:
-                # let's try to generate it from cmake:
-                flags_file_generated = FlagsFile.generate_from_cmake(
-                                settings.project_base_folder)
-                if flags_file_generated:
-                    log.debug(" new .clang_complete generated from cmake")
-
-                file_name = view.file_name()
-                file_folder = path.dirname(file_name)
-                if not self.flags_file:
-                    self.flags_file = FlagsFile(
-                        from_folder=file_folder,
-                        to_folder=settings.project_base_folder)
-                if flags_file_generated or self.flags_file.was_modified():
-                    custom_flags = []
-                    custom_flags = self.flags_file.get_flags(
-                        separate_includes=True)
-                    clang_flags += custom_flags
+            if settings.search_clang_complete and self.flags_manager:
+                log.debug(" flags_manager loaded")
+                custom_flags = self.flags_manager.get_flags(
+                    separate_includes=True)
+                clang_flags += custom_flags
         # let's print the flags just to be sure
         self.flags_dict[view.buffer_id()] = clang_flags
         log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])
@@ -356,7 +346,7 @@ class Completer(BaseCompleter):
                     completion, Completer.compl_regex)
                 continue
             comp_dict = pos_search.groupdict()
-            log.debug("completions parsed: %s", comp_dict)
+            # log.debug("completions parsed: %s", comp_dict)
             trigger = comp_dict['name']
             parser = Parser()
             # remove optional parameters triggers

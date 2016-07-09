@@ -9,6 +9,7 @@ Attributes:
 """
 from os import path
 from os import makedirs
+from os import listdir
 
 import sublime
 import logging
@@ -87,6 +88,64 @@ class PosStatus:
     COMPLETION_NEEDED = 0
     COMPLETION_NOT_NEEDED = 1
     WRONG_TRIGGER = 2
+
+
+class File:
+    __full_path = None
+    __last_seen_modification = 0
+
+    def __init__(self, file_path=None):
+        if not file_path or not path:
+            # leave the object unitialized
+            return
+        self.__full_path = path.abspath(file_path)
+
+    def full_path(self):
+        return self.__full_path
+
+    def folder(self):
+        return path.dirname(self.__full_path)
+
+    def loaded(self):
+        if self.__full_path:
+            return True
+        return False
+
+    def was_modified(self):
+        if not self.loaded():
+            return False
+        actual_modification_time = path.getmtime(self.__full_path)
+        if actual_modification_time > self.__last_seen_modification:
+            self.__last_seen_modification = actual_modification_time
+            return True
+        return False
+
+    @staticmethod
+    def search(file_name, from_folder, to_folder):
+        """search for a file up the tree
+
+        Args:
+            from_folder (str): path to folder where we start the search
+            to_folder (str): path to folder we should not go beyond
+
+        Returns:
+            File: found file
+        """
+        log.debug(" searching '%s' from '%s' to '%s'",
+                  file_name, from_folder, to_folder)
+        current_folder = from_folder
+        one_past_stop_folder = path.dirname(to_folder)
+        while current_folder != one_past_stop_folder:
+            for file in listdir(current_folder):
+                if file == file_name:
+                    found_file = File(path.join(current_folder, file))
+                    log.debug(" found '%s' file: %s",
+                              file_name, found_file.full_path())
+                    return found_file
+            if current_folder == path.dirname(current_folder):
+                break
+            current_folder = path.dirname(current_folder)
+        return None
 
 
 class Tools:
@@ -238,3 +297,4 @@ class Tools:
         # if nothing fired we don't need to do anything
         log.debug(" no completions needed")
         return PosStatus.COMPLETION_NOT_NEEDED
+

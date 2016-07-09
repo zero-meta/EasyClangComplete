@@ -16,8 +16,10 @@ sys.path.append(path.dirname(path.dirname(__file__)))
 Settings = easy_clang_complete.plugin.plugin_settings.Settings
 SublBridge = easy_clang_complete.plugin.tools.SublBridge
 Tools = easy_clang_complete.plugin.tools.Tools
+File = easy_clang_complete.plugin.tools.File
 PosStatus = easy_clang_complete.plugin.tools.PosStatus
 # for testing sublime command
+
 
 class test_tools_command(TestCase):
     """Test commands
@@ -169,3 +171,16 @@ class test_tools(TestCase):
         """
         self.assertEqual(easy_clang_complete.plugin.tools.PKG_NAME,
                          "EasyClangComplete")
+
+
+class test_file(TestCase):
+    def test_find_file(self):
+        current_folder = path.dirname(path.abspath(__file__))
+        parent_folder = path.dirname(current_folder)
+        file = File.search(
+             file_name='.clang_complete',
+             from_folder=current_folder,
+             to_folder=parent_folder)
+        expected = path.join(parent_folder, '.clang_complete')
+        self.assertTrue(file.loaded())
+        self.assertEqual(file.full_path(), expected)

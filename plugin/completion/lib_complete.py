@@ -9,12 +9,10 @@ import sublime
 import time
 import logging
 
-from os import path
-
 from .. import error_vis
 from .. import tools
 from .base_complete import BaseCompleter
-from .flags_file import FlagsFile
+from .flags_manager import FlagsManager
 
 
 log = logging.getLogger(__name__)
@@ -120,14 +118,15 @@ class Completer(BaseCompleter):
             settings (Settings): plugin settings
 
         """
-
         # Return early if this is an invalid view.
         if not Tools.is_valid_view(view):
             return
 
+        # call initializer from the super class
+        super(Completer, self).init(view, settings)
+
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
-        file_folder = path.dirname(file_name)
 
         # initialize unsaved files
         files = [(file_name, file_body)]
@@ -156,23 +155,12 @@ class Completer(BaseCompleter):
 
             for include in includes:
                 clang_flags.append('-I' + include)
-            # support .clang_complete file with -I<indlude> entries
-            if settings.search_clang_complete:
-                # let's try to generate it from cmake:
-                flags_file_generated = FlagsFile.generate_from_cmake(
-                                settings.project_base_folder)
-                if flags_file_generated:
-                    log.debug(" new .clang_complete generated from cmake")
-                # now let's search for .clang_complete file
-                if not self.flags_file:
-                    self.flags_file = FlagsFile(
-                        from_folder=file_folder,
-                        to_folder=settings.project_base_folder)
-                if flags_file_generated or self.flags_file.was_modified():
-                    custom_flags = []
-                    custom_flags = self.flags_file.get_flags(
-                        separate_includes=False)
-                    clang_flags += custom_flags
+
+            if settings.search_clang_complete and self.flags_manager:
+                log.debug(" flags_manager loaded")
+                custom_flags = self.flags_manager.get_flags(
+                    separate_includes=False)
+                clang_flags += custom_flags
         # now we have the flags and can continue initializing the TU
         if Tools.get_view_syntax(view) != "C":
             # treat this as c++ even if it is a header

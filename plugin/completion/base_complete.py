@@ -9,8 +9,14 @@ import subprocess
 import platform
 import logging
 
+from os import path
+
 from .. import error_vis
 from .. import tools
+
+from .flags_manager import FlagsManager
+from .flags_manager import SearchScope
+
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +35,7 @@ class BaseCompleter:
     version_str = None
     error_vis = None
 
-    flags_file = None
+    flags_manager = None
 
     completions = []
 
@@ -82,11 +88,12 @@ class BaseCompleter:
             bool: True if init needed, False if not
         """
         # TODO: test this approach. Call it in main file
-        if not self.flags_file:
-            log.debug(" .clang_complete file handler not initialized.")
+        if not self.flags_manager:
+            log.debug(" flags handler not initialized. Do it.")
             return True
-        if self.flags_file.was_modified():
-            log.debug(" .clang_complete file was modified. Need to reinit.")
+        if self.flags_manager.any_file_modified():
+            log.debug(" .clang_complete or CMakeLists.txt were modified. "
+                      "Need to reinit.")
             return True
         if self.exists_for_view(view.buffer_id()):
             log.debug(" view %s, already has a completer", view.buffer_id())
@@ -126,10 +133,13 @@ class BaseCompleter:
             view (sublime.View): current view
             settings (Settings): plugin settings
 
-        Raises:
-            NotImplementedError: Guarantees we do not call this abstract method
         """
-        raise NotImplementedError("calling abstract method")
+        if not view:
+            return
+        current_dir = path.dirname(view.file_name())
+        self.flags_manager = FlagsManager(SearchScope(
+            from_folder=current_dir,
+            to_folder=settings.project_base_folder))
 
     def complete(self, view, cursor_pos, show_errors):
         """Function to generate completions. See children for implementation.

@@ -16,7 +16,6 @@ from os import path
 from .. import error_vis
 from ..tools import Tools
 from .base_complete import BaseCompleter
-from .flags_manager import FlagsManager
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -161,6 +160,7 @@ class Completer(BaseCompleter):
                 custom_flags = self.flags_manager.get_flags(
                     separate_includes=True)
                 clang_flags += custom_flags
+
         # let's print the flags just to be sure
         self.flags_dict[view.buffer_id()] = clang_flags
         log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])

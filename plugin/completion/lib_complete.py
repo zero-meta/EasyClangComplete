@@ -12,7 +12,6 @@ import logging
 from .. import error_vis
 from .. import tools
 from .base_complete import BaseCompleter
-from .flags_manager import FlagsManager
 
 
 log = logging.getLogger(__name__)
@@ -161,6 +160,7 @@ class Completer(BaseCompleter):
                 custom_flags = self.flags_manager.get_flags(
                     separate_includes=False)
                 clang_flags += custom_flags
+
         # now we have the flags and can continue initializing the TU
         if Tools.get_view_syntax(view) != "C":
             # treat this as c++ even if it is a header

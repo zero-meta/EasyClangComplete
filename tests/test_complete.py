@@ -13,6 +13,7 @@ from plugin.completion.bin_complete import Completer as CompleterBin
 from plugin.completion.lib_complete import Completer as CompleterLib
 from plugin.tools import PKG_NAME
 
+
 def has_libclang():
     """
     Ensure libclang tests will run only on platforms that support this.
@@ -26,9 +27,11 @@ def has_libclang():
         return True
     return False
 
+
 class base_test_complete(object):
     """
-    Base class for all tests that are independent of the Completer implementation.
+    Base class for all tests that are independent of the Completer
+    implementation.
 
     Attributes:
         view (sublime.View): view
@@ -42,6 +45,7 @@ class base_test_complete(object):
         s.set("close_windows_when_empty", False)
         s = sublime.load_settings(PKG_NAME + ".sublime-settings")
         s.set("verbose", True)
+        s.set("cmake_flags_priority", "overwrite")
 
         self.view = None
 
@@ -147,7 +151,7 @@ class base_test_complete(object):
             time.sleep(0.1)
             counter += 1
             if counter > 20:
-                self.fail("Async completions not ready after %d tries" % counter)
+                self.fail("Completions not ready after %d tries" % counter)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completer.completions)
@@ -177,7 +181,7 @@ class base_test_complete(object):
             time.sleep(0.1)
             counter += 1
             if counter > 20:
-                self.fail("Async completions not ready after %d tries" % counter)
+                self.fail("Completions not ready after %d tries" % counter)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completer.completions)
@@ -201,7 +205,7 @@ class base_test_complete(object):
         # Verify that the completer ignores the scratch view.
         self.assertFalse(completer.exists_for_view(self.view.buffer_id()))
 
-# Define the actual test class implementations.
+
 class test_bin_complete(base_test_complete, TestCase):
     """ Test class for the binary based completer. """
     Completer = CompleterBin

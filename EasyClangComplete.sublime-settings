@@ -13,6 +13,19 @@
 	// search for .clang_complete file up the tree. Use includes from it if found
 	"search_clang_complete_file": true,
 
+	// search for CMakeLists.txt with a "project" command in it. Run cmake on this
+	// file from temporary folder to generate compilation database. Update
+	// .clang_complete file with these generated flags.
+	"generate_flags_with_cmake": true,
+
+	// what to do if old flags were found in .clang_complete file?
+	// can be one of the following:
+	// 		- "ask": ask the user every time we need to overwite .clang_complete
+	// 		- "merge": merge all together, ignore dublicates
+	// 		- "overwrite": overwrite whatever is already in the file
+	// 		- "keep_old": ignore flags from cmake, keep old one instead
+	"cmake_flags_priority": "ask",
+
 	// show compile errors on save
 	"errors_on_save": true,
 

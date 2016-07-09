@@ -4,6 +4,7 @@ Attributes:
     log (logging.log): logger for this module
 """
 import logging
+import sublime
 import subprocess
 
 from os import path
@@ -35,6 +36,8 @@ class FlagsManager:
     _clang_complete_file = File()
     _flags = []
     _search_scope = SearchScope()
+    _use_cmake = False
+    _flags_update_strategy = "ask"
 
     cmake_mask = "cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {}"
 
@@ -42,10 +45,15 @@ class FlagsManager:
     CMAKE_DB_FILE_NAME = "compile_commands.json"
     CLANG_COMPLETE_FILE_NAME = ".clang_complete"
 
-    def __init__(self, search_scope=SearchScope()):
+    def __init__(self,
+                 use_cmake,
+                 flags_update_strategy,
+                 search_scope=SearchScope()):
         if not search_scope.valid():
             log.error(" search scope is wrong.", search_scope)
         self._search_scope = search_scope
+        self._use_cmake = use_cmake
+        self._flags_update_strategy = flags_update_strategy
 
     def any_file_modified(self):
         if self._cmake_file.was_modified():
@@ -55,15 +63,16 @@ class FlagsManager:
         return False
 
     def get_flags(self, separate_includes):
-        if not self._cmake_file.loaded():
+        if self._use_cmake and not self._cmake_file.loaded():
             # CMakeLists.txt was not loaded yet, so search for it
             log.debug(" cmake file not loaded yet. Searching for one...")
             self._cmake_file = File.search(
                 file_name=FlagsManager.CMAKE_FILE_NAME,
                 from_folder=self._search_scope.from_folder,
-                to_folder=self._search_scope.to_folder)
+                to_folder=self._search_scope.to_folder,
+                search_content="project")
 
-        if self._cmake_file.was_modified():
+        if self._use_cmake and self._cmake_file.was_modified():
             # generate a .clang_complete file from cmake file if cmake file
             # exists and was modified
             log.debug(" CMakeLists.txt was modified."
@@ -76,7 +85,8 @@ class FlagsManager:
                     self._cmake_file.folder(),
                     FlagsManager.CLANG_COMPLETE_FILE_NAME)
                 FlagsManager.write_flags_to_file(
-                    flags_set, new_clang_file_path)
+                    flags_set, new_clang_file_path,
+                    self._flags_update_strategy)
             else:
                 log.warning(" could not get compilation database from cmake")
 
@@ -121,12 +131,46 @@ class FlagsManager:
         return File(database_path)
 
     @staticmethod
-    def write_flags_to_file(flags, file_path):
+    def write_flags_to_file(flags_set, file_path, strategy):
+        if path.exists(file_path):
+            log.debug(" path already exists")
+            flag_strategy = FlagsManager.get_flags_strategy(strategy)
+            log.debug(" picked '%s' strategy.", flag_strategy)
+            if flag_strategy == "keep_old":
+                return
+            if flag_strategy == "merge":
+                curr_flags = set(FlagsManager.flags_from_clang_file(
+                    File(file_path), separate_includes=False))
+                # union
+                flags_set = flags_set.union(curr_flags)
+            # unhandled is only "overwrite". "ask" is not possible here.
         f = open(file_path, 'w')
-        # overwrite file
+        # write file
         f.seek(0)
-        f.write('\n'.join(flags) + '\n')
+        f.write('\n'.join(flags_set) + '\n')
         f.close()
+
+    @staticmethod
+    def get_flags_strategy(strategy):
+        if strategy == "ask":
+            user_pick = sublime.yes_no_cancel_dialog(
+                ".clang_complete file exists. What do you want to do?",
+                "Merge!", "Overwrite!")
+            if user_pick == sublime.DIALOG_YES:
+                return "merge"
+            if user_pick == sublime.DIALOG_NO:
+                return "overwrite"
+            if user_pick == sublime.DIALOG_CANCEL:
+                return "keep_old"
+        else:
+            return strategy
+
+    @staticmethod
+    def merge_flags(flags_1, flags_2):
+        s = set()
+        s.add(flags_1)
+        s.add(flags_2)
+        return list(s)
 
     @staticmethod
     def flags_from_database(database_file):

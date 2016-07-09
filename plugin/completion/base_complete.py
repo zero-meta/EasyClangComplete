@@ -137,9 +137,13 @@ class BaseCompleter:
         if not view:
             return
         current_dir = path.dirname(view.file_name())
-        self.flags_manager = FlagsManager(SearchScope(
+        search_scope = SearchScope(
             from_folder=current_dir,
-            to_folder=settings.project_base_folder))
+            to_folder=settings.project_base_folder)
+        self.flags_manager = FlagsManager(
+            use_cmake=settings.generate_flags_with_cmake,
+            flags_update_strategy=settings.cmake_flags_priority,
+            search_scope=search_scope)
 
     def complete(self, view, cursor_pos, show_errors):
         """Function to generate completions. See children for implementation.

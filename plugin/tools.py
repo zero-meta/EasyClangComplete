@@ -121,7 +121,7 @@ class File:
         return False
 
     @staticmethod
-    def search(file_name, from_folder, to_folder):
+    def search(file_name, from_folder, to_folder, search_content=None):
         """search for a file up the tree
 
         Args:
@@ -141,11 +141,30 @@ class File:
                     found_file = File(path.join(current_folder, file))
                     log.debug(" found '%s' file: %s",
                               file_name, found_file.full_path())
+                    if search_content:
+                        if File.contains(found_file.full_path(),
+                                         search_content):
+                            return found_file
+                        else:
+                            log.debug(" skipping file '%s'. ", found_file)
+                            log.debug(" no line starts with: '%s'",
+                                      search_content)
+                            continue
+                    # this is reached only if we don't search any content
                     return found_file
             if current_folder == path.dirname(current_folder):
                 break
             current_folder = path.dirname(current_folder)
         return None
+
+    @staticmethod
+    def contains(file_path, str):
+        with open(file_path) as f:
+            for line in f:
+                if line.startswith(str):
+                    log.debug(" found needed line: '%s'", line)
+                    return True
+        return False
 
 
 class Tools:
@@ -297,4 +316,3 @@ class Tools:
         # if nothing fired we don't need to do anything
         log.debug(" no completions needed")
         return PosStatus.COMPLETION_NOT_NEEDED
-

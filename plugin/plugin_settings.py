@@ -52,6 +52,10 @@ class Settings:
     errors_on_save = None
     use_libclang = None
     hide_default_completions = None
+    generate_flags_with_cmake = None
+    cmake_flags_priority = None
+
+    CMAKE_PRIORITIES = ["ask", "merge", "overwrite", "keep_old"]
 
     def __init__(self):
         """Initialize the class.
@@ -85,12 +89,18 @@ class Settings:
         self.errors_on_save = self.subl_settings.get("errors_on_save")
         self.std_flag = self.subl_settings.get("std_flag")
         self.use_libclang = self.subl_settings.get("use_libclang")
-        self.search_clang_complete = self.subl_settings.get(
-            "search_clang_complete_file")
         self.project_specific_settings = self.subl_settings.get(
             "use_project_specific_settings")
         self.hide_default_completions = self.subl_settings.get(
             "hide_default_completions")
+
+        # handle flags-related things
+        self.search_clang_complete = self.subl_settings.get(
+            "search_clang_complete_file")
+        self.generate_flags_with_cmake = self.subl_settings.get(
+            "generate_flags_with_cmake")
+        self.cmake_flags_priority = self.subl_settings.get(
+            "cmake_flags_priority")
 
         self.subl_settings.clear_on_change(PKG_NAME)
         self.subl_settings.add_on_change(PKG_NAME, self.on_settings_changed)
@@ -201,6 +211,16 @@ class Settings:
             return False
         if self.hide_default_completions is None:
             log.critical(" no hide_default_completions setting found")
+            return False
+        if self.generate_flags_with_cmake is None:
+            log.critical(" no generate_flags_with_cmake setting found")
+            return False
+        if self.cmake_flags_priority is None:
+            log.critical(" no cmake_flags_priority setting found")
+            return False
+        if self.cmake_flags_priority not in Settings.CMAKE_PRIORITIES:
+            log.critical(" priority: '%s' is not one of allowed ones!",
+                         self.cmake_flags_priority)
             return False
         return True
 

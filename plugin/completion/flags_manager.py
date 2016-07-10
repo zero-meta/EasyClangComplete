@@ -39,7 +39,7 @@ class FlagsManager:
     _use_cmake = False
     _flags_update_strategy = "ask"
 
-    cmake_mask = "cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {}"
+    cmake_mask = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {path}'
 
     CMAKE_FILE_NAME = "CMakeLists.txt"
     CMAKE_DB_FILE_NAME = "compile_commands.json"
@@ -80,13 +80,25 @@ class FlagsManager:
             compilation_db = FlagsManager.compile_cmake(
                 self._cmake_file)
             if compilation_db:
-                flags_set = FlagsManager.flags_from_database(compilation_db)
+                new_flags = FlagsManager.flags_from_database(compilation_db)
                 new_clang_file_path = path.join(
                     self._cmake_file.folder(),
                     FlagsManager.CLANG_COMPLETE_FILE_NAME)
-                FlagsManager.write_flags_to_file(
-                    flags_set, new_clang_file_path,
-                    self._flags_update_strategy)
+                # there is no need to modify anything if the flags have not
+                # changed since we have last read them
+                curr_flags = set(FlagsManager.flags_from_clang_file(
+                                file=File(new_clang_file_path),
+                                separate_includes=False))
+                if len(new_flags.symmetric_difference(curr_flags)) > 0:
+                    FlagsManager.write_flags_to_file(
+                        new_flags, new_clang_file_path,
+                        self._flags_update_strategy)
+                    log.debug("'%s' is not equal to '%s' by %s so update",
+                              new_flags, curr_flags,
+                              new_flags.symmetric_difference(curr_flags))
+                else:
+                    log.debug(" the flags have not changed so we don't "
+                              "modify the .clang_complete file")
             else:
                 log.warning(" could not get compilation database from cmake")
 
@@ -108,15 +120,23 @@ class FlagsManager:
     @staticmethod
     def compile_cmake(cmake_file):
         import os
-        cmake_cmd = FlagsManager.cmake_mask.format(cmake_file.folder())
-        tempdir = path.join(Tools.get_temp_dir(), 'build')
+        import hashlib
+        cmake_cmd = FlagsManager.cmake_mask.format(path=cmake_file.folder())
+        unique_proj_str = hashlib.md5(
+            cmake_file.full_path().encode('utf-8')).hexdigest()
+        tempdir = path.join(
+            Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
         if not path.exists(tempdir):
             os.makedirs(tempdir)
         try:
+            my_env = os.environ.copy()
+            # TODO: add variables that are otherwise missing
+            # my_env['CMAKE_PREFIX_PATH'] = '/home/igor/Code/catkin_ws/devel:/opt/ros/indigo'
             output = subprocess.check_output(cmake_cmd,
                                              stderr=subprocess.STDOUT,
                                              shell=True,
-                                             cwd=tempdir)
+                                             cwd=tempdir,
+                                             env=my_env)
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")
@@ -131,7 +151,7 @@ class FlagsManager:
         return File(database_path)
 
     @staticmethod
-    def write_flags_to_file(flags_set, file_path, strategy):
+    def write_flags_to_file(new_flags, file_path, strategy):
         if path.exists(file_path):
             log.debug(" path already exists")
             flag_strategy = FlagsManager.get_flags_strategy(strategy)
@@ -139,15 +159,15 @@ class FlagsManager:
             if flag_strategy == "keep_old":
                 return
             if flag_strategy == "merge":
+                # union of two flags sets
                 curr_flags = set(FlagsManager.flags_from_clang_file(
                     File(file_path), separate_includes=False))
-                # union
-                flags_set = flags_set.union(curr_flags)
+                new_flags = new_flags.union(curr_flags)
             # unhandled is only "overwrite". "ask" is not possible here.
         f = open(file_path, 'w')
         # write file
         f.seek(0)
-        f.write('\n'.join(flags_set) + '\n')
+        f.write('\n'.join(new_flags) + '\n')
         f.close()
 
     @staticmethod
@@ -186,11 +206,11 @@ class FlagsManager:
             all_command_parts = command.split()
             for (i, part) in enumerate(all_command_parts):
                 if part.startswith('-I') or part.startswith('-D'):
-                    flags_set.add(part)
+                    flags_set.add(part.strip())
                     continue
                 if part.startswith('-isystem'):
-                    flags_set.add(
-                        all_command_parts[i] + ' ' + all_command_parts[i + 1])
+                    tmp = all_command_parts[i] + ' ' + all_command_parts[i + 1]
+                    flags_set.add(tmp.strip())
                     continue
         log.debug(" flags set: %s", flags_set)
         return flags_set
@@ -223,9 +243,9 @@ class FlagsManager:
             content = f.readlines()
             for line in content:
                 if line.startswith('-D'):
-                    flags.append(line)
+                    flags.append(line.strip())
                 elif line.startswith('-I'):
-                    path_to_add = line[2:].rstrip()
+                    path_to_add = line[2:].strip()
                     if path.isabs(path_to_add):
                         flags.append(mask.format(
                             '-I', path.normpath(path_to_add)))
@@ -233,12 +253,13 @@ class FlagsManager:
                         flags.append(mask.format(
                             '-I', path.join(folder, path_to_add)))
                 elif line.startswith('-isystem'):
-                    path_to_add = line[8:].rstrip().strip()
+                    path_to_add = line[8:].strip()
                     if path.isabs(path_to_add):
                         flags.append(mask.format(
-                            '-isystem', path.normpath(path_to_add)))
+                            '-isystem', path.normpath(path_to_add)).strip())
                     else:
                         flags.append(mask.format(
-                            '-isystem', path.join(folder, path_to_add)))
+                            '-isystem',
+                            path.join(folder, path_to_add)).strip())
         log.debug(" .clang_complete contains flags: %s", flags)
         return flags

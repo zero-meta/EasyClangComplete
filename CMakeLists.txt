@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(blah)
 
-include_directories(${PROJECT_SOURCE_DIR})
+find_package(OpenCV)
+
+include_directories(${PROJECT_SOURCE_DIR}
+                    SYSTEM ${OpenCV_DIRS})
 
 add_executable(main test.cpp)

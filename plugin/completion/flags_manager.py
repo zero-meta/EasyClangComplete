@@ -90,12 +90,12 @@ class FlagsManager:
                                 file=File(new_clang_file_path),
                                 separate_includes=False))
                 if len(new_flags.symmetric_difference(curr_flags)) > 0:
-                    FlagsManager.write_flags_to_file(
-                        new_flags, new_clang_file_path,
-                        self._flags_update_strategy)
                     log.debug("'%s' is not equal to '%s' by %s so update",
                               new_flags, curr_flags,
                               new_flags.symmetric_difference(curr_flags))
+                    FlagsManager.write_flags_to_file(
+                        new_flags, new_clang_file_path,
+                        self._flags_update_strategy)
                 else:
                     log.debug(" the flags have not changed so we don't "
                               "modify the .clang_complete file")
@@ -256,10 +256,10 @@ class FlagsManager:
                     path_to_add = line[8:].strip()
                     if path.isabs(path_to_add):
                         flags.append(mask.format(
-                            '-isystem', path.normpath(path_to_add)).strip())
+                            '-isystem ', path.normpath(path_to_add)).strip())
                     else:
                         flags.append(mask.format(
-                            '-isystem',
+                            '-isystem ',
                             path.join(folder, path_to_add)).strip())
         log.debug(" .clang_complete contains flags: %s", flags)
         return flags

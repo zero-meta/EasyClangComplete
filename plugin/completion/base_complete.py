@@ -143,6 +143,7 @@ class BaseCompleter:
         self.flags_manager = FlagsManager(
             use_cmake=settings.generate_flags_with_cmake,
             flags_update_strategy=settings.cmake_flags_priority,
+            cmake_prefix_paths=settings.cmake_prefix_paths,
             search_scope=search_scope)
 
     def complete(self, view, cursor_pos, show_errors):

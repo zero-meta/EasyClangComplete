@@ -26,6 +26,11 @@
 	// 		- "keep_old": ignore flags from cmake, keep old one instead
 	"cmake_flags_priority": "ask",
 
+	// add these to CMAKE_PREFIX_PATH. Needed if you have an esoteric build system
+	"cmake_prefix_paths": [
+			"~/relative/path",
+			"/absolute/path"],
+
 	// show compile errors on save
 	"errors_on_save": true,
 

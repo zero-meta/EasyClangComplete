@@ -54,6 +54,7 @@ class Settings:
     hide_default_completions = None
     generate_flags_with_cmake = None
     cmake_flags_priority = None
+    cmake_prefix_paths = None
 
     CMAKE_PRIORITIES = ["ask", "merge", "overwrite", "keep_old"]
 
@@ -101,6 +102,8 @@ class Settings:
             "generate_flags_with_cmake")
         self.cmake_flags_priority = self.subl_settings.get(
             "cmake_flags_priority")
+        self.cmake_prefix_paths = self.subl_settings.get(
+            "cmake_prefix_paths")
 
         self.subl_settings.clear_on_change(PKG_NAME)
         self.subl_settings.add_on_change(PKG_NAME, self.on_settings_changed)
@@ -221,6 +224,9 @@ class Settings:
         if self.cmake_flags_priority not in Settings.CMAKE_PRIORITIES:
             log.critical(" priority: '%s' is not one of allowed ones!",
                          self.cmake_flags_priority)
+            return False
+        if self.cmake_prefix_paths is None:
+            log.critical(" no cmake_prefix_paths setting found")
             return False
         return True
 

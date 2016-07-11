@@ -38,6 +38,7 @@ class FlagsManager:
     _search_scope = SearchScope()
     _use_cmake = False
     _flags_update_strategy = "ask"
+    _cmake_prefix_paths = []
 
     cmake_mask = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {path}'
 
@@ -48,12 +49,18 @@ class FlagsManager:
     def __init__(self,
                  use_cmake,
                  flags_update_strategy,
+                 cmake_prefix_paths=[],
                  search_scope=SearchScope()):
         if not search_scope.valid():
             log.error(" search scope is wrong.", search_scope)
         self._search_scope = search_scope
         self._use_cmake = use_cmake
         self._flags_update_strategy = flags_update_strategy
+        self._cmake_prefix_paths = cmake_prefix_paths
+        # expand all entries containing "~"
+        self._cmake_prefix_paths \
+            = [path.expanduser(x) for x in self._cmake_prefix_paths]
+        log.debug(" expanded CMAKE_PREFIX_PATHs: %s", self._cmake_prefix_paths)
 
     def any_file_modified(self):
         if self._cmake_file.was_modified():
@@ -78,7 +85,8 @@ class FlagsManager:
             log.debug(" CMakeLists.txt was modified."
                       " Generate new .clang_complete")
             compilation_db = FlagsManager.compile_cmake(
-                self._cmake_file)
+                cmake_file=self._cmake_file,
+                prefix_paths=self._cmake_prefix_paths)
             if compilation_db:
                 new_flags = FlagsManager.flags_from_database(compilation_db)
                 new_clang_file_path = path.join(
@@ -118,7 +126,7 @@ class FlagsManager:
         return self._flags
 
     @staticmethod
-    def compile_cmake(cmake_file):
+    def compile_cmake(cmake_file, prefix_paths):
         import os
         import hashlib
         cmake_cmd = FlagsManager.cmake_mask.format(path=cmake_file.folder())
@@ -131,7 +139,8 @@ class FlagsManager:
         try:
             my_env = os.environ.copy()
             # TODO: add variables that are otherwise missing
-            # my_env['CMAKE_PREFIX_PATH'] = '/home/igor/Code/catkin_ws/devel:/opt/ros/indigo'
+            my_env['CMAKE_PREFIX_PATH'] = ":".join(prefix_paths)
+            # /home/igor/Code/catkin_ws/devel:/opt/ros/indigo
             output = subprocess.check_output(cmake_cmd,
                                              stderr=subprocess.STDOUT,
                                              shell=True,
@@ -186,13 +195,6 @@ class FlagsManager:
             return strategy
 
     @staticmethod
-    def merge_flags(flags_1, flags_2):
-        s = set()
-        s.add(flags_1)
-        s.add(flags_2)
-        return list(s)
-
-    @staticmethod
     def flags_from_database(database_file):
         import json
         data = None
@@ -209,7 +211,13 @@ class FlagsManager:
                     flags_set.add(part.strip())
                     continue
                 if part.startswith('-isystem'):
-                    tmp = all_command_parts[i] + ' ' + all_command_parts[i + 1]
+                    full_include = all_command_parts[i + 1]
+                    if full_include.startswith('"'):
+                        j = 2
+                        while not full_include.endswith('"'):
+                            full_include += " " + all_command_parts[i + j]
+                            j += 1
+                    tmp = '-isystem {}'.format(full_include)
                     flags_set.add(tmp.strip())
                     continue
         log.debug(" flags set: %s", flags_set)

@@ -99,6 +99,8 @@ class File:
             # leave the object unitialized
             return
         self.__full_path = path.abspath(file_path)
+        # TODO: probably I should initialize the file here if it does not exist
+        # yet. Alternatively, I could just set the path to None in thie case
 
     def full_path(self):
         return self.__full_path

@@ -40,6 +40,9 @@ class FlagsManager:
     _flags_update_strategy = "ask"
     _cmake_prefix_paths = []
 
+    _possible_prefixes = ['std', 'isystem', 'D', 'I']
+    _include_prefixes = ['isystem', 'I']
+
     cmake_mask = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {path}'
 
     CMAKE_FILE_NAME = "CMakeLists.txt"
@@ -88,15 +91,17 @@ class FlagsManager:
                 cmake_file=self._cmake_file,
                 prefix_paths=self._cmake_prefix_paths)
             if compilation_db:
-                new_flags = FlagsManager.flags_from_database(compilation_db)
+                new_flags = FlagsManager.flags_from_database(
+                    database_file=compilation_db,
+                    separate_includes=separate_includes)
                 new_clang_file_path = path.join(
                     self._cmake_file.folder(),
                     FlagsManager.CLANG_COMPLETE_FILE_NAME)
                 # there is no need to modify anything if the flags have not
                 # changed since we have last read them
-                curr_flags = set(FlagsManager.flags_from_clang_file(
+                curr_flags = FlagsManager.flags_from_clang_file(
                                 file=File(new_clang_file_path),
-                                separate_includes=False))
+                                separate_includes=separate_includes)
                 if len(new_flags.symmetric_difference(curr_flags)) > 0:
                     log.debug("'%s' is not equal to '%s' by %s so update",
                               new_flags, curr_flags,
@@ -140,7 +145,6 @@ class FlagsManager:
             my_env = os.environ.copy()
             # TODO: add variables that are otherwise missing
             my_env['CMAKE_PREFIX_PATH'] = ":".join(prefix_paths)
-            # /home/igor/Code/catkin_ws/devel:/opt/ros/indigo
             output = subprocess.check_output(cmake_cmd,
                                              stderr=subprocess.STDOUT,
                                              shell=True,
@@ -195,7 +199,7 @@ class FlagsManager:
             return strategy
 
     @staticmethod
-    def flags_from_database(database_file):
+    def flags_from_database(database_file, separate_includes):
         import json
         data = None
         with open(database_file.full_path()) as data_file:
@@ -205,21 +209,10 @@ class FlagsManager:
         flags_set = set()
         for entry in data:
             command = entry['command']
-            all_command_parts = command.split()
-            for (i, part) in enumerate(all_command_parts):
-                if part.startswith('-I') or part.startswith('-D'):
-                    flags_set.add(part.strip())
-                    continue
-                if part.startswith('-isystem'):
-                    full_include = all_command_parts[i + 1]
-                    if full_include.startswith('"'):
-                        j = 2
-                        while not full_include.endswith('"'):
-                            full_include += " " + all_command_parts[i + j]
-                            j += 1
-                    tmp = '-isystem {}'.format(full_include)
-                    flags_set.add(tmp.strip())
-                    continue
+            all_command_parts = command.split(' -')
+            current_flags = FlagsManager.parse_flags(
+                database_file, all_command_parts, separate_includes)
+            flags_set = flags_set.union(current_flags)
         log.debug(" flags set: %s", flags_set)
         return flags_set
 
@@ -242,32 +235,31 @@ class FlagsManager:
             log.error(" cannot get flags from clang_complete_file. No file.")
             return []
 
-        flags = []
-        folder = file.folder()
+        flags = set()
+        with open(file.full_path()) as f:
+            content = f.readlines()
+            flags = FlagsManager.parse_flags(file, content, separate_includes)
+        log.debug(" .clang_complete contains flags: %s", flags)
+        return flags
+
+    @staticmethod
+    def parse_flags(file, lines, separate_includes):
         mask = '{}{}'
         if separate_includes:
             mask = '{} "{}"'
-        with open(file.full_path()) as f:
-            content = f.readlines()
-            for line in content:
-                if line.startswith('-D'):
-                    flags.append(line.strip())
-                elif line.startswith('-I'):
-                    path_to_add = line[2:].strip()
-                    if path.isabs(path_to_add):
-                        flags.append(mask.format(
-                            '-I', path.normpath(path_to_add)))
-                    else:
-                        flags.append(mask.format(
-                            '-I', path.join(folder, path_to_add)))
-                elif line.startswith('-isystem'):
-                    path_to_add = line[8:].strip()
-                    if path.isabs(path_to_add):
-                        flags.append(mask.format(
-                            '-isystem ', path.normpath(path_to_add)).strip())
-                    else:
-                        flags.append(mask.format(
-                            '-isystem ',
-                            path.join(folder, path_to_add)).strip())
-        log.debug(" .clang_complete contains flags: %s", flags)
+        folder = file.folder()
+        flags = set()
+        log.debug(" all lines: %s", lines)
+        for line in lines:
+            for prefix in FlagsManager._possible_prefixes:
+                full_prefix = '-' + prefix
+                if not line.startswith('-'):
+                    line = '-' + line
+                if line.startswith(full_prefix):
+                    flag_content = line[len(full_prefix):].strip()
+                    flag_content = flag_content.strip('"')
+                    if prefix in FlagsManager._include_prefixes:
+                        if not path.isabs(flag_content):
+                            flag_content = path.join(folder, flag_content)
+                    flags.add(mask.format(full_prefix, flag_content))
         return flags

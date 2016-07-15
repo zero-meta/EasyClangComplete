@@ -5,7 +5,7 @@ project(blah)
 find_package(OpenCV)
 
 include_directories(${PROJECT_SOURCE_DIR}
-                    SYSTEM ${OpenCV_DIRS},
-                    "src blah")
+                    "src blah"
+                    SYSTEM ${OpenCV_DIRS})
 
 add_executable(main test.cpp)

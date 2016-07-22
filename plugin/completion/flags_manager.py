@@ -99,6 +99,8 @@ class FlagsManager:
                     FlagsManager.CLANG_COMPLETE_FILE_NAME)
                 # there is no need to modify anything if the flags have not
                 # changed since we have last read them
+                # we also create a file if it was not created before
+                open(new_clang_file_path, 'a+').close()
                 curr_flags = FlagsManager.flags_from_clang_file(
                                 file=File(new_clang_file_path),
                                 separate_includes=separate_includes)
@@ -106,9 +108,12 @@ class FlagsManager:
                     log.debug("'%s' is not equal to '%s' by %s so update",
                               new_flags, curr_flags,
                               new_flags.symmetric_difference(curr_flags))
+                    if (len(curr_flags) > 0):
+                        strategy = self._flags_update_strategy
+                    else:
+                        strategy = "overwrite"
                     FlagsManager.write_flags_to_file(
-                        new_flags, new_clang_file_path,
-                        self._flags_update_strategy)
+                        new_flags, new_clang_file_path, strategy)
                 else:
                     log.debug(" the flags have not changed so we don't "
                               "modify the .clang_complete file")

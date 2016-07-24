@@ -34,7 +34,10 @@ log = logging.getLogger(__name__)
 
 class SublBridge:
 
-    """ A small help class that bridges with sublime (maybe will grow)
+    """A small help class that bridges with sublime (maybe will grow)
+
+    Attributes:
+        NO_DEFAULT_COMPLETIONS (TYPE): Description
     """
 
     NO_DEFAULT_COMPLETIONS = sublime.INHIBIT_WORD_COMPLETIONS \
@@ -78,7 +81,7 @@ class SublBridge:
 
 class PosStatus:
 
-    """ Enum class for position status
+    """Enum class for position status
 
     Attributes:
         COMPLETION_NEEDED (int): completion needed
@@ -91,32 +94,58 @@ class PosStatus:
 
 
 class File:
+    """Class that handles a path to the file
+    """
     __full_path = None
     __last_seen_modification = 0
 
     def __init__(self, file_path=None):
+        """Initialize a new file and create if needed
+
+        Args:
+            file_path (str, optional): generate file object from this path
+        """
         if not file_path or not path:
             # leave the object unitialized
             return
         self.__full_path = path.abspath(file_path)
-        # TODO: probably I should initialize the file here if it does not exist
-        # yet. Alternatively, I could just set the path to None in thie case
+        # initialize the file
+        open(self.__full_path, 'a+').close()
 
     def full_path(self):
+        """Get full path to file.
+
+        Returns:
+            str: full path
+        """
         return self.__full_path
 
     def folder(self):
+        """Get parent folder to the file.
+
+        Returns:
+            str: parent folder of a file
+        """
         return path.dirname(self.__full_path)
 
     def loaded(self):
+        """Is the file loaded?
+        """
         if self.__full_path:
             return True
         return False
 
     def was_modified(self):
+        """Was the file modified since the last access?
+
+        Returns:
+            bool: True if modified, False if not. Creation is modification.
+        """
         if not self.loaded():
             return False
         actual_modification_time = path.getmtime(self.__full_path)
+        log.debug(" last mod: %s, actual mod: %s",
+                  self.__last_seen_modification, actual_modification_time)
         if actual_modification_time > self.__last_seen_modification:
             self.__last_seen_modification = actual_modification_time
             return True
@@ -127,8 +156,10 @@ class File:
         """search for a file up the tree
 
         Args:
+            file_name (TYPE): Description
             from_folder (str): path to folder where we start the search
             to_folder (str): path to folder we should not go beyond
+            search_content (None, optional): Description
 
         Returns:
             File: found file
@@ -161,6 +192,15 @@ class File:
 
     @staticmethod
     def contains(file_path, str):
+        """Contains line
+
+        Args:
+            file_path (str): path to file
+            str (str): string to search
+
+        Returns:
+            bool: True if contains str, False if not
+        """
         with open(file_path) as f:
             for line in f:
                 if line.startswith(str):
@@ -171,16 +211,16 @@ class File:
 
 class Tools:
 
-    """ just a bunch of helpful tools to unclutter main file
+    """just a bunch of helpful tools to unclutter main file
 
     Attributes:
-        syntax_regex (regex): regex to parse syntax setting
-        valid_extensions (list): list of valid extentions for autocompletion
-        valid_synax (list): list of valid syntaxes for this plugin
-        SHOW_DEFAULT_COMPLETIONS: `None` to return from `on_query_completions`.
-            This guarantees that sublime text will show default completions.
         HIDE_DEFAULT_COMPLETIONS: a valud to return from `on_query_completions`
             Ensures nothing will be shown apart from the output of this plugin
+        SHOW_DEFAULT_COMPLETIONS: `None` to return from `on_query_completions`.
+            This guarantees that sublime text will show default completions.
+        syntax_regex (regex): regex to parse syntax setting
+        valid_extensions (list): list of valid extentions for autocompletion
+        valid_syntax (list): list of valid syntaxes for this plugin
 
     """
 

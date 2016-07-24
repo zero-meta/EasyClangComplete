@@ -1,4 +1,4 @@
-""" Module with a class for .clang_complete file
+""" Module with a class for managing flags from different sources
 
 Attributes:
     log (logging.log): logger for this module
@@ -16,7 +16,9 @@ log = logging.getLogger(__name__)
 
 
 class SearchScope:
-    """docstring for SearchScope"""
+    """
+    Encapsulation of a search scope for code cleanness.
+    """
     from_folder = None
     to_folder = None
 
@@ -31,7 +33,15 @@ class SearchScope:
 
 
 class FlagsManager:
+    """
+    A class that manages all the work with flags generation and update.
 
+    Attributes:
+        CLANG_COMPLETE_FILE_NAME (str): constant name of file to store flags
+        CMAKE_DB_FILE_NAME (str): constant name of cmake database file
+        CMAKE_FILE_NAME (str): constant name of CMakeLists.txt file
+        cmake_mask (str format): mask for cmake command with path to fill
+    """
     _cmake_file = File()
     _clang_complete_file = File()
     _flags = []
@@ -52,10 +62,24 @@ class FlagsManager:
     def __init__(self,
                  use_cmake,
                  flags_update_strategy,
-                 cmake_prefix_paths=[],
+                 cmake_prefix_paths=None,
                  search_scope=SearchScope()):
+        """
+        Initialize the flags manager
+
+        Args:
+            use_cmake (bool): should we search for CMakeLists.txt?
+            flags_update_strategy (str): how to deal with flags conflicts?
+            cmake_prefix_paths (str[], optional): should we add any file paths
+                to the CMAKE_PREFIX_PATH before building a cmake project?
+            search_scope (tools.SearchScope, optional): search scope where to
+                search for CMakeLists.txt file and .clang_complete file.
+        """
         if not search_scope.valid():
             log.error(" search scope is wrong.", search_scope)
+            return
+        if not cmake_prefix_paths:
+            cmake_prefix_paths = []
         self._search_scope = search_scope
         self._use_cmake = use_cmake
         self._flags_update_strategy = flags_update_strategy
@@ -73,6 +97,19 @@ class FlagsManager:
         return False
 
     def get_flags(self, separate_includes):
+        """
+        A function that handles getting all the flags. It will generate new
+        flags in a lazy fashion. When any changes are detected and will update
+        the needed files and flags generated from them. In case no changes have
+        been made to .clang_complete file or to CMakeLists.txt file it will
+        just return already existing flags.
+
+        Args: separate_includes (bool): should we separate include path from
+            their identifier?
+
+        Returns:
+            str[]: flags
+        """
         if self._use_cmake and not self._cmake_file.loaded():
             # CMakeLists.txt was not loaded yet, so search for it
             log.debug(" cmake file not loaded yet. Searching for one...")
@@ -99,11 +136,9 @@ class FlagsManager:
                     FlagsManager.CLANG_COMPLETE_FILE_NAME)
                 # there is no need to modify anything if the flags have not
                 # changed since we have last read them
-                # we also create a file if it was not created before
-                open(new_clang_file_path, 'a+').close()
                 curr_flags = FlagsManager.flags_from_clang_file(
-                                file=File(new_clang_file_path),
-                                separate_includes=separate_includes)
+                    file=File(new_clang_file_path),
+                    separate_includes=separate_includes)
                 if len(new_flags.symmetric_difference(curr_flags)) > 0:
                     log.debug("'%s' is not equal to '%s' by %s so update",
                               new_flags, curr_flags,
@@ -137,18 +172,33 @@ class FlagsManager:
 
     @staticmethod
     def compile_cmake(cmake_file, prefix_paths):
+        """
+        Compiles cmake given a CMakeLists.txt file and get a new compilation
+        database path to further parse the generated flags. The build is
+        performed in a temporary folder with a unique folder name for the
+        project being built - a hex number generated from the pull path to
+        current CMakeListst.txt file.
+
+        Args:
+            cmake_file (tools.file): file object for CMakeLists.txt file
+            prefix_paths (str[]): paths to add to CMAKE_PREFIX_PATH before
+            running `cmake`
+        """
         import os
+        import shutil
         import hashlib
         cmake_cmd = FlagsManager.cmake_mask.format(path=cmake_file.folder())
         unique_proj_str = hashlib.md5(
             cmake_file.full_path().encode('utf-8')).hexdigest()
         tempdir = path.join(
             Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
-        if not path.exists(tempdir):
-            os.makedirs(tempdir)
+        # ensure a clean build
+        shutil.rmtree(tempdir)
+        os.makedirs(tempdir)
         try:
+            # sometimes there are variables missing to carry out the build. We
+            # can set them here from the settings.
             my_env = os.environ.copy()
-            # TODO: add variables that are otherwise missing
             my_env['CMAKE_PREFIX_PATH'] = ":".join(prefix_paths)
             output = subprocess.check_output(cmake_cmd,
                                              stderr=subprocess.STDOUT,
@@ -170,6 +220,16 @@ class FlagsManager:
 
     @staticmethod
     def write_flags_to_file(new_flags, file_path, strategy):
+        """
+        Given new set of flags, check if we need to overwrite flags and then if
+        needed write these flags to the `.clang_complete` file.
+
+        Args:
+            new_flags (set(str)): new flags
+            file_path (str): path to .clang_complete file
+            strategy (str): strategy to deal with conflicts in flags
+
+        """
         if path.exists(file_path):
             log.debug(" path already exists")
             flag_strategy = FlagsManager.get_flags_strategy(strategy)
@@ -190,6 +250,17 @@ class FlagsManager:
 
     @staticmethod
     def get_flags_strategy(strategy):
+        """
+        Get a str representing strategy used when dealing with new flags. Does
+        not change the default strategy unless "ask" starategy is default. Then
+        the strategy will be picked by asking the user.
+
+        Args:
+            strategy (str): default strategy
+
+        Returns:
+            str: picked strategy
+        """
         if strategy == "ask":
             user_pick = sublime.yes_no_cancel_dialog(
                 ".clang_complete file exists. What do you want to do?",
@@ -205,6 +276,13 @@ class FlagsManager:
 
     @staticmethod
     def flags_from_database(database_file, separate_includes):
+        """Get flags from cmake compilation database
+        Args: database_file (tools.File): compilation database file
+            separate_includes (bool): separate include specifier from the path
+            by a space
+        Returns:
+            set(str): flags
+        """
         import json
         data = None
         with open(database_file.full_path()) as data_file:
@@ -231,11 +309,11 @@ class FlagsManager:
                 if False: stays -I<include>
 
         Returns:
-            list(str): parsed list of includes from the file
-
-        Deleted Parameters:
-            file (str): path to a file
+            se(tstr): parsed list of includes from the file
         """
+        if not path.exists(file.full_path()):
+            log.debug(" .clang_complete does not exist yet. No flags present.")
+            return []
         if not file.loaded():
             log.error(" cannot get flags from clang_complete_file. No file.")
             return []
@@ -243,16 +321,27 @@ class FlagsManager:
         flags = set()
         with open(file.full_path()) as f:
             content = f.readlines()
-            flags = FlagsManager.parse_flags(file, content, separate_includes)
+            flags = FlagsManager.parse_flags(file.full_path(),
+                                             content,
+                                             separate_includes)
         log.debug(" .clang_complete contains flags: %s", flags)
         return flags
 
     @staticmethod
-    def parse_flags(file, lines, separate_includes):
+    def parse_flags(folder, lines, separate_includes):
+        """Parse the flags in a given file
+
+        Args:
+            folder (str): current folder
+            lines (str[]): lines to parse
+            separate_includes (bool): if True "-I/blah" turns to "-I '/blah'"
+
+        Returns:
+            str[]: flags
+        """
         mask = '{}{}'
         if separate_includes:
             mask = '{} "{}"'
-        folder = file.folder()
         flags = set()
         log.debug(" all lines: %s", lines)
         for line in lines:

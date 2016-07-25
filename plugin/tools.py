@@ -191,19 +191,19 @@ class File:
         return None
 
     @staticmethod
-    def contains(file_path, str):
+    def contains(file_path, query):
         """Contains line
 
         Args:
             file_path (str): path to file
-            str (str): string to search
+            query (str): string to search
 
         Returns:
             bool: True if contains str, False if not
         """
         with open(file_path) as f:
             for line in f:
-                if line.startswith(str):
+                if line.startswith(query):
                     log.debug(" found needed line: '%s'", line)
                     return True
         return False

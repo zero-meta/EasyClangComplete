@@ -29,6 +29,8 @@ class BaseCompleter:
         async_completions_ready (bool): is true after async completions ready
         completions (list): current list of completions
         error_vis (plugin.CompileErrors): object of compile errors class
+        flags_manager (FlagsManager): An object that manages all the flags and
+            how to load them from disk to memory.
         valid (bool): is completer valid
         version_str (str): version string of format "3.4" for clang v. 3.4
     """
@@ -102,8 +104,9 @@ class BaseCompleter:
         return True
 
     def remove(self, view_id):
-        """called when completion for this view is not needed anymore.
-        For actual implementation see children of this class.
+        """
+        Called when completion for this view is not needed anymore. For actual
+        implementation see children of this class.
 
         Args:
             view_id (sublime.View): current view
@@ -114,7 +117,8 @@ class BaseCompleter:
         raise NotImplementedError("calling abstract method")
 
     def exists_for_view(self, view_id):
-        """check if completer for this view is initialized and is ready to
+        """
+        Check if completer for this view is initialized and is ready to
         autocomplete. For real implementation see children.
 
         Args:
@@ -126,7 +130,8 @@ class BaseCompleter:
         raise NotImplementedError("calling abstract method")
 
     def init(self, view, settings):
-        """Initialize the completer for this view. For real implementation see
+        """
+        Initialize the completer for this view. For real implementation see
         children.
 
         Args:
@@ -173,6 +178,14 @@ class BaseCompleter:
         raise NotImplementedError("calling abstract method")
 
     def get_completions(self, hide_default_completions):
+        """ Get completions. Manage hiding default ones.
+
+        Args:
+            hide_default_completions (bool): True if we hide default ones
+
+        Returns:
+            tupple: (completions, flags)
+        """
         if hide_default_completions:
             log.debug(" hiding default completions")
             return (self.completions, tools.SublBridge.NO_DEFAULT_COMPLETIONS)

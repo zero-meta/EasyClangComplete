@@ -23,6 +23,14 @@ class SearchScope:
     to_folder = None
 
     def __init__(self, from_folder=None, to_folder=None):
+        """
+        Initialize the search scope. If eny of the folders in None,
+        set it to root
+
+        Args:
+            from_folder (str, optional): search from this folder
+            to_folder (str, optional): search up to this folder
+        """
         self.from_folder = from_folder
         self.to_folder = to_folder
         if not self.to_folder:
@@ -31,6 +39,11 @@ class SearchScope:
             self.from_folder = path.abspath('/')
 
     def valid(self):
+        """ Is the search scope valid?
+
+        Returns:
+            bool: True if valid, False otherwise
+        """
         if self.from_folder and self.to_folder:
             return True
         return False
@@ -94,6 +107,12 @@ class FlagsManager:
         log.debug(" expanded CMAKE_PREFIX_PATHs: %s", self._cmake_prefix_paths)
 
     def any_file_modified(self):
+        """
+        Any of the checked files was modified since last use.
+
+        Returns:
+            bool: True if modified, False otherwise
+        """
         if self._cmake_file.was_modified():
             return True
         if self._clang_complete_file.was_modified():
@@ -307,7 +326,8 @@ class FlagsManager:
 
     @staticmethod
     def flags_from_clang_file(file, separate_includes):
-        """parse .clang_complete file
+        """
+        Parse .clang_complete file
 
         Args:
             separate_includes (bool):  Separation is needed for binary complete
@@ -335,7 +355,8 @@ class FlagsManager:
 
     @staticmethod
     def parse_flags(folder, lines, separate_includes):
-        """Parse the flags in a given file
+        """
+        Parse the flags in a given file
 
         Args:
             folder (str): current folder

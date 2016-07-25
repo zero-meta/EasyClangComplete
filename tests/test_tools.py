@@ -174,7 +174,11 @@ class test_tools(TestCase):
 
 
 class test_file(TestCase):
+    """ Testing file related stuff
+    """
     def test_find_file(self):
+        """ Test if we can find a file
+        """
         current_folder = path.dirname(path.abspath(__file__))
         parent_folder = path.dirname(current_folder)
         file = File.search(

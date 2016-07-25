@@ -143,9 +143,11 @@ class FlagsManager:
                     log.debug("'%s' is not equal to '%s' by %s so update",
                               new_flags, curr_flags,
                               new_flags.symmetric_difference(curr_flags))
-                    if (len(curr_flags) > 0):
+                    if len(curr_flags) > 0:
                         strategy = self._flags_update_strategy
                     else:
+                        # there are no current flags, so no need to ask user
+                        # what to do, just write the new file content
                         strategy = "overwrite"
                     FlagsManager.write_flags_to_file(
                         new_flags, new_clang_file_path, strategy)

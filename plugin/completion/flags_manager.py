@@ -76,7 +76,7 @@ class FlagsManager:
                 search for CMakeLists.txt file and .clang_complete file.
         """
         if not search_scope.valid():
-            log.error(" search scope is wrong.", search_scope)
+            log.error(" search scope is wrong.")
             return
         if not cmake_prefix_paths:
             cmake_prefix_paths = []

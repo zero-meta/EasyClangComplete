@@ -25,8 +25,6 @@ class SearchScope:
     def __init__(self, from_folder=None, to_folder=None):
         self.from_folder = from_folder
         self.to_folder = to_folder
-        if not self.to_folder:
-            self.to_folder = path.abspath('/')
 
     def valid(self):
         if self.from_folder and self.to_folder:
@@ -197,7 +195,7 @@ class FlagsManager:
         tempdir = path.join(
             Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
         # ensure a clean build
-        shutil.rmtree(tempdir)
+        shutil.rmtree(tempdir, ignore_errors=True)
         os.makedirs(tempdir)
         try:
             # sometimes there are variables missing to carry out the build. We

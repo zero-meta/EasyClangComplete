@@ -25,6 +25,10 @@ class SearchScope:
     def __init__(self, from_folder=None, to_folder=None):
         self.from_folder = from_folder
         self.to_folder = to_folder
+        if not self.to_folder:
+            self.to_folder = path.abspath('/')
+        if not self.from_folder:
+            self.from_folder = path.abspath('/')
 
     def valid(self):
         if self.from_folder and self.to_folder:

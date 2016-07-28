@@ -225,6 +225,7 @@ class FlagsManager:
             # can set them here from the settings.
             my_env = os.environ.copy()
             my_env['CMAKE_PREFIX_PATH'] = ":".join(prefix_paths)
+            log.info(' runnign command: %s', cmake_cmd)
             output = subprocess.check_output(cmake_cmd,
                                              stderr=subprocess.STDOUT,
                                              shell=True,

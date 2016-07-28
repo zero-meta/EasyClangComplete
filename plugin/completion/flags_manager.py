@@ -70,7 +70,7 @@ class FlagsManager:
     _possible_prefixes = ['std', 'isystem', 'D', 'I']
     _include_prefixes = ['isystem', 'I']
 
-    cmake_mask = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {path}'
+    cmake_mask = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
 
     CMAKE_FILE_NAME = "CMakeLists.txt"
     CMAKE_DB_FILE_NAME = "compile_commands.json"

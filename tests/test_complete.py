@@ -233,8 +233,10 @@ class base_test_complete(object):
         line = file.readline()
         while line:
             print(line)
-            if line.startswith('-I') and line.strip().endswith('lib'):
-                found = True
+            real_line = line.strip()
+            if line.startswith('-I'):
+                if real_line.endswith('lib') or real_line.endswith('lib"'):
+                    found = True
             line = file.readline()
         file.close()
         self.assertTrue(found)

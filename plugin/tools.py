@@ -188,7 +188,7 @@ class File:
             if current_folder == path.dirname(current_folder):
                 break
             current_folder = path.dirname(current_folder)
-        return None
+        return File()
 
     @staticmethod
     def contains(file_path, query):

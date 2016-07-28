@@ -235,8 +235,7 @@ class FlagsManager:
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")
             log.info(" clang process finished with code: \n%s", e.returncode)
-            log.info(" clang process output: \n%s", output_text)
-        log.debug(" cmake produced output: \n%s", output_text)
+        log.info(" cmake produced output: \n%s", output_text)
 
         database_path = path.join(tempdir, FlagsManager.CMAKE_DB_FILE_NAME)
         if not path.exists(database_path):

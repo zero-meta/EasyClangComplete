@@ -10,3 +10,6 @@
 
 # added by GitSavvy
 /easy_auto_complete.sublime-workspace
+
+# added by GitSavvy
+/tests/cmake_tests/.clang_complete

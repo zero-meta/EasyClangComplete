@@ -205,6 +205,40 @@ class base_test_complete(object):
         # Verify that the completer ignores the scratch view.
         self.assertFalse(completer.exists_for_view(self.view.buffer_id()))
 
+    def test_cmake_generate(self):
+        """
+        We search for cmakelists and generate .clang_complete file.
+        Here we test that everything has happenede as expected.
+        """
+        test_file_path = path.join('cmake_tests', 'test_a.cpp')
+        self.setUpView(test_file_path)
+
+        file_name = path.join(path.dirname(__file__),
+                              'cmake_tests',
+                              'test_a.cpp')
+        self.assertEqual(self.view.file_name(), file_name)
+        completer = self.setUpCompleter()
+        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
+        expected_cmake_file = path.join('cmake_tests', 'CMakeLists.txt')
+        expected_clang_file = path.join('cmake_tests', '.clang_complete')
+        self.assertTrue(
+            completer.flags_manager._cmake_file.full_path().endswith(
+                expected_cmake_file))
+        self.assertTrue(
+            completer.flags_manager._clang_complete_file.full_path().endswith(
+                expected_clang_file))
+        flags_file = completer.flags_manager._clang_complete_file.full_path()
+        file = open(flags_file, 'r')
+        found = False
+        line = file.readline()
+        while line:
+            print(line)
+            if line.startswith('-I') and line.strip().endswith('lib'):
+                found = True
+            line = file.readline()
+        file.close()
+        self.assertTrue(found)
+
 
 class test_bin_complete(base_test_complete, TestCase):
     """ Test class for the binary based completer. """

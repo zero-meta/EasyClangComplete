@@ -210,6 +210,9 @@ class base_test_complete(object):
         We search for cmakelists and generate .clang_complete file.
         Here we test that everything has happenede as expected.
         """
+        if platform.system() == "Windows":
+            print("windows is not fully supported for cmake")
+            return
         test_file_path = path.join('cmake_tests', 'test_a.cpp')
         self.setUpView(test_file_path)
 

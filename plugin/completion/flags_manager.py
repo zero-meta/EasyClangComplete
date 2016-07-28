@@ -70,7 +70,10 @@ class FlagsManager:
     _possible_prefixes = ['std', 'isystem', 'D', 'I']
     _include_prefixes = ['isystem', 'I']
 
-    cmake_mask = 'cmake -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
+    cmake_mask = 'cmake -G "Unix Makefiles" '
+    '-DCMAKE_C_COMPILER={clang_path} '
+    '-DCMAKE_CXX_COMPILER={clang_path} '
+    '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
 
     CMAKE_FILE_NAME = "CMakeLists.txt"
     CMAKE_DB_FILE_NAME = "compile_commands.json"
@@ -212,7 +215,8 @@ class FlagsManager:
         import os
         import shutil
         import hashlib
-        cmake_cmd = FlagsManager.cmake_mask.format(path=cmake_file.folder())
+        cmake_cmd = FlagsManager.cmake_mask.format(clang_path="clang",
+                                                   path=cmake_file.folder())
         unique_proj_str = hashlib.md5(
             cmake_file.full_path().encode('utf-8')).hexdigest()
         tempdir = path.join(

@@ -342,8 +342,8 @@ class Completer(BaseCompleter):
             pos_search = Completer.compl_regex.search(completion)
             if not pos_search:
                 log.debug(
-                    " completion %s did not match pattern %s",
-                    completion, Completer.compl_regex)
+                    " completion '%s' did not match pattern '%s'",
+                    completion, Completer.compl_regex.pattern)
                 continue
             comp_dict = pos_search.groupdict()
             # log.debug("completions parsed: %s", comp_dict)

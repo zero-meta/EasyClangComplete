@@ -229,6 +229,6 @@ class BaseCompleter:
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")
-            log.info(" clang process finished with code: \n%s", e.returncode)
+            log.debug(" clang process finished with code: %s", e.returncode)
             log.debug(" clang process output: \n%s", output_text)
         return output_text

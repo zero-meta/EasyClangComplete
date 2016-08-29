@@ -59,25 +59,28 @@ class BaseCompleter:
             raise RuntimeError("clang binary not defined")
 
         # run the cmd to get the proper version of the installed clang
-        check_version_cmd = clang_binary + " --version"
+        check_version_cmd = clang_binary + " -v"
         log.info(" Getting version from command: `%s`", check_version_cmd)
-        output = subprocess.check_output(check_version_cmd, shell=True)
-        output_text = ''.join(map(chr, output))
+        output_text = BaseCompleter.run_command(check_version_cmd, shell=True)
 
         # now we have the output, and can extract version from it
-        version_regex = re.compile("\d.\d")
-        found = version_regex.search(output_text)
-        self.version_str = found.group()
-        if self.version_str > "3.8" and platform.system() == "Darwin":
-            # info from this table: https://gist.github.com/yamaya/2924292
-            osx_version = self.version_str
-            self.version_str = tools.OSX_CLANG_VERSION_DICT[osx_version]
-            info = {"platform": platform.system()}
-            log.warning(
-                " OSX version %s reported. Reducing it to %s. Info: %s",
-                osx_version, self.version_str, info)
-        log.info(" Found clang version: %s", self.version_str)
-        # initialize error visuzlization
+        version_regex = re.compile("\d\.\d")
+        match = version_regex.search(output_text)
+        if match:
+            self.version_str = match.group()
+            if self.version_str > "3.8" and platform.system() == "Darwin":
+                # info from this table: https://gist.github.com/yamaya/2924292
+                osx_version = self.version_str
+                self.version_str = tools.OSX_CLANG_VERSION_DICT[osx_version]
+                info = {"platform": platform.system()}
+                log.warning(
+                    " OSX version %s reported. Reducing it to %s. Info: %s",
+                    osx_version, self.version_str, info)
+            log.info(" Found clang version: %s", self.version_str)
+        else:
+            raise RuntimeError(
+                " Couldn't find clang version in clang version output.")
+        # initialize error visualization
         self.error_vis = error_vis.CompileErrors()
 
     def needs_init(self, view):
@@ -210,7 +213,7 @@ class BaseCompleter:
             'next_competion_if_showing': True, })
 
     @staticmethod
-    def run_command(command):
+    def run_command(command, shell=True):
         """ Run a generic command in a subprocess
 
         Args:
@@ -222,7 +225,7 @@ class BaseCompleter:
         try:
             output = subprocess.check_output(command,
                                              stderr=subprocess.STDOUT,
-                                             shell=True)
+                                             shell=shell)
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")

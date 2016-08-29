@@ -182,9 +182,9 @@ class test_file(TestCase):
         current_folder = path.dirname(path.abspath(__file__))
         parent_folder = path.dirname(current_folder)
         file = File.search(
-             file_name='.travis.yml',
+             file_name='README.md',
              from_folder=current_folder,
              to_folder=parent_folder)
-        expected = path.join(parent_folder, '.travis.yml')
+        expected = path.join(parent_folder, 'README.md')
         self.assertTrue(file.loaded())
         self.assertEqual(file.full_path(), expected)

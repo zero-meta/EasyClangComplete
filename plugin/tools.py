@@ -107,6 +107,7 @@ class File:
         """
         if not file_path or not path:
             # leave the object unitialized
+            log.error(" path not initialized!")
             return
         self.__full_path = path.abspath(file_path)
         # initialize the file
@@ -164,24 +165,24 @@ class File:
         Returns:
             File: found file
         """
-        log.debug(" searching '%s' from '%s' to '%s'",
-                  file_name, from_folder, to_folder)
+        log.info(" searching '%s' from '%s' to '%s'",
+                 file_name, from_folder, to_folder)
         current_folder = from_folder
         one_past_stop_folder = path.dirname(to_folder)
         while current_folder != one_past_stop_folder:
             for file in listdir(current_folder):
                 if file == file_name:
                     found_file = File(path.join(current_folder, file))
-                    log.debug(" found '%s' file: %s",
-                              file_name, found_file.full_path())
+                    log.info(" found '%s' file: %s",
+                             file_name, found_file.full_path())
                     if search_content:
                         if File.contains(found_file.full_path(),
                                          search_content):
                             return found_file
                         else:
-                            log.debug(" skipping file '%s'. ", found_file)
-                            log.debug(" no line starts with: '%s'",
-                                      search_content)
+                            log.info(" skipping file '%s'. ", found_file)
+                            log.info(" no line starts with: '%s'",
+                                     search_content)
                             continue
                     # this is reached only if we don't search any content
                     return found_file

@@ -172,6 +172,7 @@ class File:
         while current_folder != one_past_stop_folder:
             for file in listdir(current_folder):
                 if file == file_name:
+                    log.info(" looking at: %s", path.join(current_folder, file))
                     found_file = File(path.join(current_folder, file))
                     log.info(" found '%s' file: %s",
                              file_name, found_file.full_path())

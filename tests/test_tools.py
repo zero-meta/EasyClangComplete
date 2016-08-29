@@ -181,6 +181,8 @@ class test_file(TestCase):
         """
         current_folder = path.dirname(path.abspath(__file__))
         parent_folder = path.dirname(current_folder)
+        print('current folder', current_folder)
+        print('parent folder', parent_folder)
         file = File.search(
              file_name='.clang_complete',
              from_folder=current_folder,

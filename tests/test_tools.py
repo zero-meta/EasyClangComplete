@@ -188,5 +188,6 @@ class test_file(TestCase):
              from_folder=current_folder,
              to_folder=parent_folder)
         expected = path.join(parent_folder, '.clang_complete')
+        print("is", file.full_path(),"equal to", expected,"?")
         self.assertTrue(file.loaded())
         self.assertEqual(file.full_path(), expected)

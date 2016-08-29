@@ -164,26 +164,24 @@ class File:
         Returns:
             File: found file
         """
-        log.info(" searching '%s' from '%s' to '%s'",
-                 file_name, from_folder, to_folder)
+        log.debug(" searching '%s' from '%s' to '%s'",
+                  file_name, from_folder, to_folder)
         current_folder = from_folder
         one_past_stop_folder = path.dirname(to_folder)
         while current_folder != one_past_stop_folder:
             for file in listdir(current_folder):
-                log.info(" looking at file: '%s'",
-                         path.join(current_folder, file))
                 if file == file_name:
                     found_file = File(path.join(current_folder, file))
-                    log.info(" found '%s' file: %s",
-                             file_name, found_file.full_path())
+                    log.debug(" found '%s' file: %s",
+                              file_name, found_file.full_path())
                     if search_content:
                         if File.contains(found_file.full_path(),
                                          search_content):
                             return found_file
                         else:
-                            log.info(" skipping file '%s'. ", found_file)
-                            log.info(" no line starts with: '%s'",
-                                     search_content)
+                            log.debug(" skipping file '%s'. ", found_file)
+                            log.debug(" no line starts with: '%s'",
+                                      search_content)
                             continue
                     # this is reached only if we don't search any content
                     return found_file

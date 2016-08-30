@@ -52,7 +52,10 @@ class Completer(BaseCompleter):
     """
     clang_binary = None
 
-    init_flags = ["-c", "-fsyntax-only", "-x c++"]
+    init_flags = ["-c",
+                  "-fsyntax-only",
+                  "-x c++",
+                  "-fdiagnostics-format=clang"]
     flags_dict = {}
     std_flag = None
 

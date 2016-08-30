@@ -35,6 +35,8 @@ Follow all the following steps to ensure the plugin works as expected!
 
 ## Install clang ##
 - **Ubuntu**: `sudo apt-get install clang`
+  + *WARNING*: for `Ubuntu 16.04` default clang is 3.8. This plugin currently has problems with it, so please instead install:
+  + `sudo apt-get install clang-3.5`
 - **Windows**: install the latest release from `clang`
   [website](http://llvm.org/releases/download.html)
 - **OSX**: ships `clang` by default. You are all set!
@@ -42,10 +44,24 @@ Follow all the following steps to ensure the plugin works as expected!
   [website](http://llvm.org/releases/download.html)
 
 ## Configure your includes ##
-`Clang` will automatically search for headers in the folder that contains the
-file you are working on and its parent. If you have a more sophisticated
-project you will need to help `clang` just a little bit. There are three ways
-to do it. Pick any of the following:
+
+### Are you using CMake? ###
+Then you're good to go! All the flags should be guessed automatically. The
+plugin will create a folder for your project in the temporary folder, will run
+`cmake -DCMAKE_EXPORT_COMPILE_COMMANDS <your_project_location>` to generate the
+compilation database and will parse it to get correct flags for your project.
+The flags will be saved to `.clang_complete` file near a `CMakeLists.txt` that
+contains a `project <name>` line.
+
+**WARNING**: this is in Beta state. Refer to issue [#19][cmake-issue] for
+discussions on the topic.
+
+### Not using CMake? ###
+You will need a little bit of manual setup for now. `Clang` will automatically
+search for headers in the folder that contains the file you are working on and
+its parent. If you have a more sophisticated project you will need to help
+`clang` just a little bit. There are three ways to do it. Pick any of the
+following:
 
 - Set `include_dirs` setting in `User Settings`:
   + see default [settings](EasyClangComplete.sublime-settings) to get started.
@@ -60,7 +76,7 @@ to do it. Pick any of the following:
     file.
   + absolute paths start with `/`. All the others are treated as relative.
 
-## You're good to go! ##
+## That's it! You're ready to use the plugin! ##
 
 # More on the plugin #
 All the essential information to make the plugin run is written above. If you
@@ -172,10 +188,9 @@ If you are an experienced python developer and find that something in my code
 sucks completely - **DO** tell me. Python is not my main language and I am
 always willing to learn.
 
-Some functionality is there only because of the help of the following users:
+Some functionality is there only because of the help of the following users (in no particualr order):
 
-- @Ventero for fixing `libclang` search on OSX
-- @riazanovskiy for hints on `clang-3.8`
+@Ventero, @riazanovskiy, @rchl.
 
 ## Tests ##
 I have tried to cover most crucial functionality with unit tests using
@@ -204,6 +219,7 @@ Please buy me a cup of tea if you appreciate the effort.
 [donate-paypal]: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2QLY7J4Q944HS
 [donate-flattr]: https://flattr.com/submit/auto?user_id=niosus&url=https://github.com/niosus/EasyClangComplete&title=EasyClangComplete&language=Python&tags=github&category=software
 [libclang-issue]: https://github.com/niosus/EasyClangComplete/issues/4
+[cmake-issue]: https://github.com/niosus/EasyClangComplete/issues/19
 
 
 [img-appveyor]: https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true

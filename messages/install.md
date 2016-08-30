@@ -12,10 +12,24 @@ Follow the following steps to make sure everything runs smoothly!
   [website](http://llvm.org/releases/download.html)
 
 ## Configure your includes ##
-`Clang` will automatically search for headers in the folder that contains the
-file you are working on and its parent. If you have a more sophisticated
-project you will need to help `clang` just a little bit. There are three ways
-to do it. Pick any of the following:
+
+### Are you using CMake? ###
+Then you're good to go! All the flags should be guessed automatically. The
+plugin will create a folder for your project in the temporary folder, will run
+`cmake -DCMAKE_EXPORT_COMPILE_COMMANDS <your_project_location>` to generate the
+compilation database and will parse it to get correct flags for your project.
+The flags will be saved to `.clang_complete` file near a `CMakeLists.txt` that
+contains a `project <name>` line.
+
+**WARNING**: this is in Beta state. Refer to issue [#19][cmake-issue] for
+discussions on the topic.
+
+### Not using CMake? ###
+You will need a little bit of manual setup for now. `Clang` will automatically
+search for headers in the folder that contains the file you are working on and
+its parent. If you have a more sophisticated project you will need to help
+`clang` just a little bit. There are three ways to do it. Pick any of the
+following:
 
 - Set `include_dirs` setting in `User Settings`:
   + see default [settings](EasyClangComplete.sublime-settings) to get started.

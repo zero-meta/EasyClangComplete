@@ -223,9 +223,16 @@ class BaseCompleter:
             str: raw command output
         """
         try:
+            startupinfo = None
+            if platform.system() == "Windows":
+                # Don't let console window pop-up briefly.
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = subprocess.SW_HIDE
             output = subprocess.check_output(command,
                                              stderr=subprocess.STDOUT,
-                                             shell=shell)
+                                             shell=shell,
+                                             startupinfo=startupinfo)
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")

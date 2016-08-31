@@ -79,17 +79,22 @@ class ClangUtils:
             log.info(" we are on '%s'", platform.system())
             file = "libclang{}".format(suffix)
             log.info(" searching for: '%s'", file)
+            startupinfo = None
             # let's find the library
             if platform.system() == "Darwin":
                 # [HACK]: wtf??? why does it not find libclang.dylib?
                 get_library_path_cmd = [clang_binary, "-print-file-name="]
             elif platform.system() == "Windows":
-                # [HACK]: wtf??? why does it not find libclang.dylib?
                 get_library_path_cmd = [clang_binary, "-print-prog-name="]
+                # Don't let console window pop-up briefly.
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = subprocess.SW_HIDE
             else:
                 get_library_path_cmd = [clang_binary, "-print-file-name={}".format(file)]
             output = subprocess.check_output(
-                get_library_path_cmd).decode('utf8').strip()
+                get_library_path_cmd,
+                startupinfo=startupinfo).decode('utf8').strip()
             log.info(" libclang search output = '%s'", output)
             if output:
                 libclang_dir = ClangUtils.dir_from_output(output)

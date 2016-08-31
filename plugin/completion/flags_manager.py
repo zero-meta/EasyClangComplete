@@ -319,7 +319,7 @@ class FlagsManager:
             command = entry['command']
             all_command_parts = command.split(' -')
             current_flags = FlagsManager.parse_flags(
-                database_file, all_command_parts, separate_includes)
+                database_file.folder(), all_command_parts, separate_includes)
             flags_set = flags_set.union(current_flags)
         log.debug(" flags set: %s", flags_set)
         return flags_set
@@ -347,7 +347,7 @@ class FlagsManager:
         flags = set()
         with open(file.full_path()) as f:
             content = f.readlines()
-            flags = FlagsManager.parse_flags(file.full_path(),
+            flags = FlagsManager.parse_flags(file.folder(),
                                              content,
                                              separate_includes)
         log.debug(" .clang_complete contains flags: %s", flags)

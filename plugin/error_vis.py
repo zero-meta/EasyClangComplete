@@ -1,8 +1,6 @@
 """module for compile error visualization
 
 Attributes:
-    FORMAT_BINARY (str): constant for picking binary parsing strategy
-    FORMAT_LIBCLANG (str): constant for picking library parsing strategy
     log (logging): this module logger
 """
 import re
@@ -11,40 +9,25 @@ from os import path
 
 log = logging.getLogger(__name__)
 
-FORMAT_LIBCLANG = "libclang"
-FORMAT_BINARY = "binary"
 
 class CompileErrors:
     """Comple errors is a class that encapsulates compile error visualization
 
     Attributes:
         err_regions (dict): dictionary of error regions for view ids
-        error_regex (re): regex to find contents of an error
-        msg_regex (re): regex to find error message
-        pos_regex (re): regex to find position of an error
     """
-
-    pos_regex = re.compile("'(?P<file>.+)'.*"  # file
-                           + "line\s(?P<row>\d+), "  # row
-                           + "column\s(?P<col>\d+)")  # col
-    msg_regex = re.compile("b\"(?P<error>.+)\"")
-    error_regex = re.compile("(?P<file>.*):" +
-                             "(?P<row>\d+):(?P<col>\d+): " +
-                             ".*error: (?P<error>.*)")
-
 
     _TAG = "easy_clang_complete_errors"
 
     err_regions = {}
 
-    def generate(self, view, errors, error_format):
+    def generate(self, view, errors):
         """Generate a dictionary that stores all errors along with their
         positions and descriptions. Needed to show these errors on the screen.
 
         Args:
             view (sublime.View): current view
-            errors (list): list of unparsed errors in format @error_format
-            error_format (str): either FORMAT_LIBCLANG or FORMAT_BINARY
+            errors (list): list of parsed errors (dict objects)
         """
         log.debug(" generating error regions for view %s", view.buffer_id())
         # first clear old regions
@@ -54,53 +37,9 @@ class CompileErrors:
         # create an empty region dict for view id
         self.err_regions[view.buffer_id()] = {}
 
-        if error_format == FORMAT_LIBCLANG:
-            # expect a tu_diagnostics instance
-            self.errors_from_tu_diag(view, errors)
-        elif error_format == FORMAT_BINARY:
-            # expect a list of strings for each line of cmd output
-            self.errors_from_clang_output(view, errors)
-        else:
-            logging.critical(
-                " error_format:'%s' should match '%s' or '%s'",
-                error_format, FORMAT_LIBCLANG, FORMAT_BINARY)
+        for error in errors:
+            self.add_error(view, error)
         log.debug(" %s error regions ready", len(self.err_regions))
-
-
-    def errors_from_clang_output(self, view, clang_output):
-        """Parse errors received from clang binary output
-
-        Args:
-            view (sublime.View): current view
-            clang_output (list): list of unparsed errors
-        """
-        for line in clang_output:
-            error_search = CompileErrors.error_regex.search(line)
-            if not error_search:
-                continue
-            error_dict = error_search.groupdict()
-            self.add_error(view, error_dict)
-
-    def errors_from_tu_diag(self, view, tu_diagnostics):
-        """Parse errors received from diagnostics of a translation unit (used
-        with libclang)
-
-        Args:
-            view (sublime.View): current view
-            tu_diagnostics (diagnostics): diagnostics from a translation unit
-        """
-        # create new ones
-        for diag in tu_diagnostics:
-            location = str(diag.location)
-            spelling = str(diag.spelling)
-            pos_search = CompileErrors.pos_regex.search(location)
-            msg_search = CompileErrors.msg_regex.search(spelling)
-            if not pos_search or not msg_search:
-                # not valid, continue
-                continue
-            error_dict = pos_search.groupdict()
-            error_dict.update(msg_search.groupdict())
-            self.add_error(view, error_dict)
 
     def add_error(self, view, error_dict):
         """Put new compile error in the dictionary of errors

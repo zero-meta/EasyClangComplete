@@ -12,6 +12,7 @@ import logging
 from .. import error_vis
 from .. import tools
 from .base_complete import BaseCompleter
+from .compiler_variant import LibClangCompilerVariant
 
 
 log = logging.getLogger(__name__)
@@ -82,6 +83,9 @@ class Completer(BaseCompleter):
             except Exception as e:
                 log.error(" error: %s", e)
                 self.valid = False
+
+        # Create compiler options of specific variant of the compiler.
+        self.compiler_variant = LibClangCompilerVariant()
 
     def remove(self, view_id):
         """Remove tu for this view. Happens when we don't need it anymore.
@@ -182,10 +186,8 @@ class Completer(BaseCompleter):
         except Exception as e:
             log.error(" error while compiling: %s", e)
         if settings.errors_on_save:
-            self.error_vis.generate(
-                view, self.translation_units[view.buffer_id()].diagnostics,
-                error_vis.FORMAT_LIBCLANG)
-            self.error_vis.show_regions(view)
+            self.show_errors(
+                view, self.translation_units[view.buffer_id()].diagnostics)
 
     def complete(self, view, cursor_pos, show_errors):
         """ This function is called asynchronously to create a list of
@@ -228,10 +230,8 @@ class Completer(BaseCompleter):
         self.async_completions_ready = True
         Completer._reload_completions(view)
         if show_errors:
-            self.error_vis.generate(
-                view, self.translation_units[view.buffer_id()].diagnostics,
-                error_vis.FORMAT_LIBCLANG)
-            self.error_vis.show_regions(view)
+            self.show_errors(
+                view, self.translation_units[view.buffer_id()].diagnostics)
 
     def update(self, view, show_errors):
         """Reparse the translation unit. This speeds up completions
@@ -254,10 +254,8 @@ class Completer(BaseCompleter):
             log.debug(" reparsed translation unit in %s seconds",
                       time.time() - start)
             if show_errors:
-                self.error_vis.generate(
-                    view, self.translation_units[view.buffer_id()].diagnostics,
-                    error_vis.FORMAT_LIBCLANG)
-                self.error_vis.show_regions(view)
+                self.show_errors(
+                    view, self.translation_units[view.buffer_id()].diagnostics)
             return True
         log.error(" no translation unit for view id %s", view.buffer_id())
         return False

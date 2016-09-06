@@ -29,6 +29,7 @@ class BaseCompleter:
         async_completions_ready (bool): is true after async completions ready
         completions (list): current list of completions
         error_vis (plugin.CompileErrors): object of compile errors class
+        compiler_variant (CompilerVariant): compiler specific options
         flags_manager (FlagsManager): An object that manages all the flags and
             how to load them from disk to memory.
         valid (bool): is completer valid
@@ -36,6 +37,7 @@ class BaseCompleter:
     """
     version_str = None
     error_vis = None
+    compiler_variant = None
 
     flags_manager = None
 
@@ -179,6 +181,17 @@ class BaseCompleter:
             NotImplementedError: Guarantees we do not call this abstract method
         """
         raise NotImplementedError("calling abstract method")
+
+    def show_errors(self, view, output):
+        """ Show current complie errors
+
+        Args:
+            view (sublime.View): Current view
+            output (object): opaque output to be parsed by compiler variant
+        """
+        errors = self.compiler_variant.errors_from_output(output)
+        self.error_vis.generate(view, errors)
+        self.error_vis.show_regions(view)
 
     def get_completions(self, hide_default_completions):
         """ Get completions. Manage hiding default ones.

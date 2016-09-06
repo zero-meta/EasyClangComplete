@@ -16,6 +16,8 @@ from os import path
 from .. import error_vis
 from ..tools import Tools
 from .base_complete import BaseCompleter
+from .compiler_variant import ClangCompilerVariant
+from .compiler_variant import ClangClCompilerVariant
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -29,7 +31,6 @@ class Completer(BaseCompleter):
 
         clang_binary (str): e.g. "clang++" or "clang++-3.6"
         flags_dict (dict): compilation flags lists for each view
-        init_flags (list): flags that every command needs
         std_flag (TYPE): std flag, e.g. "std=c++11"
 
         completions (list): current completions
@@ -52,10 +53,6 @@ class Completer(BaseCompleter):
     """
     clang_binary = None
 
-    init_flags = ["-c",
-                  "-fsyntax-only",
-                  "-x c++",
-                  "-fdiagnostics-format=clang"]
     flags_dict = {}
     std_flag = None
 
@@ -91,6 +88,13 @@ class Completer(BaseCompleter):
         # init common completer interface
         super(Completer, self).__init__(clang_binary)
         Completer.clang_binary = clang_binary
+
+        # Create compiler options of specific variant of the compiler.
+        filename = path.splitext(path.basename(clang_binary))[0]
+        if filename.startswith('clang-cl'):
+            self.compiler_variant = ClangClCompilerVariant()
+        else:
+            self.compiler_variant = ClangCompilerVariant()
 
     def remove(self, view_id):
         """remove compile flags for view
@@ -155,8 +159,7 @@ class Completer(BaseCompleter):
             includes = settings.populate_include_dirs(view)
 
             for include in includes:
-                clang_flags.append('-I "{}"'.format(
-                    include))
+                clang_flags.append('-I "{}"'.format(include))
 
             if settings.search_clang_complete and self.flags_manager:
                 log.debug(" flags_manager loaded")
@@ -247,7 +250,7 @@ class Completer(BaseCompleter):
             # we construct command for update task
             complete_cmd = Completer.update_mask.format(
                 binary=Completer.clang_binary,
-                init=" ".join(Completer.init_flags),
+                init=" ".join(self.compiler_variant.init_flags),
                 std=self.std_flag,
                 file=temp_file_name,
                 flags=" ".join(flags))
@@ -261,7 +264,7 @@ class Completer(BaseCompleter):
                 file=temp_file_name, row=row, col=col)
             complete_cmd = Completer.completion_mask.format(
                 binary=Completer.clang_binary,
-                init=" ".join(Completer.init_flags),
+                init=" ".join(self.compiler_variant.init_flags),
                 std=self.std_flag,
                 complete_at=complete_at_str,
                 flags=" ".join(flags))
@@ -272,17 +275,6 @@ class Completer(BaseCompleter):
         log.debug(" clang command: \n%s", complete_cmd)
 
         return BaseCompleter.run_command(complete_cmd)
-
-    def show_errors(self, view, output_text):
-        """ Show current complie errors
-
-        Args:
-            view (sublime.View): Current view
-            output_text (str): raw clang command output to be parsed
-        """
-        self.error_vis.generate(view, output_text.splitlines(),
-                                error_vis.FORMAT_BINARY)
-        self.error_vis.show_regions(view)
 
     @staticmethod
     def _parse_completions(complete_results):

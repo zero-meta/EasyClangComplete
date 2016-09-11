@@ -7,8 +7,11 @@
 						"/workspace/$project_name/src",
 						],
 
-	// set the standard library flag.
-	"std_flag" : "-std=c++11",
+	// set the default c standard library flag.
+	"std_flag_c" : "-std=c11",
+
+	// set the default c++ standard library flag.
+	"std_flag_cpp" : "-std=c++11",
 
 	// search for .clang_complete file up the tree. Use includes from it if found
 	"search_clang_complete_file": true,

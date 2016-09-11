@@ -137,19 +137,27 @@ class Completer(BaseCompleter):
         # init needed variables from settings
         clang_flags = []
 
+        # set std_flag
+        std_flag = None
+        current_lang = Tools.get_view_syntax(view)
+        if current_lang != 'C':
+            std_flag = settings.std_flag_cpp
+        else:
+            std_flag = settings.std_flag_c
+
         # if we use project-specific settings we ignore everything else
         if settings.project_specific_settings:
             log.info(" overriding all flags by project ones")
             project_flags = settings.get_project_clang_flags()
             if project_flags:
-                clang_flags.append(settings.std_flag)
+                clang_flags.append(std_flag)
                 clang_flags += project_flags
             else:
                 log.error(" there are no project-specific settings.")
                 log.info(" falling back to using plugin settings.")
         if len(clang_flags) < 2:
             # add std flag to all flags
-            clang_flags.append(settings.std_flag)
+            clang_flags.append(std_flag)
             # this means that project specific settings are either not used or
             # invalid, so we still need to initialize from settings
 

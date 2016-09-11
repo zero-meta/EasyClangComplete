@@ -59,7 +59,8 @@ class test_settings(TestCase):
         self.assertIsNotNone(settings.triggers)
         self.assertIsNotNone(settings.include_dirs)
         self.assertIsNotNone(settings.clang_binary)
-        self.assertIsNotNone(settings.std_flag)
+        self.assertIsNotNone(settings.std_flag_c)
+        self.assertIsNotNone(settings.std_flag_cpp)
         self.assertIsNotNone(settings.search_clang_complete)
         self.assertIsNotNone(settings.errors_on_save)
 

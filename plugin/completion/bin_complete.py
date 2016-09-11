@@ -142,7 +142,12 @@ class Completer(BaseCompleter):
         clang_flags = None
 
         # set std_flag
-        self.std_flag = settings.std_flag
+        current_lang = Tools.get_view_syntax(view)
+        if current_lang != 'C':
+            self.std_flag = settings.std_flag_cpp
+        else:
+            self.std_flag = settings.std_flag_c
+
         # if we use project-specific settings we ignore everything else
         if settings.project_specific_settings:
             log.debug(" overriding all flags by project ones")

@@ -31,7 +31,8 @@ class Settings:
         project_specific_settings (TYPE): use project-specific settings
         search_clang_complete (bool): if true search for '.clang_complete'
             file up the tree
-        std_flag (string): flag of the c++ std library, e.g. -std=c++11
+        std_flag_c (string): flag of the c std library, e.g. -std=c11
+        std_flag_cpp (string): flag of the c++ std library, e.g. -std=c++11
         subl_settings (sublime.settings): link to sublime text settings dict
         triggers (string[]): triggers that trigger autocompletion
         use_libclang (bool): use libclang instead of parsing binary output
@@ -47,7 +48,8 @@ class Settings:
     triggers = None
     include_dirs = None
     clang_binary = None
-    std_flag = None
+    std_flag_cpp = None
+    std_flag_c = None
     search_clang_complete = None
     errors_on_save = None
     use_libclang = None
@@ -88,7 +90,8 @@ class Settings:
         self.include_dirs = self.subl_settings.get("include_dirs")
         self.clang_binary = self.subl_settings.get("clang_binary")
         self.errors_on_save = self.subl_settings.get("errors_on_save")
-        self.std_flag = self.subl_settings.get("std_flag")
+        self.std_flag_c = self.subl_settings.get("std_flag_c")
+        self.std_flag_cpp = self.subl_settings.get("std_flag_cpp")
         self.use_libclang = self.subl_settings.get("use_libclang")
         self.project_specific_settings = self.subl_settings.get(
             "use_project_specific_settings")
@@ -116,10 +119,6 @@ class Settings:
         if 'project_base_name' in variables:
             self.project_base_name = variables['project_base_name']
 
-        if self.std_flag is None:
-            self.std_flag = "-std=c++11"
-            log.debug(" set std_flag to default: %s", self.std_flag)
-
     def get_project_clang_flags(self):
         """Get clang flags for the current project
 
@@ -136,7 +135,10 @@ class Settings:
                 if flag.startswith('-I'):
                     project_flags.append(self.__expand_include(flag))
                 elif flag.startswith('-std'):
-                    self.std_flag = flag
+                    if 'c++' in flag:
+                        self.std_flag_cpp = flag
+                    else:
+                        self.std_flag_c = flag
                 else:
                     # we just append everything else
                     project_flags.append(flag)
@@ -197,8 +199,11 @@ class Settings:
         if self.clang_binary is None:
             log.critical(" no clang_binary setting found")
             return False
-        if self.std_flag is None:
-            log.critical(" no std_flag setting found")
+        if self.std_flag_c is None:
+            log.critical(" no std_flag_c setting found")
+            return False
+        if self.std_flag_cpp is None:
+            log.critical(" no std_flag_cpp setting found")
             return False
         if self.search_clang_complete is None:
             log.critical(" no search_clang_complete setting found")

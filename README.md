@@ -125,9 +125,12 @@ I will only cover most important settings here.
     + it is absolutely ok to include a folder that does not exist. `clang`
       knows how to deal with it and it will neither break anything nor make
       things slower.
-- `std_flag`:
-    + sets the standard flag that will be used for compilation. Defaults to
-      `std=c++11`
+- `std_flag_cpp`:
+    + sets the standard flag that will be used for compilation of `C++` code.
+      Defaults to `std=c++11`.
+- `std_flag_c`:
+    + sets the standard flag that will be used for compilation of `C` code.
+      Defaults to `std=c11`.
 - `use_libclang`:
     + if `true` use libclang as backend.
     + if `false` or if first option failed, use output from `clang -Xclang

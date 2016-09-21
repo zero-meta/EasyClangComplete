@@ -13,18 +13,5 @@
 		{
 			"path": "."
 		}
-	],
-	"settings":
-	{
-		"FuzzyFilePath":
-		{
-		},
-		"clang_flags":
-		[
-			"-std=c++11",
-			"-Isrc",
-			"-I/usr/include",
-			"-I/opt/ros/indigo/include"
-		]
-	}
+	]
 }

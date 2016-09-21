@@ -28,6 +28,7 @@ cindex_dict = {
     '3.6': tools.PKG_NAME + ".clang.cindex36",
     '3.7': tools.PKG_NAME + ".clang.cindex37",
     '3.8': tools.PKG_NAME + ".clang.cindex38",
+    '3.9': tools.PKG_NAME + ".clang.cindex39"
 }
 
 clang_utils_module_name = tools.PKG_NAME + ".clang.utils"

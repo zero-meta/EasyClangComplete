@@ -87,7 +87,7 @@ class LibClangCompilerVariant(CompilerVariant):
     pos_regex = re.compile("'(?P<file>.+)'.*" +  # file
                            "line\s(?P<row>\d+), " +  # row
                            "column\s(?P<col>\d+)")  # col
-    msg_regex = re.compile("b\"(?P<error>.+)\"")
+    msg_regex = re.compile('\"*(?P<error>.+)\"*')
 
     def errors_from_output(self, output):
         """Parse errors received from diagnostics of a translation unit (used
@@ -105,9 +105,15 @@ class LibClangCompilerVariant(CompilerVariant):
             spelling = str(diag.spelling)
             pos_search = self.pos_regex.search(location)
             msg_search = self.msg_regex.search(spelling)
-            if not pos_search or not msg_search:
+            if not pos_search:
                 # not valid, continue
+                log.error("regex %s failed to match location: %s",
+                          self.pos_regex.pattern, location)
                 continue
+            if not msg_search:
+                # maybe there was no error word, so show everything there is
+                log.error("regex %s failed to match error: %s",
+                          self.msg_regex.pattern, spelling)
             error_dict = pos_search.groupdict()
             error_dict.update(msg_search.groupdict())
             errors.append(error_dict)

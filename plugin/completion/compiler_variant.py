@@ -114,6 +114,7 @@ class LibClangCompilerVariant(CompilerVariant):
                 # maybe there was no error word, so show everything there is
                 log.error("regex %s failed to match error: %s",
                           self.msg_regex.pattern, spelling)
+                continue
             error_dict = pos_search.groupdict()
             error_dict.update(msg_search.groupdict())
             errors.append(error_dict)

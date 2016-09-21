@@ -12,6 +12,7 @@ Attributes:
     settings (plugin_settings.Settings): class that encapsulates settings
 """
 
+import sublime
 import sublime_plugin
 import imp
 import logging
@@ -69,6 +70,10 @@ def plugin_loaded():
     if not completer:
         log.info(" init completer based on clang from cmd")
         completer = bin_complete.Completer(settings.clang_binary)
+    # As the plugin have just loaded, we might have missed an activation event
+    # for the active view so completion will not work for it until re-activated.
+    # Force active view initialization in that case.
+    EasyClangComplete.on_activated_async(sublime.active_window().active_view())
 
 
 class EasyClangComplete(sublime_plugin.EventListener):

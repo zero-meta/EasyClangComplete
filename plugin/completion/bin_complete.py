@@ -59,12 +59,13 @@ class Completer(BaseCompleter):
     PARAM_TAG = "param"
     TYPE_TAG = "type"
     PARAM_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}!"
+    TYPE_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}\[\]!"
     group_params = "(?P<{param_tag}>[{param_chars}]+)".format(
         param_chars=PARAM_CHARS,
         param_tag=PARAM_TAG)
     group_types = "(?P<{type_tag}>[{type_chars}]+)".format(
         type_tag=TYPE_TAG,
-        type_chars=PARAM_CHARS)
+        type_chars=TYPE_CHARS)
 
     compl_str_mask = "{complete_flag}={file}:{row}:{col} {file}"
 

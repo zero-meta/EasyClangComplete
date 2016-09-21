@@ -348,7 +348,7 @@ class Tools:
                     log.debug(" wrong trigger '%s%s'.", prev_char, curr_char)
                     wrong_trigger_found = True
         if wrong_trigger_found:
-            # no correct trigger found, vut a wrong one fired instead
+            # no correct trigger found, but a wrong one fired instead
             log.debug(" wrong trigger fired")
             return PosStatus.WRONG_TRIGGER
 

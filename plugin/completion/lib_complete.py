@@ -228,15 +228,19 @@ class Completer(BaseCompleter):
             row, col,
             unsaved_files=files)
         end = time.time()
-        if complete_obj is None or len(complete_obj.results) == 0:
-            log.debug(" no completions")
-            return None
         log.debug(" code complete done in %s seconds", end - start)
 
-        self.completions = Completer._parse_completions(complete_obj)
-        log.debug(self.completions)
+        if complete_obj is None or len(complete_obj.results) == 0:
+            self.completions = []
+        else:
+            self.completions = Completer._parse_completions(complete_obj)
+        log.debug(' completions: %s' % self.completions)
         self.async_completions_ready = True
-        Completer._reload_completions(view)
+        if len(self.completions) > 0:
+            Completer._reload_completions(view)
+        else:
+            log.debug(" no completions")
+
         if show_errors:
             self.show_errors(
                 view, self.translation_units[view.buffer_id()].diagnostics)

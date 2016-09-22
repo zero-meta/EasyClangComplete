@@ -21,11 +21,11 @@ def has_libclang():
     Returns:
         str: row contents
     """
-    if platform.system() == "Darwin":
-        return True
-    if platform.system() == "Linux":
-        return True
-    return False
+    # Older version of Sublime Text x64 have ctypes crash bug.
+    if platform.system() == "Windows" and sublime.arch() == "x64" and \
+            int(sublime.version()) < 3123:
+        return False
+    return True
 
 
 class base_test_complete(object):

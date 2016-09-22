@@ -278,8 +278,7 @@ class base_test_complete(object):
         regions_dict = error_vis.err_regions[self.view.buffer_id()]
         self.assertIsNotNone(regions_dict)
         # Verify the number of rows with error regions.
-        expected_rows_count = 1
-        self.assertEqual(expected_rows_count, len(regions_dict.keys()))
+        self.assertTrue(len(regions_dict.keys()) > 0)
         # Verify the region row.
         expected_row = 2
         self.assertIn(expected_row, regions_dict)

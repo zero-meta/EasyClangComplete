@@ -10,6 +10,7 @@ import re
 import os.path as path
 
 from .tools import PKG_NAME
+from .tools import Tools
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -54,9 +55,12 @@ class Settings:
     errors_on_save = None
     use_libclang = None
     hide_default_completions = None
+
     generate_flags_with_cmake = None
     cmake_flags_priority = None
     cmake_prefix_paths = None
+
+    tu_max_age = None
 
     CMAKE_PRIORITIES = ["ask", "merge", "overwrite", "keep_old"]
 
@@ -105,8 +109,10 @@ class Settings:
             "generate_flags_with_cmake")
         self.cmake_flags_priority = self.subl_settings.get(
             "cmake_flags_priority")
-        self.cmake_prefix_paths = self.subl_settings.get(
-            "cmake_prefix_paths")
+        self.cmake_prefix_paths = self.subl_settings.get("cmake_prefix_paths")
+
+        max_tu_age_str = self.subl_settings.get("max_tu_age")
+        self.max_tu_age = Tools.seconds_from_string(max_tu_age_str)
 
         self.subl_settings.clear_on_change(PKG_NAME)
         self.subl_settings.add_on_change(PKG_NAME, self.on_settings_changed)
@@ -225,6 +231,9 @@ class Settings:
             return False
         if self.cmake_flags_priority is None:
             log.critical(" no cmake_flags_priority setting found")
+            return False
+        if self.max_tu_age is None:
+            log.critical(" no max_tu_age setting found")
             return False
         if self.cmake_flags_priority not in Settings.CMAKE_PRIORITIES:
             log.critical(" priority: '%s' is not one of allowed ones!",

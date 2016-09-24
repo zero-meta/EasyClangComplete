@@ -318,6 +318,19 @@ class Tools:
         return False
 
     @staticmethod
+    def seconds_from_string(time_str):
+        """ Get int seconds from string
+
+        Args:
+            time_str (str): string in format 'HH:MM:SS'
+
+        Returns:
+            int: seconds
+        """
+        h, m, s = time_str.split(":")
+        return int(h) * 3600 + int(m) * 60 + int(s)
+
+    @staticmethod
     def get_position_status(point, view, settings):
         """Check if the cursor focuses a valid trigger
 

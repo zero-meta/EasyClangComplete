@@ -9,30 +9,33 @@ import sublime
 import time
 import logging
 
-from .. import error_vis
-from .. import tools
 from .base_complete import BaseCompleter
 from .compiler_variant import LibClangCompilerVariant
+from .. import error_vis
+from ..tools import Tools
+from ..tools import SublBridge
+from ..tools import PKG_NAME
+from ..utils.stamped_tu import StampedTu
+
+from threading import Timer
+from threading import RLock
 
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
 
-Tools = tools.Tools
-SublBridge = tools.SublBridge
-
 cindex_dict = {
-    '3.2': tools.PKG_NAME + ".clang.cindex32",
-    '3.3': tools.PKG_NAME + ".clang.cindex33",
-    '3.4': tools.PKG_NAME + ".clang.cindex34",
-    '3.5': tools.PKG_NAME + ".clang.cindex35",
-    '3.6': tools.PKG_NAME + ".clang.cindex36",
-    '3.7': tools.PKG_NAME + ".clang.cindex37",
-    '3.8': tools.PKG_NAME + ".clang.cindex38",
-    '3.9': tools.PKG_NAME + ".clang.cindex39"
+    '3.2': PKG_NAME + ".clang.cindex32",
+    '3.3': PKG_NAME + ".clang.cindex33",
+    '3.4': PKG_NAME + ".clang.cindex34",
+    '3.5': PKG_NAME + ".clang.cindex35",
+    '3.6': PKG_NAME + ".clang.cindex36",
+    '3.7': PKG_NAME + ".clang.cindex37",
+    '3.8': PKG_NAME + ".clang.cindex38",
+    '3.9': PKG_NAME + ".clang.cindex39"
 }
 
-clang_utils_module_name = tools.PKG_NAME + ".clang.utils"
+clang_utils_module_name = PKG_NAME + ".clang.utils"
 
 
 class Completer(BaseCompleter):
@@ -41,19 +44,26 @@ class Completer(BaseCompleter):
 
     Attributes:
         tu_module (cindex.TranslationUnit): module for proper cindex
-        translation_units (dict): dictionary of tu's for each view id
+        TUs (dict(cindex.TranslationUnit)): dictionary of translation units
+            for each view id
     """
 
     tu_module = None
 
-    translation_units = {}
+    TUs = {}
+
+    timer = None
+    max_tu_age = None
+    timer_period = 10  # seconds
+
+    rlock = RLock()
 
     def __init__(self, clang_binary):
         """Initialize the Completer from clang binary, reading its version.
         Picks an according cindex for the found version.
 
         Args:
-            clang_binary (str): string for clang binary e.g. 'clang-3.6++'
+            clang_binary (str): string for clang binary e.g. 'clang++-3.8'
 
         """
         super(Completer, self).__init__(clang_binary)
@@ -96,11 +106,12 @@ class Completer(BaseCompleter):
             view_id (int): view id
 
         """
-        if view_id not in self.translation_units:
-            log.error(" no tu for view id: %s, so not removing", view_id)
-            return
-        log.debug(" removing translation unit for view id: %s", view_id)
-        del self.translation_units[view_id]
+        with self.rlock:
+            if view_id not in self.TUs:
+                log.error(" no tu for view id: %s, so not removing", view_id)
+                return
+            log.debug(" removing translation unit for view id: %s", view_id)
+            del self.TUs[view_id]
 
     def exists_for_view(self, view_id):
         """find if there is a completer for the view
@@ -111,9 +122,11 @@ class Completer(BaseCompleter):
         Returns:
             bool: has completer
         """
-        if view_id in self.translation_units:
-            return True
-        return False
+        with self.rlock:
+            if view_id in self.TUs:
+                self.TUs[view_id].touch()
+                return True
+            return False
 
     def init(self, view, settings):
         """Initialize the completer. Builds the view.
@@ -181,23 +194,31 @@ class Completer(BaseCompleter):
             log.debug(" This is a C++ file. Adding `-x c++` to flags")
             clang_flags = ['-x'] + ['c++'] + clang_flags
         log.debug(" clang flags are: %s", clang_flags)
-        try:
-            TU = Completer.tu_module
-            start = time.time()
-            log.debug(" compilation started for view id: %s", view.buffer_id())
-            self.translation_units[view.buffer_id()] = TU.from_source(
-                filename=file_name,
-                args=clang_flags,
-                unsaved_files=files,
-                options=TU.PARSE_PRECOMPILED_PREAMBLE |
-                TU.PARSE_CACHE_COMPLETION_RESULTS)
-            end = time.time()
-            log.debug(" compilation done in %s seconds", end - start)
-        except Exception as e:
-            log.error(" error while compiling: %s", e)
-        if settings.errors_on_save:
-            self.show_errors(
-                view, self.translation_units[view.buffer_id()].diagnostics)
+        v_id = view.buffer_id()
+        with self.rlock:
+            try:
+                TU = Completer.tu_module
+                start = time.time()
+                log.debug(" compilation started for view id: %s", v_id)
+                trans_unit = TU.from_source(
+                    filename=file_name,
+                    args=clang_flags,
+                    unsaved_files=files,
+                    options=TU.PARSE_PRECOMPILED_PREAMBLE |
+                    TU.PARSE_CACHE_COMPLETION_RESULTS)
+                self.TUs[v_id] = StampedTu(trans_unit)
+                end = time.time()
+                log.debug(" compilation done in %s seconds", end - start)
+            except Exception as e:
+                log.error(" error while compiling: %s", e)
+            if settings.errors_on_save:
+                self.show_errors(view, self.TUs[v_id].tu().diagnostics)
+
+        # start timer if it is not set yet
+        self.max_tu_age = settings.max_tu_age
+        if not self.timer:
+            self.timer = Timer(Completer.timer_period, self.__remove_old_TUs)
+            self.timer.start()
 
     def complete(self, view, cursor_pos, show_errors):
         """ This function is called asynchronously to create a list of
@@ -215,20 +236,23 @@ class Completer(BaseCompleter):
         # unsaved files
         files = [(view.file_name(), file_body)]
 
+        v_id = view.buffer_id()
+
         # do nothing if there in no translation_unit present
-        if not view.buffer_id() in self.translation_units:
-            log.error(" cannot complete. No translation unit for view %s",
-                      view.buffer_id())
-            return None
+        with self.rlock:
+            if v_id not in self.TUs:
+                log.error(" cannot complete. No TU for view %s", v_id)
+                return None
         # execute clang code completion
-        start = time.time()
-        log.debug(" started code complete for view %s", view.buffer_id())
-        complete_obj = self.translation_units[view.buffer_id()].codeComplete(
-            view.file_name(),
-            row, col,
-            unsaved_files=files)
-        end = time.time()
-        log.debug(" code complete done in %s seconds", end - start)
+        with self.rlock:
+            start = time.time()
+            log.debug(" started code complete for view %s", v_id)
+            complete_obj = self.TUs[v_id].tu().codeComplete(
+                view.file_name(),
+                row, col,
+                unsaved_files=files)
+            end = time.time()
+            log.debug(" code complete done in %s seconds", end - start)
 
         if complete_obj is None or len(complete_obj.results) == 0:
             self.completions = []
@@ -242,8 +266,9 @@ class Completer(BaseCompleter):
             log.debug(" no completions")
 
         if show_errors:
-            self.show_errors(
-                view, self.translation_units[view.buffer_id()].diagnostics)
+            with self.rlock:
+                self.show_errors(
+                    view, self.TUs[v_id].tu().diagnostics)
 
     def update(self, view, show_errors):
         """Reparse the translation unit. This speeds up completions
@@ -257,20 +282,41 @@ class Completer(BaseCompleter):
             bool: reparsed successfully
 
         """
-        log.debug(" view is %s", view.buffer_id())
-        if view.buffer_id() in self.translation_units:
-            log.debug(
-                " reparsing translation_unit for view %s", view.buffer_id())
-            start = time.time()
-            self.translation_units[view.buffer_id()].reparse()
-            log.debug(" reparsed translation unit in %s seconds",
-                      time.time() - start)
-            if show_errors:
-                self.show_errors(
-                    view, self.translation_units[view.buffer_id()].diagnostics)
-            return True
-        log.error(" no translation unit for view id %s", view.buffer_id())
+        v_id = view.buffer_id()
+        log.debug(" view is %s", v_id)
+        if v_id in self.TUs:
+            with self.rlock:
+                log.debug(" reparsing translation_unit for view %s", v_id)
+                start = time.time()
+                self.TUs[v_id].tu().reparse()
+                end = time.time()
+                log.debug(" reparsed in %s seconds", end - start)
+                if show_errors:
+                    self.show_errors(view, self.TUs[v_id].tu().diagnostics)
+                return True
+        log.error(" no translation unit for view id %s", v_id)
         return False
+
+    def __remove_old_TUs(self):
+        """ Remove old translation units and restart timer """
+        # first restart timer
+        self.timer.cancel()
+        self.timer = Timer(Completer.timer_period, self.__remove_old_TUs)
+        self.timer.start()
+
+        # now do some work if needed
+        if not self.max_tu_age:
+            return
+
+        log.debug(" removing TUs older than: %s secs.", self.max_tu_age)
+        with self.rlock:
+            old_TUs = []
+            for key, tu in self.TUs.items():
+                if tu.is_older_than(self.max_tu_age):
+                    log.debug(" TU for view: %s is old. Removing.", key)
+                    old_TUs.append(key)
+            for key in old_TUs:
+                del self.TUs[key]
 
     @staticmethod
     def _parse_completions(complete_results):

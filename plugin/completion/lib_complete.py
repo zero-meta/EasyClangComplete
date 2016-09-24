@@ -19,6 +19,7 @@ log = logging.getLogger(__name__)
 log.debug(" reloading module")
 
 Tools = tools.Tools
+SublBridge = tools.SublBridge
 
 cindex_dict = {
     '3.2': tools.PKG_NAME + ".clang.cindex32",
@@ -209,9 +210,7 @@ class Completer(BaseCompleter):
             show_errors (bool): controls if we need to show errors
         """
         file_body = view.substr(sublime.Region(0, view.size()))
-        (row, col) = view.rowcol(cursor_pos)
-        row += 1
-        col += 1
+        (row, col) = SublBridge.cursor_pos(view, cursor_pos)
 
         # unsaved files
         files = [(view.file_name(), file_body)]

@@ -45,21 +45,25 @@ class SublBridge:
         | sublime.INHIBIT_EXPLICIT_COMPLETIONS
 
     @staticmethod
-    def cursor_pos(view):
+    def cursor_pos(view, pos=None):
         """Get current cursor position. Returns position of the first cursor if
         multiple are present
 
         Args:
             view (sublime.View): current view
+            pos (int, optional): given positioned. First selection by default
 
         Returns:
             (row, col): tuple of row and col for cursor position
         """
-        pos = view.sel()
-        if len(pos) < 1:
-            # something is wrong
-            return None
-        (row, col) = view.rowcol(pos[0].a)
+        if not pos:
+            pos = view.sel()
+            if len(pos) < 1:
+                # something is wrong
+                return None
+            # we care about the first position
+            pos = pos[0].a
+        (row, col) = view.rowcol(pos)
         row += 1
         col += 1
         return (row, col)

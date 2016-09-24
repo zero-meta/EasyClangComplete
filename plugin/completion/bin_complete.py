@@ -15,6 +15,7 @@ from os import path
 
 from .. import error_vis
 from ..tools import Tools
+from ..tools import SublBridge
 from .base_complete import BaseCompleter
 from .compiler_variant import ClangCompilerVariant
 from .compiler_variant import ClangClCompilerVariant
@@ -266,9 +267,7 @@ class Completer(BaseCompleter):
                 flags=" ".join(flags))
         elif task_type == "complete":
             # we construct command for complete task
-            (row, col) = view.rowcol(cursor_pos)
-            row += 1
-            col += 1
+            (row, col) = SublBridge.cursor_pos(view, cursor_pos)
             complete_at_str = Completer.compl_str_mask.format(
                 complete_flag="-Xclang -code-completion-at",
                 file=temp_file_name, row=row, col=col)

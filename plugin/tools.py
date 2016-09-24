@@ -51,7 +51,7 @@ class SublBridge:
 
         Args:
             view (sublime.View): current view
-            pos (int, optional): given positioned. First selection by default
+            pos (int, optional): given position. First selection by default
 
         Returns:
             (row, col): tuple of row and col for cursor position

@@ -34,9 +34,10 @@ imp.reload(error_vis)
 imp.reload(lib_complete)
 imp.reload(bin_complete)
 
-from .plugin.tools import SublBridge
-from .plugin.tools import Tools
-from .plugin.tools import PosStatus
+# some useful aliases
+SublBridge = tools.SublBridge
+Tools = tools.Tools
+PosStatus = tools.PosStatus
 
 # unfortunately because of how sublime text initializes the plugins I cannot
 # move these inside of some class.

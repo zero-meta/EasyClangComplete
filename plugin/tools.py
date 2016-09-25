@@ -45,6 +45,15 @@ class SublBridge:
         | sublime.INHIBIT_EXPLICIT_COMPLETIONS
 
     @staticmethod
+    def active_view_id():
+        """ Get the id of the active view
+
+        Returns:
+            int: buffer id of the active view
+        """
+        return sublime.active_window().active_view().buffer_id()
+
+    @staticmethod
     def cursor_pos(view, pos=None):
         """Get current cursor position. Returns position of the first cursor if
         multiple are present

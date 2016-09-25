@@ -313,9 +313,17 @@ class Completer(BaseCompleter):
             old_TUs = []
             for key, tu in self.TUs.items():
                 if tu.is_older_than(self.max_tu_age):
-                    log.debug(" TU for view: %s is old. Removing.", key)
                     old_TUs.append(key)
+            current_id = SublBridge.active_view_id()
+            if len(old_TUs) < 1:
+                log.debug(" no old TUs.")
+                return
             for key in old_TUs:
+                if key == current_id:
+                    # don't delete the tu if this view is focused
+                    log.debug(" TU for view %s is old but active: [skip]", key)
+                    continue
+                log.debug(" TU for view %s is old [delete]", key)
                 del self.TUs[key]
 
     @staticmethod

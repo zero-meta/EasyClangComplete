@@ -43,10 +43,15 @@ class Completer(BaseCompleter):
     """Encapsulates completions based on libclang
 
     Attributes:
+        rlock (threading.Rlock): recursive mutex
+        timer (threading.Timer): timer object to schedule tu removal
+        max_tu_age (int): maximum translation unit age in seconds
+        timer_period (int): period of timer in seconds
         tu_module (cindex.TranslationUnit): module for proper cindex
-        TUs (dict(cindex.TranslationUnit)): dictionary of translation units
-            for each view id
+        TUs (dict(utils.StampledTu)): dictionary of timestamped translation
+            units for each view id
     """
+    rlock = RLock()
 
     tu_module = None
 
@@ -54,9 +59,7 @@ class Completer(BaseCompleter):
 
     timer = None
     max_tu_age = None
-    timer_period = 10  # seconds
-
-    rlock = RLock()
+    timer_period = 60  # seconds
 
     def __init__(self, clang_binary):
         """Initialize the Completer from clang binary, reading its version.

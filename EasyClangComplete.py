@@ -167,23 +167,30 @@ class EasyClangComplete(sublime_plugin.EventListener):
             sublime.Completions: completions with a flag
         """
         log.debug(" on_query_completions view id %s", view.buffer_id())
+        log.debug(" prefix: %s, locations: %s" % (prefix, locations))
 
         if not Tools.is_valid_view(view):
+            log.debug(" not a valid view")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
         if not completer:
+            log.debug(" no completer")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
         if completer.async_completions_ready:
             completer.async_completions_ready = False
+            log.debug(" returning existing completions")
             return completer.get_completions(settings.hide_default_completions)
 
         # Verify that character under the cursor is one allowed trigger
         pos_status = Tools.get_position_status(locations[0], view, settings)
         if pos_status == PosStatus.WRONG_TRIGGER:
             # we are at a wrong trigger, remove all completions from the list
+            log.debug(" wrong trigger")
+            log.debug(" hiding default completions")
             return Tools.HIDE_DEFAULT_COMPLETIONS
         if pos_status == PosStatus.COMPLETION_NOT_NEEDED:
+            log.debug(" completion not needed")
             # show default completions for now if allowed
             if settings.hide_default_completions:
                 log.debug(" hiding default completions")

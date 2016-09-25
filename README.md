@@ -30,8 +30,6 @@ Follow all the following steps to ensure the plugin works as expected!
 
 ## Install clang ##
 - **Ubuntu**: `sudo apt-get install clang`
-  + *WARNING*: for `Ubuntu 16.04` default clang is 3.8. This plugin currently has problems with it, so please instead install:
-  + `sudo apt-get install clang-3.5`
 - **Windows**: install the latest release from `clang`
   [website](http://llvm.org/releases/download.html)
 - **OSX**: ships `clang` by default. You are all set!

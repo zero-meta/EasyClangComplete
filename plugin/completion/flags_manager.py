@@ -225,7 +225,7 @@ class FlagsManager:
             # can set them here from the settings.
             my_env = os.environ.copy()
             my_env['CMAKE_PREFIX_PATH'] = ":".join(prefix_paths)
-            log.info(' runnign command: %s', cmake_cmd)
+            log.info(' running command: %s', cmake_cmd)
             output = subprocess.check_output(cmake_cmd,
                                              stderr=subprocess.STDOUT,
                                              shell=True,
@@ -234,7 +234,7 @@ class FlagsManager:
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")
-            log.info(" clang process finished with code: \n%s", e.returncode)
+            log.info(" cmake process finished with code: %s", e.returncode)
         log.info(" cmake produced output: \n%s", output_text)
 
         database_path = path.join(tempdir, FlagsManager.CMAKE_DB_FILE_NAME)

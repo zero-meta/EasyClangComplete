@@ -87,7 +87,7 @@ class LibClangCompilerVariant(CompilerVariant):
     pos_regex = re.compile("'(?P<file>.+)'.*" +  # file
                            "line\s(?P<row>\d+), " +  # row
                            "column\s(?P<col>\d+)")  # col
-    msg_regex = re.compile('\"*(?P<error>.+)\"*')
+    msg_regex = re.compile('[b\"|\"]*(?P<error>[^"]+)\"*')
 
     def errors_from_output(self, output):
         """Parse errors received from diagnostics of a translation unit (used

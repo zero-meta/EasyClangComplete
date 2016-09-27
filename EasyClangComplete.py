@@ -59,6 +59,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
     completer = None
 
     def __init__(self):
+        """Initializes the object."""
         super().__init__()
         global handle_plugin_loaded_function
         handle_plugin_loaded_function = lambda: self.on_plugin_loaded()
@@ -67,6 +68,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         logging.basicConfig(level=logging.DEBUG)
 
     def on_plugin_loaded(self):
+        """Called upon plugin load event."""
         self.settings = plugin_settings.Settings()
         self.on_settings_changed()
         self.settings.add_change_listener(lambda: self.on_settings_changed())
@@ -76,6 +78,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         self.on_activated_async(sublime.active_window().active_view())
 
     def on_settings_changed(self):
+        """Called when any of the settings changes."""
         # If verbose flag is set then respect default DEBUG level.
         # Otherwise disable level DEBUG and allow INFO and higher levels.
         off_level = logging.NOTSET if self.settings.verbose else logging.DEBUG

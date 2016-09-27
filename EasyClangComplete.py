@@ -3,13 +3,7 @@
 Provides completion suggestions for C/C++ languages based on clang
 
 Attributes:
-    completer (plugin.completion.base_completion.BaseCompleter):
-        This object handles auto completion. It can be one of the following:
-        - bin_complete.Completer
-        - lib_complete.Completer
-
     log (logging.Logger): logger for this module
-    settings (plugin_settings.Settings): class that encapsulates settings
 """
 
 import sublime
@@ -39,51 +33,68 @@ SublBridge = tools.SublBridge
 Tools = tools.Tools
 PosStatus = tools.PosStatus
 
-# unfortunately because of how sublime text initializes the plugins I cannot
-# move these inside of some class.
-settings = None
-completer = None
-
 log = logging.getLogger(__name__)
+
+handle_plugin_loaded_function = None
 
 
 def plugin_loaded():
     """called right after sublime api is ready to use. We need it to initialize
     all the different classes that encapsulate functionality. We can only
     properly init them after sublime api is available."""
-    global settings
-    global completer
-    settings = plugin_settings.Settings()
-    # init the loggers
-    if settings.verbose:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
-
-    # init everythin else
-    if settings.use_libclang:
-        log.info(" init completer based on libclang")
-        completer = lib_complete.Completer(settings.clang_binary)
-        if not completer.valid:
-            log.error(" cannot initialize completer with libclang.")
-            log.info(" falling back to using clang in a subprocess.")
-            completer = None
-    if not completer:
-        log.info(" init completer based on clang from cmd")
-        completer = bin_complete.Completer(settings.clang_binary)
-    # As the plugin have just loaded, we might have missed an activation event
-    # for the active view so completion will not work for it until re-activated.
-    # Force active view initialization in that case.
-    EasyClangComplete.on_activated_async(sublime.active_window().active_view())
+    handle_plugin_loaded_function()
 
 
 class EasyClangComplete(sublime_plugin.EventListener):
-
     """Base class for this plugin. Most of the functionality is delegated
 
+    Attributes:
+        settings (plugin_settings.Settings): class that encapsulates settings
+        completer (plugin.completion.base_completion.BaseCompleter):
+            This object handles auto completion. It can be one of the following:
+            - bin_complete.Completer
+            - lib_complete.Completer
     """
-    @staticmethod
-    def on_activated_async(view):
+    settings = None
+    completer = None
+
+    def __init__(self):
+        super().__init__()
+        global handle_plugin_loaded_function
+        handle_plugin_loaded_function = lambda: self.on_plugin_loaded()
+        # By default be verbose and limit on settings change if verbose flag is
+        # not set.
+        logging.basicConfig(level=logging.DEBUG)
+
+    def on_plugin_loaded(self):
+        self.settings = plugin_settings.Settings()
+        self.on_settings_changed()
+        self.settings.add_change_listener(lambda: self.on_settings_changed())
+        # As the plugin have just loaded, we might have missed an activation
+        # event for the active view so completion will not work for it until
+        # re-activated. Force active view initialization in that case.
+        self.on_activated_async(sublime.active_window().active_view())
+
+    def on_settings_changed(self):
+        # If verbose flag is set then respect default DEBUG level.
+        # Otherwise disable level DEBUG and allow INFO and higher levels.
+        off_level = logging.NOTSET if self.settings.verbose else logging.DEBUG
+        logging.disable(level=off_level)
+
+        # init everything else
+        self.completer = None
+        if self.settings.use_libclang:
+            log.info(" init completer based on libclang")
+            self.completer = lib_complete.Completer(self.settings.clang_binary)
+            if not self.completer.valid:
+                log.error(" cannot initialize completer with libclang.")
+                log.info(" falling back to using clang in a subprocess.")
+                self.completer = None
+        if not self.completer:
+            log.info(" init completer based on clang from cmd")
+            self.completer = bin_complete.Completer(self.settings.clang_binary)
+
+    def on_activated_async(self, view):
         """Called upon activating a view. Execution in a worker thread.
 
         Args:
@@ -92,15 +103,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         log.debug(" on_activated_async view id %s", view.buffer_id())
         if Tools.is_valid_view(view):
-            if not completer:
+            if not self.completer:
                 return
-            if not completer.needs_init(view):
+            if not self.completer.needs_init(view):
                 return
             log.debug("init completer for view id: %s", view.buffer_id())
-            completer.init(view, settings)
+            self.completer.init(view, self.settings)
 
-    @staticmethod
-    def on_selection_modified(view):
+    def on_selection_modified(self, view):
         """Called when selection is modified. Executed in gui thread.
 
         Args:
@@ -108,12 +118,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         if Tools.is_valid_view(view):
             (row, _) = SublBridge.cursor_pos(view)
-            if not completer:
+            if not self.completer:
                 return
-            completer.error_vis.show_popup_if_needed(view, row)
+            self.completer.error_vis.show_popup_if_needed(view, row)
 
-    @staticmethod
-    def on_modified_async(view):
+    def on_modified_async(self, view):
         """Called in a worker thread when view is modified
 
         Args:
@@ -121,12 +130,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         if Tools.is_valid_view(view):
             log.debug(" on_modified_async view id %s", view.buffer_id())
-            if not completer:
+            if not self.completer:
                 return
-            completer.error_vis.clear(view)
+            self.completer.error_vis.clear(view)
 
-    @staticmethod
-    def on_post_save_async(view):
+    def on_post_save_async(self, view):
         """On save. Executed in a worker thread.
 
         Args:
@@ -135,13 +143,12 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         if Tools.is_valid_view(view):
             log.debug(" saving view: %s", view.buffer_id())
-            if not completer:
+            if not self.completer:
                 return
-            completer.error_vis.erase_regions(view)
-            completer.update(view, settings.errors_on_save)
+            self.completer.error_vis.erase_regions(view)
+            self.completer.update(view, self.settings.errors_on_save)
 
-    @staticmethod
-    def on_close(view):
+    def on_close(self, view):
         """Called on closing the view.
 
         Args:
@@ -150,12 +157,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         if Tools.is_valid_view(view):
             log.debug(" closing view %s", view.buffer_id())
-            if not completer:
+            if not self.completer:
                 return
-            completer.remove(view.buffer_id())
+            self.completer.remove(view.buffer_id())
 
-    @staticmethod
-    def on_query_completions(view, prefix, locations):
+    def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code
 
         Args:
@@ -173,17 +179,19 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug(" not a valid view")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
-        if not completer:
+        if not self.completer:
             log.debug(" no completer")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
-        if completer.async_completions_ready:
-            completer.async_completions_ready = False
+        if self.completer.async_completions_ready:
+            self.completer.async_completions_ready = False
             log.debug(" returning existing completions")
-            return completer.get_completions(settings.hide_default_completions)
+            return self.completer.get_completions(
+                self.settings.hide_default_completions)
 
         # Verify that character under the cursor is one allowed trigger
-        pos_status = Tools.get_position_status(locations[0], view, settings)
+        pos_status = Tools.get_position_status(
+            locations[0], view, self.settings)
         if pos_status == PosStatus.WRONG_TRIGGER:
             # we are at a wrong trigger, remove all completions from the list
             log.debug(" wrong trigger")
@@ -192,7 +200,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if pos_status == PosStatus.COMPLETION_NOT_NEEDED:
             log.debug(" completion not needed")
             # show default completions for now if allowed
-            if settings.hide_default_completions:
+            if self.settings.hide_default_completions:
                 log.debug(" hiding default completions")
                 return Tools.HIDE_DEFAULT_COMPLETIONS
             log.debug(" showing default completions")
@@ -201,13 +209,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # create a daemon thread to update the completions
         log.debug(" starting async auto_complete at pos: %s", locations[0])
         completion_thread = Thread(
-            target=completer.complete,
-            args=[view, locations[0], settings.errors_on_save])
+            target=self.completer.complete,
+            args=[view, locations[0], self.settings.errors_on_save])
         completion_thread.deamon = True
         completion_thread.start()
 
         # show default completions for now if allowed
-        if settings.hide_default_completions:
+        if self.settings.hide_default_completions:
             log.debug(" hiding default completions")
             return Tools.HIDE_DEFAULT_COMPLETIONS
         log.debug(" showing default completions")

@@ -64,6 +64,8 @@ class Settings:
 
     CMAKE_PRIORITIES = ["ask", "merge", "overwrite", "keep_old"]
 
+    __change_listeners = []
+
     def __init__(self):
         """Initialize the class.
         """
@@ -73,10 +75,17 @@ class Settings:
             log.critical(" NO AUTOCOMPLETE WILL BE AVAILABLE")
             return
 
+    def add_change_listener(self, listener):
+        if listener in self.__change_listeners:
+            log.error(' this settings listener was already added before')
+        self.__change_listeners.append(listener)
+
     def on_settings_changed(self):
         """When user changes settings, trigger this.
         """
         self.load_settings()
+        for listener in self.__change_listeners:
+            listener()
         log.info(" settings changed and reloaded")
 
     def load_settings(self):

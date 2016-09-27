@@ -76,6 +76,11 @@ class Settings:
             return
 
     def add_change_listener(self, listener):
+        """Registers given listener to be notified whenever settings change.
+
+        Args:
+            listener (function): function to call on settings change
+        """
         if listener in self.__change_listeners:
             log.error(' this settings listener was already added before')
         self.__change_listeners.append(listener)

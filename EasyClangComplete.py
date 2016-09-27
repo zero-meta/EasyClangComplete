@@ -62,7 +62,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """Initializes the object."""
         super().__init__()
         global handle_plugin_loaded_function
-        handle_plugin_loaded_function = lambda: self.on_plugin_loaded()
+        handle_plugin_loaded_function = self.on_plugin_loaded
         # By default be verbose and limit on settings change if verbose flag is
         # not set.
         logging.basicConfig(level=logging.DEBUG)
@@ -71,7 +71,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """Called upon plugin load event."""
         self.settings = plugin_settings.Settings()
         self.on_settings_changed()
-        self.settings.add_change_listener(lambda: self.on_settings_changed())
+        self.settings.add_change_listener(self.on_settings_changed)
         # As the plugin have just loaded, we might have missed an activation
         # event for the active view so completion will not work for it until
         # re-activated. Force active view initialization in that case.

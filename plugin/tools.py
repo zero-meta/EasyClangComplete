@@ -228,12 +228,12 @@ class Tools:
     """just a bunch of helpful tools to unclutter main file
 
     Attributes:
-        HIDE_DEFAULT_COMPLETIONS: a valud to return from `on_query_completions`
+        HIDE_DEFAULT_COMPLETIONS: a value to return from `on_query_completions`
             Ensures nothing will be shown apart from the output of this plugin
         SHOW_DEFAULT_COMPLETIONS: `None` to return from `on_query_completions`.
             This guarantees that sublime text will show default completions.
         syntax_regex (regex): regex to parse syntax setting
-        valid_extensions (list): list of valid extentions for autocompletion
+        valid_extensions (list): list of valid extensions for auto-completion
         valid_syntax (list): list of valid syntaxes for this plugin
 
     """
@@ -285,7 +285,7 @@ class Tools:
         if syntax in Tools.valid_syntax:
             log.debug(" file has valid syntax: `%s`", syntax)
             return True
-        log.debug(" file has unsopported syntax: `%s`", syntax)
+        log.debug(" file has unsupported syntax: `%s`", syntax)
         return False
 
     @staticmethod

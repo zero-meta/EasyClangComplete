@@ -10,6 +10,7 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 
 [![Release][img-release]][release]
 [![Downloads][img-downloads]][downloads]
+[![Downloads Month][img-downloads-month]][downloads]
 [![Codacy Badge][img-codacy]][codacy]
 [![MIT licensed][img-mit]](./LICENSE)
 [![Gitter][img-gitter]][gitter]
@@ -223,6 +224,7 @@ Please buy me a cup of tea if you appreciate the effort.
 [img-codacy]: https://goo.gl/PDVYTj
 [img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?maxAge=3600
 [img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600
+[img-downloads-month]: https://img.shields.io/packagecontrol/dm/EasyClangComplete.svg?maxAge=2592000
 [img-subl]: https://img.shields.io/badge/Sublime%20Text-3-green.svg
 [img-mit]: https://img.shields.io/badge/license-MIT-blue.svg
 [img-paypal]: https://img.shields.io/badge/Donate-PayPal-blue.svg

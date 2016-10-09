@@ -367,8 +367,7 @@ class FlagsManager:
             str[]: flags
         """
         mask = '{}{}'
-        if separate_includes:
-            mask = '{} "{}"'
+        separate_mask = '{} "{}"'
         flags = set()
         log.debug(" all lines: %s", lines)
         for line in lines:
@@ -382,5 +381,10 @@ class FlagsManager:
                     if prefix in FlagsManager._include_prefixes:
                         if not path.isabs(flag_content):
                             flag_content = path.join(folder, flag_content)
-                    flags.add(mask.format(full_prefix, flag_content))
+                        if separate_includes:
+                            flags.add(separate_mask.format(full_prefix, flag_content))
+                        else:
+                            flags.add(mask.format(full_prefix, flag_content))
+                    else:
+                        flags.add(mask.format(full_prefix, flag_content))
         return flags

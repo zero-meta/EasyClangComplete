@@ -217,7 +217,7 @@ class File:
         """
         with open(file_path) as f:
             for line in f:
-                if line.startswith(query):
+                if line.lower().startswith(query):
                     log.debug(" found needed line: '%s'", line)
                     return True
         return False

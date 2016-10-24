@@ -187,7 +187,7 @@ always willing to learn.
 
 Some functionality is there only because of the help of the following users (in no particualr order):
 
-@Ventero, @riazanovskiy, @rchl.
+@Ventero, @riazanovskiy, @rchl, @Mischa-Alff, @jdumas.
 
 ## Tests ##
 I have tried to cover most crucial functionality with unit tests using

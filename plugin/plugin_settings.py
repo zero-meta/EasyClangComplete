@@ -281,7 +281,7 @@ class Settings:
         log.debug(" file_parent_folder = %s", file_parent_folder)
 
         # replace project related variables to real ones
-        for i, include_dir in enumerate(list(self.include_dirs)):
+        for include_dir in self.include_dirs:
             include_dir = re.sub(
                 "(\$project_base_path)", self.project_base_folder, include_dir)
             include_dir = re.sub("(\$project_name)",
@@ -329,8 +329,12 @@ class Settings:
                             newpath = rootpath + newdir
                             if pos_after != -1:
                                 newpath += include_dir[pos_after:]
-                            log.debug("   adding: %s", newpath)
-                            pathlist.append(newpath)
+                            if newpath.find("*") == -1:
+                                log.debug("   adding: %s", newpath)
+                                pathlist.append(newpath)
+                            else:   # If there is 1 more *, recurse
+                                for p in self.expand_wildcard(newpath):
+                                    pathlist.append(p)
         else:
             pathlist = [include_dir]
         return pathlist

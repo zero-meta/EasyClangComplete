@@ -379,7 +379,7 @@ class Tools:
             log.debug(" wrong trigger fired")
             return PosStatus.WRONG_TRIGGER
 
-        if settings.complete_all:
+        if settings.autocomplete_all:
             return PosStatus.COMPLETION_NEEDED
 
         # if nothing fired we don't need to do anything

@@ -55,13 +55,13 @@ class test_settings(TestCase):
         # test other settings
         self.assertIsNotNone(settings.verbose)
         self.assertIsNotNone(settings.include_file_folder)
-        self.assertIsNotNone(settings.include_parent_folder)
+        self.assertIsNotNone(settings.include_file_parent_folder)
         self.assertIsNotNone(settings.triggers)
         self.assertIsNotNone(settings.include_dirs)
         self.assertIsNotNone(settings.clang_binary)
         self.assertIsNotNone(settings.std_flag_c)
         self.assertIsNotNone(settings.std_flag_cpp)
-        self.assertIsNotNone(settings.search_clang_complete)
+        self.assertIsNotNone(settings.search_clang_complete_file)
         self.assertIsNotNone(settings.errors_on_save)
 
     def test_valid(self):
@@ -81,7 +81,7 @@ class test_settings(TestCase):
         settings = Settings()
         self.assertTrue(settings.is_valid())
         settings.include_file_folder = True
-        settings.include_parent_folder = True
+        settings.include_file_parent_folder = True
         settings.include_dirs = [
             path.realpath("/$project_name/src"),
             path.realpath("/test/test")

@@ -163,33 +163,22 @@ class Completer(BaseCompleter):
         else:
             std_flag = settings.std_flag_c
 
-        # if we use project-specific settings we ignore everything else
-        if settings.project_specific_settings:
-            log.info(" overriding all flags by project ones")
-            project_flags = settings.get_project_clang_flags()
-            if project_flags:
-                clang_flags.append(std_flag)
-                clang_flags += project_flags
-            else:
-                log.error(" there are no project-specific settings.")
-                log.info(" falling back to using plugin settings.")
-        if len(clang_flags) < 2:
-            # add std flag to all flags
-            clang_flags.append(std_flag)
-            # this means that project specific settings are either not used or
-            # invalid, so we still need to initialize from settings
+        # add std flag to all flags
+        clang_flags.append(std_flag)
+        # this means that project specific settings are either not used or
+        # invalid, so we still need to initialize from settings
 
-            # init includes to start with from settings
-            includes = settings.populate_include_dirs(view)
+        # init includes to start with from settings
+        includes = settings.populate_include_dirs(view)
 
-            for include in includes:
-                clang_flags.append('-I' + include)
+        for include in includes:
+            clang_flags.append('-I' + include)
 
-            if settings.search_clang_complete and self.flags_manager:
-                log.debug(" flags_manager loaded")
-                custom_flags = self.flags_manager.get_flags(
-                    separate_includes=False)
-                clang_flags += custom_flags
+        if settings.search_clang_complete_file and self.flags_manager:
+            log.debug(" flags_manager loaded")
+            custom_flags = self.flags_manager.get_flags(
+                separate_includes=False)
+            clang_flags += custom_flags
 
         # now we have the flags and can continue initializing the TU
         if Tools.get_view_syntax(view) != "C":

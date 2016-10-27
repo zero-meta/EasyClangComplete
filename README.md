@@ -15,6 +15,8 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 [![MIT licensed][img-mit]](./LICENSE)
 [![Gitter][img-gitter]][gitter]
 
+*Seems OSX build are misbehaving on Travis-CI side*
+
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++
 for Sublime Text 3. [Support](#support-it) it if you like it.
 
@@ -146,20 +148,18 @@ I will only cover most important settings here.
       can also set these settings manually by copying the default ones defined
       [here](Preferences.sublime-settings) to your User Preferences and
       modifying them there.
-- `use_project_specific_settings`:
-    + when `true` will enforce sublime text to read all flags from project
-      settings(`*.sublime-project` -> `settings` -> `clang_flags`). This
-      settings overrides all other settings like `include_dirs` or `std_flag`
-      so should be used with caution. Defaults to `false`. If the project
-      settings cannot be found, the plugin will fall back to default behavior.
-      An example settings entry looks like this:
+- Override any setting in your project file! You can override any setting
+  there. See the project file in this repo for example. Minimal example for
+  clarity:
 
       ```json
       {
         "settings":
         {
-          "clang_flags":
-          ["-std=c++11", "-Isrc", "-I/usr/include",]
+          "include_dirs":
+          ["-Isrc", "-I/usr/include"],
+          "verbose": false,
+          "use_libclang": true,
         }
       }
       ```

@@ -61,7 +61,7 @@ class test_settings(TestCase):
         self.assertIsNotNone(settings.clang_binary)
         self.assertIsNotNone(settings.std_flag_c)
         self.assertIsNotNone(settings.std_flag_cpp)
-        self.assertIsNotNone(settings.search_clang_complete)
+        self.assertIsNotNone(settings.search_clang_complete_file)
         self.assertIsNotNone(settings.errors_on_save)
 
     def test_valid(self):

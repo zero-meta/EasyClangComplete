@@ -13,5 +13,9 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings":
+	{
+			"use_libclang": true
+	}
 }

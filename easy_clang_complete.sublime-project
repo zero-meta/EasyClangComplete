@@ -16,6 +16,7 @@
 	],
 	"settings":
 	{
-			"use_libclang": true
+			"use_libclang": true,
+			"verbose": true
 	}
 }

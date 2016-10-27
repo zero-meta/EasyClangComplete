@@ -116,7 +116,7 @@ class Completer(BaseCompleter):
         Returns:
             bool: compile flags exist for this view
         """
-        if view_id not in self.flags_dict:
+        if self.flags_dict.get(view_id) is None:
             log.debug(" no build flags for view: %s", view_id)
             return False
         if len(self.flags_dict[view_id]) > 0:

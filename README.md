@@ -146,18 +146,19 @@ I will only cover most important settings here.
       can also set these settings manually by copying the default ones defined
       [here](Preferences.sublime-settings) to your User Preferences and
       modifying them there.
-- Override any setting in your project file! You can override any setting
-  there. See the project file in this repo for example. Minimal example for
-  clarity:
+- Override any setting in your project file! Just define the same setting in
+  project specific settings with either one of two prefixes: `"ecc_"` or
+  `"easy_clang_complete"`. See the project file in this repo for example.
+  Minimal example for clarity (here, `include_dirs` and `verbose` are
+  overridden):
 
       ```json
       {
         "settings":
         {
-          "include_dirs":
+          "ecc_include_dirs":
           ["-Isrc", "-I/usr/include"],
-          "verbose": false,
-          "use_libclang": true,
+          "easy_clang_complete_verbose": true,
         }
       }
       ```

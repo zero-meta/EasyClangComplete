@@ -165,8 +165,6 @@ class Completer(BaseCompleter):
 
         # add std flag to all flags
         clang_flags.append(std_flag)
-        # this means that project specific settings are either not used or
-        # invalid, so we still need to initialize from settings
 
         # init includes to start with from settings
         includes = settings.populate_include_dirs(view)

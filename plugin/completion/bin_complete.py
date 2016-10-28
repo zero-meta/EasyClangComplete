@@ -150,8 +150,6 @@ class Completer(BaseCompleter):
         else:
             self.std_flag = settings.std_flag_c
 
-        # init needed variables from plugin settings as project settings
-        # are either not used or invalid
         clang_flags = []
 
         # init includes to start with from settings

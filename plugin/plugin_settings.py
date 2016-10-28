@@ -16,60 +16,42 @@ log = logging.getLogger(__name__)
 log.debug(" reloading module")
 
 
-class SettingsEnum:
-    include_dirs = None
-    std_flag_c = None
-    std_flag_cpp = None
-    search_clang_complete_file = None
-    generate_flags_with_cmake = None
-    cmake_flags_priority = None
-    cmake_prefix_paths = None
-    errors_on_save = None
-    triggers = None
-    use_libclang = None
-    verbose = None
-    include_file_folder = None
-    include_file_parent_folder = None
-    clang_binary = None
-    autocomplete_all = None
-    hide_default_completions = None
-    max_tu_age = None
-
-
 class Settings:
-
-    """class that encapsulates sublime settings
+    """ Encapsulates sublime settings
 
     Attributes:
-        clang_binary (string): name of clang binary to be used
-        autocomplete_all (bool): flag to trigger completion on every keystroke
-        errors_on_save (bool): if true, show errors on save
-        include_dirs (string[]): array of directories with headers
-        include_file_folder (bool): if true, current location -> 'include_dirs'
-        include_file_parent_folder (bool): if true, parent -> 'include_dirs'
+        CMAKE_PRIORITIES (list): possible priorities for generating
+            .clang_complete file
+        max_tu_age (int): lifetime of any translation unit in seconds
+        NAMES_ENUM (list): list of all setting names of this plugin
+        PREFIXES (list): prefixes to be used in project specific settings
         project_base_folder (str): root folder of current project
         project_base_name (str): name of the current project
-        project_specific_settings (TYPE): use project-specific settings
-        search_clang_complete_file (bool): if true search for '.clang_complete'
-            file up the tree
-        std_flag_c (string): flag of the c std library, e.g. -std=c11
-        std_flag_cpp (string): flag of the c++ std library, e.g. -std=c++11
         subl_settings (sublime.settings): link to sublime text settings dict
-        triggers (string[]): triggers that trigger autocompletion
-        use_libclang (bool): use libclang instead of parsing binary output
-        verbose (bool): verbose flag
-        cmake_flags_priority(str): priority of cmake flags. They can override
-            user settings, do nothing, or ask user what to do.
-        generate_flags_with_cmake(bool): generate .clang_complete file from
-            CMake generated compilation database
-        cmake_prefix_paths(list): some build systems need specific folders
-            to be part of CMAKE_PREFIX_PATH. This sets just that.
-        hide_default_completions(bool): do we hide default completions?
-        max_tu_age(int): lifetime of translation units in seconds
     """
-    subl_settings = None
-
     CMAKE_PRIORITIES = ["ask", "merge", "overwrite", "keep_old"]
+    PREFIXES = ["ecc_", "easy_clang_complete_"]
+
+    # refer to Preferences.sublime-settings for usage explanation
+    NAMES_ENUM = [
+        "autocomplete_all",
+        "clang_binary",
+        "cmake_flags_priority",
+        "cmake_prefix_paths",
+        "errors_on_save",
+        "generate_flags_with_cmake",
+        "hide_default_completions",
+        "include_dirs",
+        "include_file_folder",
+        "include_file_parent_folder",
+        "max_tu_age",
+        "search_clang_complete_file",
+        "std_flag_c",
+        "std_flag_cpp",
+        "triggers",
+        "use_libclang",
+        "verbose",
+    ]
 
     __change_listeners = []
 
@@ -101,7 +83,7 @@ class Settings:
         log.info(" settings changed and reloaded")
 
     def load_settings(self):
-        """Load settings from sublime dictionary to internal variables
+        """ Load settings from sublime dictionary to internal variables
         """
         self.subl_settings = sublime.load_settings(
             PKG_NAME + ".sublime-settings")
@@ -122,34 +104,49 @@ class Settings:
         self.__update_settings_from_project_if_needed()
 
     def __update_settings_from_project_if_needed(self):
-        """Get clang flags for the current project
+        """ Get clang flags for the current project
 
         Returns:
             list(str): flags for clang, None if no project found
         """
-        log.debug(" overriding settings by project ones if needed:")
+        log.debug(" Overriding settings by project ones if needed:")
+        log.debug(" Valid prefixes: %s", Settings.PREFIXES)
         settings_handle = sublime.active_window().active_view().settings()
-        self.__load_vars_from_settings(settings_handle)
-        log.debug(" done.")
+        self.__load_vars_from_settings(settings_handle, Settings.PREFIXES)
+        log.debug(" All overrides applied.")
 
-    def __load_vars_from_settings(self, settings_handle):
-        for key, value in SettingsEnum.__dict__.items():
-            if key.startswith('__') or callable(key):
+    def __load_vars_from_settings(self, settings_handle, prefixes=[""]):
+        """
+        Load all settings and add them as attributes of self
+
+        Args:
+            settings_handle (dict): settings from sublime
+            prefixes (list, optional): package-specific prefixes to
+                disambiguate settings when loading them from project settings
+
+        """
+        log.debug(" Reading settings...")
+        for setting_name in Settings.NAMES_ENUM:
+            if setting_name.startswith('__') or callable(setting_name):
                 continue
-            val = settings_handle.get(key)
+            for prefix in prefixes:
+                val = settings_handle.get(prefix + setting_name)
+                if val is not None:
+                    # we don't want to override existing setting
+                    break
             if val is not None:
-                value = val
                 # set this value to this object too
-                setattr(self, key, val)
+                setattr(self, setting_name, val)
                 # tell the user what we have done
-                log.debug(" setting %s -> '%s'", key, val)
+                log.debug("  %-26s <-- '%s'", setting_name, val)
+        log.debug(" Settings sucessfully read...")
 
         # process some special settings
         if isinstance(self.max_tu_age, str):
             self.max_tu_age = Tools.seconds_from_string(self.max_tu_age)
 
     def __expand_include(self, include):
-        """Expand include. Make sure path is ok given a specific os and add
+        """ Expand include. Make sure path is ok given a specific os and add
         current project path if the include path is relative.
 
         Args:

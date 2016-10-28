@@ -8,6 +8,7 @@ import logging
 import re
 
 import os.path as path
+import os
 
 from .tools import PKG_NAME
 from .tools import Tools
@@ -199,14 +200,14 @@ class Settings:
         file_parent_folder = path.dirname(file_current_folder)
 
         # initialize new include_dirs
-        include_dirs = list(self.include_dirs)
+        include_dirs = []
         log.debug(" populating include dirs with current variables:")
         log.debug(" project_base_name = %s", self.project_base_name)
         log.debug(" project_base_folder = %s", self.project_base_folder)
         log.debug(" file_parent_folder = %s", file_parent_folder)
 
         # replace project related variables to real ones
-        for i, include_dir in enumerate(include_dirs):
+        for include_dir in self.include_dirs:
             include_dir = re.sub(
                 r"\$project_base_path",
                 re.escape(self.project_base_folder),
@@ -215,7 +216,9 @@ class Settings:
                                  re.escape(self.project_base_name),
                                  include_dir)
             include_dir = path.abspath(include_dir)
-            include_dirs[i] = include_dir
+            # Check for wildcard
+            for newpath in self.expand_wildcard(include_dir):
+                include_dirs.append(newpath)
 
         if self.include_file_folder:
             include_dirs.append(file_current_folder)
@@ -225,3 +228,42 @@ class Settings:
         # print resulting include dirs
         log.debug(" include_dirs = %s", include_dirs)
         return include_dirs
+
+    def expand_wildcard(self, include_dir):
+        """Find and expand first wildcard(*)
+
+        Args:
+            include_dir: path to a directory to search
+
+        Returns:
+            str[]: list of expanded directories, include_dir if no wildcard was
+            found
+        """
+        pos = include_dir.find("*")
+        if pos != -1:
+            log.debug(" found wildcard in: %s", include_dir)
+            # pos_before = first character of dir containing *
+            # pos_after = last character of dir containing *
+            pos_before = include_dir.rfind(os.sep, 0, pos) + len(os.sep)
+            pos_after = include_dir.find(os.sep, pos)
+            if pos_after == -1:                 # If no trailing separator was
+                pos_after = len(include_dir)    # found, set to end of string
+            rootpath = include_dir[0:pos_before]
+            pathlist = []
+
+            for newdir in os.listdir(rootpath):
+                if path.isdir(rootpath + newdir):
+                    if newdir.startswith(include_dir[pos_before:pos]):
+                        if newdir.endswith(include_dir[pos + 1:pos_after]):
+                            newpath = rootpath + newdir
+                            if pos_after != -1:
+                                newpath += include_dir[pos_after:]
+                            if newpath.find("*") == -1:
+                                log.debug("   adding: %s", newpath)
+                                pathlist.append(newpath)
+                            else:   # If there is 1 more *, recurse
+                                for p in self.expand_wildcard(newpath):
+                                    pathlist.append(p)
+        else:
+            pathlist = [include_dir]
+        return pathlist

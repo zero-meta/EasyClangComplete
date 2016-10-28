@@ -1,11 +1,14 @@
 {
 	 // Where should clang search for headers
 	 // These will be appended to build with `-I` flag each
+	 // "$project_base_path" will be replaced with opened project path
+	 // "$project_name" will be replaced with opened project name
+	 // "$clang_version" will be replaced with numerical version str, e.g. 3.8.0
 	"include_dirs" : [
 						"/usr/include",
 						"$project_base_path/src",
 						"/workspace/$project_name/src",
-            "/usr/lib/clang/3.8/include"  // example for Ubuntu 16.04
+            "/usr/lib/clang/$clang_version/include" // example for Ubuntu 16.04
 						],
 
 	// set the default c standard library flag.

@@ -5,8 +5,6 @@ Attributes:
 
 """
 import re
-import subprocess
-import platform
 import logging
 
 from os import path
@@ -17,8 +15,9 @@ from .. import tools
 from .flags_manager import FlagsManager
 from .flags_manager import SearchScope
 
-
 log = logging.getLogger(__name__)
+
+Tools = tools.Tools
 
 
 class BaseCompleter:
@@ -61,27 +60,7 @@ class BaseCompleter:
             raise RuntimeError("clang binary not defined")
 
         # run the cmd to get the proper version of the installed clang
-        check_version_cmd = clang_binary + " -v"
-        log.info(" Getting version from command: `%s`", check_version_cmd)
-        output_text = BaseCompleter.run_command(check_version_cmd, shell=True)
-
-        # now we have the output, and can extract version from it
-        version_regex = re.compile("\d\.\d")
-        match = version_regex.search(output_text)
-        if match:
-            self.version_str = match.group()
-            if self.version_str > "3.8" and platform.system() == "Darwin":
-                # info from this table: https://gist.github.com/yamaya/2924292
-                osx_version = self.version_str
-                self.version_str = tools.OSX_CLANG_VERSION_DICT[osx_version]
-                info = {"platform": platform.system()}
-                log.warning(
-                    " OSX version %s reported. Reducing it to %s. Info: %s",
-                    osx_version, self.version_str, info)
-            log.info(" Found clang version: %s", self.version_str)
-        else:
-            raise RuntimeError(
-                " Couldn't find clang version in clang version output.")
+        self.version_str = Tools.get_clang_version_str(clang_binary)
         # initialize error visualization
         self.error_vis = error_vis.CompileErrors()
 
@@ -224,31 +203,3 @@ class BaseCompleter:
             'disable_auto_insert': True,
             'api_completions_only': True,
             'next_competion_if_showing': True, })
-
-    @staticmethod
-    def run_command(command, shell=True):
-        """ Run a generic command in a subprocess
-
-        Args:
-            command (str): command to run
-
-        Returns:
-            str: raw command output
-        """
-        try:
-            startupinfo = None
-            if platform.system() == "Windows":
-                # Don't let console window pop-up briefly.
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                startupinfo.wShowWindow = subprocess.SW_HIDE
-            output = subprocess.check_output(command,
-                                             stderr=subprocess.STDOUT,
-                                             shell=shell,
-                                             startupinfo=startupinfo)
-            output_text = ''.join(map(chr, output))
-        except subprocess.CalledProcessError as e:
-            output_text = e.output.decode("utf-8")
-            log.debug(" clang process finished with code: %s", e.returncode)
-            log.debug(" clang process output: \n%s", output_text)
-        return output_text

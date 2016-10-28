@@ -273,7 +273,7 @@ class Completer(BaseCompleter):
         # now run this command
         log.debug(" clang command: \n%s", complete_cmd)
 
-        return BaseCompleter.run_command(complete_cmd)
+        return Tools.run_command(complete_cmd)
 
     @staticmethod
     def _parse_completions(complete_results):

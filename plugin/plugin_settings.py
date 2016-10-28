@@ -17,6 +17,7 @@ log.debug(" reloading module")
 
 
 class Settings:
+
     """ Encapsulates sublime settings
 
     Attributes:
@@ -207,9 +208,12 @@ class Settings:
         # replace project related variables to real ones
         for i, include_dir in enumerate(include_dirs):
             include_dir = re.sub(
-                r"\$project_base_path", re.escape(self.project_base_folder), include_dir)
+                r"\$project_base_path",
+                re.escape(self.project_base_folder),
+                include_dir)
             include_dir = re.sub(r"\$project_name",
-                                 re.escape(self.project_base_name), include_dir)
+                                 re.escape(self.project_base_name),
+                                 include_dir)
             include_dir = path.abspath(include_dir)
             include_dirs[i] = include_dir
 

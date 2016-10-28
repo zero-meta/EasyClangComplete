@@ -15,8 +15,6 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 [![MIT licensed][img-mit]](./LICENSE)
 [![Gitter][img-gitter]][gitter]
 
-*Seems OSX build are misbehaving on Travis-CI side*
-
 This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++
 for Sublime Text 3. [Support](#support-it) it if you like it.
 

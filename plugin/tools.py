@@ -441,7 +441,7 @@ class Tools:
             version_str = match.group()
             if version_str > "3.8" and platform.system() == "Darwin":
                 # info from this table: https://gist.github.com/yamaya/2924292
-                osx_version = version_str
+                osx_version = version_str[:3]
                 version_str = OSX_CLANG_VERSION_DICT[osx_version]
                 info = {"platform": platform.system()}
                 log.warning(

@@ -183,8 +183,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
             (job_id, completions) = future.result()
             if job_id == self.current_job_id:
                 self.current_completions = completions
-                SublBridge.show_auto_complete(
-                    sublime.active_window().active_view())
+                if self.current_completions:
+                    # we only want to trigger the autocompletion popup if there
+                    # are new completions to show there. Otherwise let it be.
+                    SublBridge.show_auto_complete(
+                        sublime.active_window().active_view())
 
     def on_query_completions(self, view, prefix, locations):
         """ Function that is called when user queries completions in the code

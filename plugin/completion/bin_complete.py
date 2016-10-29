@@ -150,29 +150,19 @@ class Completer(BaseCompleter):
         else:
             self.std_flag = settings.std_flag_c
 
-        # if we use project-specific settings we ignore everything else
-        if settings.project_specific_settings:
-            log.debug(" overriding all flags by project ones")
-            clang_flags = settings.get_project_clang_flags()
-            if not clang_flags:
-                log.error(" could not read project specific settings")
-                log.info(" falling back to default plugin ones")
-        if not clang_flags:
-            # init needed variables from plugin settings as project settings
-            # are either not used or invalid
-            clang_flags = []
+        clang_flags = []
 
-            # init includes to start with from settings
-            includes = settings.populate_include_dirs(view)
+        # init includes to start with from settings
+        includes = settings.populate_include_dirs(view)
 
-            for include in includes:
-                clang_flags.append('-I "{}"'.format(include))
+        for include in includes:
+            clang_flags.append('-I "{}"'.format(include))
 
-            if settings.search_clang_complete and self.flags_manager:
-                log.debug(" flags_manager loaded")
-                custom_flags = self.flags_manager.get_flags(
-                    separate_includes=True)
-                clang_flags += custom_flags
+        if settings.search_clang_complete_file and self.flags_manager:
+            log.debug(" flags_manager loaded")
+            custom_flags = self.flags_manager.get_flags(
+                separate_includes=True)
+            clang_flags += custom_flags
 
         # let's print the flags just to be sure
         self.flags_dict[view.buffer_id()] = clang_flags
@@ -283,7 +273,7 @@ class Completer(BaseCompleter):
         # now run this command
         log.debug(" clang command: \n%s", complete_cmd)
 
-        return BaseCompleter.run_command(complete_cmd)
+        return Tools.run_command(complete_cmd)
 
     @staticmethod
     def _parse_completions(complete_results):

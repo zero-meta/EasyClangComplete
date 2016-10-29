@@ -146,20 +146,19 @@ I will only cover most important settings here.
       can also set these settings manually by copying the default ones defined
       [here](Preferences.sublime-settings) to your User Preferences and
       modifying them there.
-- `use_project_specific_settings`:
-    + when `true` will enforce sublime text to read all flags from project
-      settings(`*.sublime-project` -> `settings` -> `clang_flags`). This
-      settings overrides all other settings like `include_dirs` or `std_flag`
-      so should be used with caution. Defaults to `false`. If the project
-      settings cannot be found, the plugin will fall back to default behavior.
-      An example settings entry looks like this:
+- Override any setting in your project file! Just define the same setting in
+  project specific settings with either one of two prefixes: `"ecc_"` or
+  `"easy_clang_complete"`. See the project file in this repo for example.
+  Minimal example for clarity (here, `include_dirs` and `verbose` are
+  overridden):
 
       ```json
       {
         "settings":
         {
-          "clang_flags":
-          ["-std=c++11", "-Isrc", "-I/usr/include",]
+          "ecc_include_dirs":
+          ["-Isrc", "-I/usr/include"],
+          "easy_clang_complete_verbose": true,
         }
       }
       ```

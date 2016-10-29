@@ -42,15 +42,19 @@ following:
   -I/usr/include
   -I/opt/ros/indigo/include
   ```
-- Add all the flags to pass to clang to `*.sublime-project` file.
-  + add all settings as a string list under `settings` -> `clang_flags`.
-  + Example:
-  ```
-  "settings":
-  {
-    "clang_flags": ["-std=c++11", "-Isrc", "-I/usr/include"]
-  }
-  ```
+- Override flags setting in your project file! Just define the same setting in
+  project specific settings with either one of two prefixes: `"ecc_"` or
+  `"easy_clang_complete"`. See the project file in this repo for a working
+  example. Minimal example for clarity:
+      ```json
+      {
+        "settings":
+        {
+          "ecc_include_dirs":
+          ["-Isrc", "-I/usr/include"],
+        }
+      }
+      ```
 
 ## You're good to go! ##
 

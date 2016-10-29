@@ -8,6 +8,7 @@ import logging
 import re
 
 import os.path as path
+import os
 
 from .tools import PKG_NAME
 from .tools import Tools
@@ -18,51 +19,41 @@ log.debug(" reloading module")
 
 class Settings:
 
-    """class that encapsulates sublime settings
+    """ Encapsulates sublime settings
 
     Attributes:
-        clang_binary (string): name of clang binary to be used
-        complete_all (bool): flag to trigger autocompletion on every keystroke
-        errors_on_save (bool): if true, show errors on save
-        include_dirs (string[]): array of directories with headers
-        include_file_folder (bool): if true, current location -> 'include_dirs'
-        include_parent_folder (bool): if true, parent -> 'include_dirs'
+        CMAKE_PRIORITIES (list): possible priorities for generating
+            .clang_complete file
+        max_tu_age (int): lifetime of any translation unit in seconds
+        NAMES_ENUM (list): list of all setting names of this plugin
+        PREFIXES (list): prefixes to be used in project specific settings
         project_base_folder (str): root folder of current project
         project_base_name (str): name of the current project
-        project_specific_settings (TYPE): use project-specific settings
-        search_clang_complete (bool): if true search for '.clang_complete'
-            file up the tree
-        std_flag_c (string): flag of the c std library, e.g. -std=c11
-        std_flag_cpp (string): flag of the c++ std library, e.g. -std=c++11
         subl_settings (sublime.settings): link to sublime text settings dict
-        triggers (string[]): triggers that trigger autocompletion
-        use_libclang (bool): use libclang instead of parsing binary output
-        verbose (bool): verbose flag
     """
-
-    subl_settings = None
-
-    verbose = None
-    include_file_folder = None
-    include_parent_folder = None
-    complete_all = None
-    triggers = None
-    include_dirs = None
-    clang_binary = None
-    std_flag_cpp = None
-    std_flag_c = None
-    search_clang_complete = None
-    errors_on_save = None
-    use_libclang = None
-    hide_default_completions = None
-
-    generate_flags_with_cmake = None
-    cmake_flags_priority = None
-    cmake_prefix_paths = None
-
-    tu_max_age = None
-
     CMAKE_PRIORITIES = ["ask", "merge", "overwrite", "keep_old"]
+    PREFIXES = ["ecc_", "easy_clang_complete_"]
+
+    # refer to Preferences.sublime-settings for usage explanation
+    NAMES_ENUM = [
+        "autocomplete_all",
+        "clang_binary",
+        "cmake_flags_priority",
+        "cmake_prefix_paths",
+        "errors_on_save",
+        "generate_flags_with_cmake",
+        "hide_default_completions",
+        "include_dirs",
+        "include_file_folder",
+        "include_file_parent_folder",
+        "max_tu_age",
+        "search_clang_complete_file",
+        "std_flag_c",
+        "std_flag_cpp",
+        "triggers",
+        "use_libclang",
+        "verbose",
+    ]
 
     __change_listeners = []
 
@@ -94,39 +85,11 @@ class Settings:
         log.info(" settings changed and reloaded")
 
     def load_settings(self):
-        """Load settings from sublime dictionary to internal variables
+        """ Load settings from sublime dictionary to internal variables
         """
         self.subl_settings = sublime.load_settings(
             PKG_NAME + ".sublime-settings")
-        self.verbose = self.subl_settings.get("verbose")
-        self.complete_all = self.subl_settings.get("autocomplete_all")
-        self.include_parent_folder = self.subl_settings.get(
-            "include_file_parent_folder")
-        self.include_file_folder = self.subl_settings.get(
-            "include_file_folder")
-        self.triggers = self.subl_settings.get("triggers")
-        self.include_dirs = self.subl_settings.get("include_dirs")
-        self.clang_binary = self.subl_settings.get("clang_binary")
-        self.errors_on_save = self.subl_settings.get("errors_on_save")
-        self.std_flag_c = self.subl_settings.get("std_flag_c")
-        self.std_flag_cpp = self.subl_settings.get("std_flag_cpp")
-        self.use_libclang = self.subl_settings.get("use_libclang")
-        self.project_specific_settings = self.subl_settings.get(
-            "use_project_specific_settings")
-        self.hide_default_completions = self.subl_settings.get(
-            "hide_default_completions")
-
-        # handle flags-related things
-        self.search_clang_complete = self.subl_settings.get(
-            "search_clang_complete_file")
-        self.generate_flags_with_cmake = self.subl_settings.get(
-            "generate_flags_with_cmake")
-        self.cmake_flags_priority = self.subl_settings.get(
-            "cmake_flags_priority")
-        self.cmake_prefix_paths = self.subl_settings.get("cmake_prefix_paths")
-
-        max_tu_age_str = self.subl_settings.get("max_tu_age")
-        self.max_tu_age = Tools.seconds_from_string(max_tu_age_str)
+        self.__load_vars_from_settings(self.subl_settings)
 
         self.subl_settings.clear_on_change(PKG_NAME)
         self.subl_settings.add_on_change(PKG_NAME, self.on_settings_changed)
@@ -139,38 +102,51 @@ class Settings:
         if 'project_base_name' in variables:
             self.project_base_name = variables['project_base_name']
 
-    def get_project_clang_flags(self):
-        """Get clang flags for the current project
+        # override nessesary settings from projects
+        self.__update_settings_from_project_if_needed()
+
+    def __update_settings_from_project_if_needed(self):
+        """ Get clang flags for the current project
 
         Returns:
             list(str): flags for clang, None if no project found
         """
-        try:
-            project_data = sublime.active_window().project_data()
-            log.debug(" project data: %s", project_data)
-            project_settings = project_data["settings"]
-            log.debug(" project settings: %s", project_settings)
-            project_flags = []
-            for flag in project_settings["clang_flags"]:
-                if flag.startswith('-I'):
-                    project_flags.append(self.__expand_include(flag))
-                elif flag.startswith('-std'):
-                    if 'c++' in flag:
-                        self.std_flag_cpp = flag
-                    else:
-                        self.std_flag_c = flag
-                else:
-                    # we just append everything else
-                    project_flags.append(flag)
-            log.debug(" project_flags: %s", project_flags)
-            return project_flags
-        except Exception as e:
-            log.error(" failed to read clang flags from project settings.")
-            log.error(" error is: %s.", e)
-            return None
+        log.debug(" Overriding settings by project ones if needed:")
+        log.debug(" Valid prefixes: %s", Settings.PREFIXES)
+        settings_handle = sublime.active_window().active_view().settings()
+        self.__load_vars_from_settings(settings_handle, Settings.PREFIXES)
+        log.debug(" All overrides applied.")
+
+    def __load_vars_from_settings(self, settings_handle, prefixes=[""]):
+        """
+        Load all settings and add them as attributes of self
+
+        Args:
+            settings_handle (dict): settings from sublime
+            prefixes (list, optional): package-specific prefixes to
+                disambiguate settings when loading them from project settings
+
+        """
+        log.debug(" Reading settings...")
+        for setting_name in Settings.NAMES_ENUM:
+            for prefix in prefixes:
+                val = settings_handle.get(prefix + setting_name)
+                if val is not None:
+                    # we don't want to override existing setting
+                    break
+            if val is not None:
+                # set this value to this object too
+                setattr(self, setting_name, val)
+                # tell the user what we have done
+                log.debug("  %-26s <-- '%s'", setting_name, val)
+        log.debug(" Settings sucessfully read...")
+
+        # process some special settings
+        if isinstance(self.max_tu_age, str):
+            self.max_tu_age = Tools.seconds_from_string(self.max_tu_age)
 
     def __expand_include(self, include):
-        """Expand include. Make sure path is ok given a specific os and add
+        """ Expand include. Make sure path is ok given a specific os and add
         current project path if the include path is relative.
 
         Args:
@@ -195,71 +171,20 @@ class Settings:
         Returns:
             bool: validity of settings
         """
-        if self.subl_settings is None:
-            log.critical(" no subl_settings found")
-            return False
-        if self.verbose is None:
-            log.critical(" no verbose flag found")
-            return False
-        if self.include_parent_folder is None:
-            log.critical(" no include_parent_folder flag found")
-            return False
-        if self.include_file_folder is None:
-            log.critical(" no include_file_folder flag found")
-            return False
-        if self.complete_all is None:
-            log.critical(" no autocomplete_all flag found")
-            return False
-        if self.triggers is None:
-            log.critical(" no triggers found")
-            return False
-        if self.include_dirs is None:
-            log.critical(" no include_dirs setting found")
-            return False
-        if self.clang_binary is None:
-            log.critical(" no clang_binary setting found")
-            return False
-        if self.std_flag_c is None:
-            log.critical(" no std_flag_c setting found")
-            return False
-        if self.std_flag_cpp is None:
-            log.critical(" no std_flag_cpp setting found")
-            return False
-        if self.search_clang_complete is None:
-            log.critical(" no search_clang_complete setting found")
-            return False
-        if self.errors_on_save is None:
-            log.critical(" no errors_on_save setting found")
-            return False
-        if self.use_libclang is None:
-            log.critical(" no use_libclang setting found")
-            return False
-        if self.project_specific_settings is None:
-            log.critical(" no use_project_specific_settings setting found")
-            return False
-        if self.hide_default_completions is None:
-            log.critical(" no hide_default_completions setting found")
-            return False
-        if self.generate_flags_with_cmake is None:
-            log.critical(" no generate_flags_with_cmake setting found")
-            return False
-        if self.cmake_flags_priority is None:
-            log.critical(" no cmake_flags_priority setting found")
-            return False
-        if self.max_tu_age is None:
-            log.critical(" no max_tu_age setting found")
-            return False
+        for key, value in self.__dict__.items():
+            if key.startswith('__') or callable(key):
+                continue
+            if value is None:
+                log.critical(" no setting '%s' found!", key)
+                return False
         if self.cmake_flags_priority not in Settings.CMAKE_PRIORITIES:
             log.critical(" priority: '%s' is not one of allowed ones!",
                          self.cmake_flags_priority)
             return False
-        if self.cmake_prefix_paths is None:
-            log.critical(" no cmake_prefix_paths setting found")
-            return False
         return True
 
     def populate_include_dirs(self, view):
-        """populate the include dirs based on the project
+        """ Populate the variables inside include dirs with real values
 
         Args:
             view (sublime.View): current view
@@ -273,25 +198,32 @@ class Settings:
         file_parent_folder = path.dirname(file_current_folder)
 
         # initialize new include_dirs
-        include_dirs = list(self.include_dirs)
+        include_dirs = set()
         log.debug(" populating include dirs with current variables:")
         log.debug(" project_base_name = %s", self.project_base_name)
         log.debug(" project_base_folder = %s", self.project_base_folder)
         log.debug(" file_parent_folder = %s", file_parent_folder)
 
-        # replace project related variables to real ones
-        for i, include_dir in enumerate(include_dirs):
-            include_dir = re.sub(
-                r"\$project_base_path", self.project_base_folder.replace('\\', '\\\\'), include_dir)
+        clang_ver_number_str = Tools.get_clang_version_str(self.clang_binary)
+
+        # populate variables to real values
+        for include_dir in self.include_dirs:
+            include_dir = re.sub(r"\$project_base_path",
+                                 self.project_base_folder.replace('\\', '\\\\'),
+                                 include_dir)
             include_dir = re.sub(r"\$project_name",
-                                 self.project_base_name.replace('\\', '\\\\'), include_dir)
+                                 self.project_base_name.replace('\\', '\\\\'),
+                                 include_dir)
+            include_dir = re.sub(r"\$clang_version",
+                                 clang_ver_number_str,
+                                 include_dir)
             include_dir = path.abspath(include_dir)
-            include_dirs[i] = include_dir
+            include_dirs.add(include_dir)
 
         if self.include_file_folder:
-            include_dirs.append(file_current_folder)
-        if self.include_parent_folder:
-            include_dirs.append(file_parent_folder)
+            include_dirs.add(file_current_folder)
+        if self.include_file_parent_folder:
+            include_dirs.add(file_parent_folder)
 
         # print resulting include dirs
         log.debug(" include_dirs = %s", include_dirs)

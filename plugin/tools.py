@@ -14,6 +14,8 @@ from os import listdir
 import sublime
 import logging
 import tempfile
+import platform
+import subprocess
 
 import re
 
@@ -379,9 +381,74 @@ class Tools:
             log.debug(" wrong trigger fired")
             return PosStatus.WRONG_TRIGGER
 
-        if settings.complete_all:
+        if settings.autocomplete_all:
             return PosStatus.COMPLETION_NEEDED
 
         # if nothing fired we don't need to do anything
         log.debug(" no completions needed")
         return PosStatus.COMPLETION_NOT_NEEDED
+
+    @staticmethod
+    def run_command(command, shell=True):
+        """ Run a generic command in a subprocess
+
+        Args:
+            command (str): command to run
+
+        Returns:
+            str: raw command output
+        """
+        try:
+            startupinfo = None
+            if platform.system() == "Windows":
+                # Don't let console window pop-up briefly.
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = subprocess.SW_HIDE
+            output = subprocess.check_output(command,
+                                             stderr=subprocess.STDOUT,
+                                             shell=shell,
+                                             startupinfo=startupinfo)
+            output_text = ''.join(map(chr, output))
+        except subprocess.CalledProcessError as e:
+            output_text = e.output.decode("utf-8")
+            log.debug(" clang process finished with code: %s", e.returncode)
+            log.debug(" clang process output: \n%s", output_text)
+        return output_text
+
+    @staticmethod
+    def get_clang_version_str(clang_binary):
+        """ Get Clang version string from subprocess run of "clang_binary -v"
+
+        Args:
+            clang_binary (str): clang binary, e.g. "clang++-3.8"
+
+        Returns:
+            str: clang version number like: 3.8.0
+
+        Raises: RuntimeError: There is an error while getting version. This is
+            too important to continue. If this fails the plugin will not work
+            at all.
+        """
+        check_version_cmd = clang_binary + " -v"
+        log.info(" Getting version from command: `%s`", check_version_cmd)
+        output_text = Tools.run_command(check_version_cmd, shell=True)
+
+        # now we have the output, and can extract version from it
+        version_regex = re.compile("\d\.\d\.*\d*")
+        match = version_regex.search(output_text)
+        if match:
+            version_str = match.group()
+            if version_str > "3.8" and platform.system() == "Darwin":
+                # info from this table: https://gist.github.com/yamaya/2924292
+                osx_version = version_str[:3]
+                version_str = OSX_CLANG_VERSION_DICT[osx_version]
+                info = {"platform": platform.system()}
+                log.warning(
+                    " OSX version %s reported. Reducing it to %s. Info: %s",
+                    osx_version, version_str, info)
+            log.info(" Found clang version: %s", version_str)
+            return version_str
+        else:
+            raise RuntimeError(
+                " Couldn't find clang version in clang version output.")

@@ -490,8 +490,6 @@ class Tools:
         return hashlib.md5(init_string.encode('utf-8')).hexdigest()
 
     @staticmethod
-    def get_position_hash(view, position_in_file):
-        """ Generate md5 unique sting hash from position in the file """
-        unique_id = Tools.get_unique_str(
-            view.file_name() + str(position_in_file))
-        return unique_id
+    def get_position_identifier(view, position_in_file):
+        """ Generate unique tuple for file and position in the file """
+        return (view.buffer_id(), position_in_file)

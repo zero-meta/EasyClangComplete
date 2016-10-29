@@ -207,8 +207,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         log.debug(" on_query_completions view id %s", view.buffer_id())
         log.debug(" prefix: %s, locations: %s" % (prefix, locations))
         trigger_pos = locations[0] - len(prefix)
-        current_pos_id = Tools.get_position_hash(view, trigger_pos)
-        log.debug(" this position has hash: '%s'", current_pos_id)
+        current_pos_id = Tools.get_position_identifier(view, trigger_pos)
+        log.debug(" this position has identifier: '%s'", current_pos_id)
 
         if not self.completer:
             log.debug(" no completer")

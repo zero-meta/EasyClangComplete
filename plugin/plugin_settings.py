@@ -129,8 +129,6 @@ class Settings:
         """
         log.debug(" Reading settings...")
         for setting_name in Settings.NAMES_ENUM:
-            if setting_name.startswith('__') or callable(setting_name):
-                continue
             for prefix in prefixes:
                 val = settings_handle.get(prefix + setting_name)
                 if val is not None:

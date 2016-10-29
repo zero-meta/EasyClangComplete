@@ -216,13 +216,9 @@ class Completer(BaseCompleter):
     def complete(self, view, cursor_pos, current_job_id):
         """ This function is called asynchronously to create a list of
         autocompletions. Using the current translation unit it queries libclang
-        for the possible completions. It also shows compile errors if needed.
+        for the possible completions.
 
-        Args:
-            view (sublime.View): current view
-            cursor_pos (int): sublime provided poistion of the cursor
         """
-        print(" in complete function")
         file_body = view.substr(sublime.Region(0, view.size()))
         (row, col) = SublBridge.cursor_pos(view, cursor_pos)
 
@@ -247,11 +243,11 @@ class Completer(BaseCompleter):
             log.debug(" code complete done in %s seconds", end - start)
 
         if complete_obj is None or len(complete_obj.results) == 0:
-            self.completions = []
+            completions = []
         else:
-            self.completions = Completer._parse_completions(complete_obj)
-        log.debug(' completions: %s' % self.completions)
-        return (current_job_id, self.completions)
+            completions = Completer._parse_completions(complete_obj)
+        log.debug(' completions: %s' % completions)
+        return (current_job_id, completions)
 
     def update(self, view, show_errors):
         """Reparse the translation unit. This speeds up completions

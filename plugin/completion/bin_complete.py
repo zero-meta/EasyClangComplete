@@ -35,9 +35,6 @@ class Completer(BaseCompleter):
         std_flag (TYPE): std flag, e.g. "std=c++11"
 
         completions (list): current completions
-        async_completions_ready (bool): turns true if there are completions
-                                    that have become ready from an async call
-
         compl_regex (regex): regex to parse raw completion for name and content
         compl_content_regex (regex): regex to parse the content of the
         completion opts_regex (regex): regex to detect optional parameters
@@ -171,14 +168,7 @@ class Completer(BaseCompleter):
     def complete(self, view, cursor_pos, current_job_id):
         """ This function is called asynchronously to create a list of
         autocompletions. It builds up a clang command that is then executed
-        as a subprocess. The output is parsed for completions and/or errors
-
-        Args:
-            view (sublime.View): current view
-            cursor_pos (int): sublime provided poistion of the cursor
-            show_errors (bool): true if we want to visualize errors
-
-        """
+        as a subprocess. The output is parsed for completions """
         if not view.buffer_id() in self.flags_dict:
             log.error(" cannot complete view: %s", view.buffer_id())
             return None
@@ -189,9 +179,9 @@ class Completer(BaseCompleter):
         end = time.time()
         log.debug(" code complete done in %s seconds", end - start)
 
-        self.completions = Completer._parse_completions(raw_complete)
-        log.debug(' completions: %s' % self.completions)
-        return (current_job_id, self.completions)
+        completions = Completer._parse_completions(raw_complete)
+        log.debug(' completions: %s' % completions)
+        return (current_job_id, completions)
 
     def update(self, view, show_errors):
         """update build for current view

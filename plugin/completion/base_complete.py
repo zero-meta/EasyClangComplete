@@ -25,7 +25,6 @@ class BaseCompleter:
     """A base class for clang based completions
 
     Attributes:
-        async_completions_ready (bool): is true after async completions ready
         completions (list): current list of completions
         error_vis (plugin.CompileErrors): object of compile errors class
         compiler_variant (CompilerVariant): compiler specific options
@@ -40,9 +39,6 @@ class BaseCompleter:
 
     flags_manager = None
 
-    completions = []
-
-    async_completions_ready = False
     valid = False
 
     def __init__(self, clang_binary):
@@ -141,7 +137,7 @@ class BaseCompleter:
         Args:
             view (sublime.View): current view
             cursor_pos (int): sublime provided poistion of the cursor
-            show_errors (bool): true if we want to visualize errors
+            current_job_id (str): identifier for this completion job
 
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method

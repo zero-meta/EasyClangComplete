@@ -117,7 +117,7 @@ class Settings:
         self.__load_vars_from_settings(settings_handle, Settings.PREFIXES)
         log.debug(" All overrides applied.")
 
-    def __load_vars_from_settings(self, settings_handle, prefixes=[""]):
+    def __load_vars_from_settings(self, settings_handle, prefixes=None):
         """
         Load all settings and add them as attributes of self
 
@@ -128,6 +128,8 @@ class Settings:
 
         """
         log.debug(" Reading settings...")
+        if not prefixes:
+            prefixes = [""]
         for setting_name in Settings.NAMES_ENUM:
             if setting_name.startswith('__') or callable(setting_name):
                 continue

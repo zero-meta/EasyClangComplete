@@ -208,12 +208,11 @@ class Settings:
 
         # populate variables to real values
         for include_dir in self.include_dirs:
-            include_dir = re.sub(
-                r"\$project_base_path",
-                self.project_base_folder,
-                include_dir)
+            include_dir = re.sub(r"\$project_base_path",
+                                 self.project_base_folder.replace('\\', '\\\\'),
+                                 include_dir)
             include_dir = re.sub(r"\$project_name",
-                                 self.project_base_name,
+                                 self.project_base_name.replace('\\', '\\\\'),
                                  include_dir)
             include_dir = re.sub(r"\$clang_version",
                                  clang_ver_number_str,

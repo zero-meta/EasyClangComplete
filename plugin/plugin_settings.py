@@ -114,27 +114,30 @@ class Settings:
         log.debug(" Overriding settings by project ones if needed:")
         log.debug(" Valid prefixes: %s", Settings.PREFIXES)
         settings_handle = sublime.active_window().active_view().settings()
-        self.__load_vars_from_settings(settings_handle, Settings.PREFIXES)
+        self.__load_vars_from_settings(settings_handle, project_specific=True)
         log.debug(" All overrides applied.")
 
-    def __load_vars_from_settings(self, settings_handle, prefixes=None):
+    def __load_vars_from_settings(self, settings, project_specific=False):
         """
         Load all settings and add them as attributes of self
 
         Args:
-            settings_handle (dict): settings from sublime
+            settings (dict): settings from sublime
             prefixes (list, optional): package-specific prefixes to
                 disambiguate settings when loading them from project settings
 
         """
         log.debug(" Reading settings...")
-        if not prefixes:
+        # project settings are all prefixed to disambiguate them from others
+        if project_specific:
+            prefixes = Settings.PREFIXES
+        else:
             prefixes = [""]
         for setting_name in Settings.NAMES_ENUM:
             if setting_name.startswith('__') or callable(setting_name):
                 continue
             for prefix in prefixes:
-                val = settings_handle.get(prefix + setting_name)
+                val = settings.get(prefix + setting_name)
                 if val is not None:
                     # we don't want to override existing setting
                     break

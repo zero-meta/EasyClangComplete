@@ -134,8 +134,6 @@ class Settings:
         else:
             prefixes = [""]
         for setting_name in Settings.NAMES_ENUM:
-            if setting_name.startswith('__') or callable(setting_name):
-                continue
             for prefix in prefixes:
                 val = settings.get(prefix + setting_name)
                 if val is not None:

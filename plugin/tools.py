@@ -94,10 +94,40 @@ class SublBridge:
         line = view.line(point_on_next_line)
         return view.substr(line)
 
+    @staticmethod
+    def format_completions(completions, hide_default_completions):
+        """ Get completions. Manage hiding default ones.
+
+        Args:
+            hide_default_completions (bool): True if we hide default ones
+
+        Returns:
+            tupple: (completions, flags)
+        """
+        if hide_default_completions:
+            log.debug(" hiding default completions")
+            return (completions, SublBridge.NO_DEFAULT_COMPLETIONS)
+        else:
+            log.debug(" adding clang completions to default ones")
+            return completions
+
+    @staticmethod
+    def show_auto_complete(view):
+        """ Calling this function reopens completion popup,
+        subsequently calling EasyClangComplete.on_query_completions(...)
+        Args:
+            view (sublime.View): view to open completion window in
+        """
+        log.debug(" reload completion tooltip")
+        view.run_command('hide_auto_complete')
+        view.run_command('auto_complete', {
+            'disable_auto_insert': True,
+            'api_completions_only': False,
+            'next_competion_if_showing': False})
+
 
 class PosStatus:
-
-    """Enum class for position status
+    """ Enum class for position status
 
     Attributes:
         COMPLETION_NEEDED (int): completion needed
@@ -342,7 +372,7 @@ class Tools:
         return int(h) * 3600 + int(m) * 60 + int(s)
 
     @staticmethod
-    def get_position_status(point, view, settings):
+    def get_pos_status(point, view, settings):
         """Check if the cursor focuses a valid trigger
 
         Args:
@@ -452,3 +482,14 @@ class Tools:
         else:
             raise RuntimeError(
                 " Couldn't find clang version in clang version output.")
+
+    @staticmethod
+    def get_unique_str(init_string):
+        """ Generate md5 unique sting hash given init_string """
+        import hashlib
+        return hashlib.md5(init_string.encode('utf-8')).hexdigest()
+
+    @staticmethod
+    def get_position_identifier(view, position_in_file):
+        """ Generate unique tuple for file and position in the file """
+        return (view.buffer_id(), position_in_file)

@@ -213,15 +213,11 @@ class Completer(BaseCompleter):
             self.timer = Timer(Completer.timer_period, self.__remove_old_TUs)
             self.timer.start()
 
-    def complete(self, view, cursor_pos, show_errors):
+    def complete(self, view, cursor_pos, current_job_id):
         """ This function is called asynchronously to create a list of
         autocompletions. Using the current translation unit it queries libclang
-        for the possible completions. It also shows compile errors if needed.
+        for the possible completions.
 
-        Args:
-            view (sublime.View): current view
-            cursor_pos (int): sublime provided poistion of the cursor
-            show_errors (bool): controls if we need to show errors
         """
         file_body = view.substr(sublime.Region(0, view.size()))
         (row, col) = SublBridge.cursor_pos(view, cursor_pos)
@@ -231,13 +227,12 @@ class Completer(BaseCompleter):
 
         v_id = view.buffer_id()
 
-        # do nothing if there in no translation_unit present
         with self.rlock:
+            # do nothing if there in no translation_unit present
             if v_id not in self.TUs:
                 log.error(" cannot complete. No TU for view %s", v_id)
                 return None
-        # execute clang code completion
-        with self.rlock:
+            # execute clang code completion
             start = time.time()
             log.debug(" started code complete for view %s", v_id)
             complete_obj = self.TUs[v_id].tu().codeComplete(
@@ -248,20 +243,11 @@ class Completer(BaseCompleter):
             log.debug(" code complete done in %s seconds", end - start)
 
         if complete_obj is None or len(complete_obj.results) == 0:
-            self.completions = []
+            completions = []
         else:
-            self.completions = Completer._parse_completions(complete_obj)
-        log.debug(' completions: %s' % self.completions)
-        self.async_completions_ready = True
-        if len(self.completions) > 0:
-            Completer._reload_completions(view)
-        else:
-            log.debug(" no completions")
-
-        if show_errors:
-            with self.rlock:
-                self.show_errors(
-                    view, self.TUs[v_id].tu().diagnostics)
+            completions = Completer._parse_completions(complete_obj)
+        log.debug(' completions: %s' % completions)
+        return (current_job_id, completions)
 
     def update(self, view, show_errors):
         """Reparse the translation unit. This speeds up completions

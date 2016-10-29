@@ -25,7 +25,6 @@ class BaseCompleter:
     """A base class for clang based completions
 
     Attributes:
-        async_completions_ready (bool): is true after async completions ready
         completions (list): current list of completions
         error_vis (plugin.CompileErrors): object of compile errors class
         compiler_variant (CompilerVariant): compiler specific options
@@ -40,9 +39,6 @@ class BaseCompleter:
 
     flags_manager = None
 
-    completions = []
-
-    async_completions_ready = False
     valid = False
 
     def __init__(self, clang_binary):
@@ -135,13 +131,13 @@ class BaseCompleter:
             cmake_prefix_paths=settings.cmake_prefix_paths,
             search_scope=search_scope)
 
-    def complete(self, view, cursor_pos, show_errors):
+    def complete(self, view, cursor_pos, current_job_id):
         """Function to generate completions. See children for implementation.
 
         Args:
             view (sublime.View): current view
             cursor_pos (int): sublime provided poistion of the cursor
-            show_errors (bool): true if we want to visualize errors
+            current_job_id (str): identifier for this completion job
 
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method
@@ -171,35 +167,3 @@ class BaseCompleter:
         errors = self.compiler_variant.errors_from_output(output)
         self.error_vis.generate(view, errors)
         self.error_vis.show_regions(view)
-
-    def get_completions(self, hide_default_completions):
-        """ Get completions. Manage hiding default ones.
-
-        Args:
-            hide_default_completions (bool): True if we hide default ones
-
-        Returns:
-            tupple: (completions, flags)
-        """
-        if hide_default_completions:
-            log.debug(" hiding default completions")
-            return (self.completions, tools.SublBridge.NO_DEFAULT_COMPLETIONS)
-        else:
-            log.debug(" adding clang completions to default ones")
-            return self.completions
-
-    @staticmethod
-    def _reload_completions(view):
-        """Ask sublime to reload the completions. Needed to update the active
-        completion list when async autocompletion task has finished.
-
-        Args:
-            view (sublime.View): current_view
-
-        """
-        log.debug(" reload completion tooltip")
-        view.run_command('hide_auto_complete')
-        view.run_command('auto_complete', {
-            'disable_auto_insert': True,
-            'api_completions_only': True,
-            'next_competion_if_showing': True, })

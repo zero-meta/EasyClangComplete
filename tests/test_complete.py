@@ -143,20 +143,12 @@ class base_test_complete(object):
 
         # Load the completions.
         settings = Settings()
-        completer.complete(self.view, pos, settings.errors_on_save)
-
-        # Wait 2 seconds for them to load.
-        counter = 0
-        while not completer.async_completions_ready:
-            time.sleep(0.1)
-            counter += 1
-            if counter > 20:
-                self.fail("Completions not ready after %d tries" % counter)
+        (_, completions) = completer.complete(self.view, pos, "¯\_(ツ)_/¯")
 
         # Verify that we got the expected completions back.
-        self.assertIsNotNone(completer.completions)
+        self.assertIsNotNone(completions)
         expected = ['a\tint a', 'a']
-        self.assertIn(expected, completer.completions)
+        self.assertIn(expected, completions)
 
     def test_complete_vector(self):
         """ Test that we can complete vector members. """
@@ -173,23 +165,15 @@ class base_test_complete(object):
 
         # Load the completions.
         settings = Settings()
-        completer.complete(self.view, pos, settings.errors_on_save)
-
-        # Wait 2 seconds for them to load.
-        counter = 0
-        while not completer.async_completions_ready:
-            time.sleep(0.1)
-            counter += 1
-            if counter > 20:
-                self.fail("Completions not ready after %d tries" % counter)
+        (_, completions) = completer.complete(self.view, pos, "¯\_(ツ)_/¯")
 
         # Verify that we got the expected completions back.
-        self.assertIsNotNone(completer.completions)
+        self.assertIsNotNone(completions)
         if platform.system() == "Windows":
             # disable the windows tests for now until AppVeyor fixes things
             return
         expected = ['begin\titerator begin()', 'begin()']
-        self.assertIn(expected, completer.completions)
+        self.assertIn(expected, completions)
 
     def test_unsaved_views(self):
         """ Test that we gracefully handle unsaved views. """
@@ -226,72 +210,6 @@ class base_test_complete(object):
         # Trigger default completions popup.
         self.view.run_command('auto_complete')
         self.assertTrue(self.view.is_auto_complete_visible())
-
-        # Load the completions.
-        settings = Settings()
-        completer.complete(self.view, pos, settings.errors_on_save)
-
-        # Wait 2 seconds for them to load.
-        counter = 0
-        while not completer.async_completions_ready:
-            time.sleep(0.1)
-            counter += 1
-            if counter > 20:
-                self.fail("Completions not ready after %d tries" % counter)
-
-        # Verify that we got the expected completions back.
-        self.assertEqual([], completer.completions)
-        # And that popup with default completions is still open.
-        self.assertTrue(self.view.is_auto_complete_visible())
-
-    def test_no_completions_with_error_markers(self):
-        """ Test that empty completions still produce error marks. """
-        self.setUpView("test_errors.cpp")
-
-        completer = self.setUpCompleter()
-        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
-
-        # Undefined foo object has no completions.
-        self.assertEqual(self.getRow(1), "  foo.")
-        pos = self.view.text_point(1, 6)
-        current_word = self.view.substr(self.view.word(pos))
-        self.assertEqual(current_word, ".\n")
-
-        # Load the completions.
-        settings = Settings()
-        completer.complete(self.view, pos, settings.errors_on_save)
-
-        # Wait 2 seconds for them to load.
-        counter = 0
-        while not completer.async_completions_ready:
-            time.sleep(0.1)
-            counter += 1
-            if counter > 20:
-                self.fail("Completions not ready after %d tries" % counter)
-
-        # Verify that we got the expected completions back.
-        self.assertEqual([], completer.completions)
-
-        # Verify that error regions were added.
-        error_vis = completer.error_vis
-        self.assertIsNotNone(error_vis)
-        regions_dict = error_vis.err_regions[self.view.buffer_id()]
-        self.assertIsNotNone(regions_dict)
-        # Verify the number of rows with error regions.
-        self.assertTrue(len(regions_dict.keys()) > 0)
-        # Verify the region row.
-        expected_row = 2
-        self.assertIn(expected_row, regions_dict)
-        # Verify that correct amount of regions were created.
-        expected_regions_count = 1
-        self.assertEqual(expected_regions_count,
-                         len(regions_dict[expected_row]))
-        # Verify the column, row and region extent.
-        error_region = regions_dict[expected_row][0]
-        self.assertEqual('3', error_region['col'])
-        self.assertEqual('2', error_region['row'])
-        self.assertEqual(43, error_region['region'].a)
-        self.assertEqual(46, error_region['region'].b)
 
     def test_cmake_generate(self):
         """

@@ -173,7 +173,7 @@ class base_test_complete(object):
             # disable the windows tests for now until AppVeyor fixes things
             return
         expected = ['begin\titerator begin()', 'begin()']
-        self.assertIn(expected, completer.completions)
+        self.assertIn(expected, completions)
 
     def test_unsaved_views(self):
         """ Test that we gracefully handle unsaved views. """

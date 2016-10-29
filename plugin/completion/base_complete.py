@@ -135,7 +135,7 @@ class BaseCompleter:
             cmake_prefix_paths=settings.cmake_prefix_paths,
             search_scope=search_scope)
 
-    def complete(self, view, cursor_pos, show_errors):
+    def complete(self, view, cursor_pos, current_job_id):
         """Function to generate completions. See children for implementation.
 
         Args:

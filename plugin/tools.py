@@ -94,6 +94,23 @@ class SublBridge:
         line = view.line(point_on_next_line)
         return view.substr(line)
 
+    @staticmethod
+    def format_completions(completions, hide_default_completions):
+        """ Get completions. Manage hiding default ones.
+
+        Args:
+            hide_default_completions (bool): True if we hide default ones
+
+        Returns:
+            tupple: (completions, flags)
+        """
+        if hide_default_completions:
+            log.debug(" hiding default completions")
+            return (completions, SublBridge.NO_DEFAULT_COMPLETIONS)
+        else:
+            log.debug(" adding clang completions to default ones")
+            return completions
+
 
 class PosStatus:
 
@@ -342,7 +359,7 @@ class Tools:
         return int(h) * 3600 + int(m) * 60 + int(s)
 
     @staticmethod
-    def get_position_status(point, view, settings):
+    def get_pos_status(point, view, settings):
         """Check if the cursor focuses a valid trigger
 
         Args:
@@ -452,3 +469,14 @@ class Tools:
         else:
             raise RuntimeError(
                 " Couldn't find clang version in clang version output.")
+
+    @staticmethod
+    def get_unique_str(init_string):
+        import hashlib
+        return hashlib.md5(init_string.encode('utf-8')).hexdigest()
+
+    @staticmethod
+    def get_position_hash(view, position_in_file):
+        unique_id = Tools.get_unique_str(
+            view.file_name() + str(position_in_file))
+        return unique_id

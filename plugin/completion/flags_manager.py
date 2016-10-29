@@ -213,8 +213,7 @@ class FlagsManager:
         import shutil
         import hashlib
         cmake_cmd = FlagsManager.cmake_mask.format(path=cmake_file.folder())
-        unique_proj_str = hashlib.md5(
-            cmake_file.full_path().encode('utf-8')).hexdigest()
+        unique_proj_str = Tools.get_unique_str(cmake_file.full_path())
         tempdir = path.join(
             Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
         # ensure a clean build

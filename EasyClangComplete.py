@@ -11,7 +11,7 @@ import sublime_plugin
 import imp
 import logging
 
-from threading import Thread
+from concurrent import futures
 
 from .plugin import tools
 from .plugin import error_vis
@@ -51,12 +51,18 @@ class EasyClangComplete(sublime_plugin.EventListener):
     Attributes:
         settings (plugin_settings.Settings): class that encapsulates settings
         completer (plugin.completion.base_completion.BaseCompleter):
-            This object handles auto completion. It can be one of the following:
+            This object handles auto completion.
+            It can be one of the following:
             - bin_complete.Completer
             - lib_complete.Completer
     """
     settings = None
     completer = None
+
+    pool_read = futures.ThreadPoolExecutor(max_workers=4)
+
+    current_job_id = None
+    current_completions = []
 
     def __init__(self):
         """Initializes the object."""
@@ -164,6 +170,21 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 return
             self.completer.remove(view.buffer_id())
 
+    def completion_finished(self, future):
+        if future.done():
+            (job_id, completions) = future.result()
+            if job_id == self.current_job_id:
+                self.current_completions = completions
+                EasyClangComplete.show_auto_complete(
+                    sublime.active_window().active_view())
+
+    def show_auto_complete(view):
+        view.run_command('hide_auto_complete')
+        view.run_command('auto_complete', {
+            'disable_auto_insert': True,
+            'api_completions_only': False,
+            'next_competion_if_showing': False})
+
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code
 
@@ -177,6 +198,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         log.debug(" on_query_completions view id %s", view.buffer_id())
         log.debug(" prefix: %s, locations: %s" % (prefix, locations))
+        trigger_pos = locations[0] - len(prefix)
+        current_pos_id = Tools.get_position_hash(view, trigger_pos)
+        log.debug(" this position has hash: '%s'", current_pos_id)
 
         if not Tools.is_valid_view(view):
             log.debug(" not a valid view")
@@ -186,15 +210,15 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug(" no completer")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
-        if self.completer.async_completions_ready:
-            self.completer.async_completions_ready = False
+        if self.current_completions and current_pos_id == self.current_job_id:
             log.debug(" returning existing completions")
-            return self.completer.get_completions(
+            print(self.current_completions)
+            return SublBridge.format_completions(
+                self.current_completions,
                 self.settings.hide_default_completions)
 
         # Verify that character under the cursor is one allowed trigger
-        pos_status = Tools.get_position_status(
-            locations[0], view, self.settings)
+        pos_status = Tools.get_pos_status(trigger_pos, view, self.settings)
         if pos_status == PosStatus.WRONG_TRIGGER:
             # we are at a wrong trigger, remove all completions from the list
             log.debug(" wrong trigger")
@@ -209,13 +233,15 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug(" showing default completions")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
-        # create a daemon thread to update the completions
-        log.debug(" starting async auto_complete at pos: %s", locations[0])
-        completion_thread = Thread(
-            target=self.completer.complete,
-            args=[view, locations[0], self.settings.errors_on_save])
-        completion_thread.deamon = True
-        completion_thread.start()
+        self.current_job_id = current_pos_id
+        log.debug(" starting async auto_complete with id: %s",
+                  self.current_job_id)
+        future = EasyClangComplete.pool_read.submit(
+                    self.completer.complete,
+                    view,
+                    trigger_pos,
+                    self.current_job_id)
+        future.add_done_callback(self.completion_finished)
 
         # show default completions for now if allowed
         if self.settings.hide_default_completions:

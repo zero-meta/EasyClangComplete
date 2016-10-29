@@ -137,7 +137,7 @@ class test_tools_command(TestCase):
         current_word = self.view.substr(self.view.word(pos))
         self.assertEqual(current_word, "> ")
 
-        status = Tools.get_position_status(pos, self.view, settings)
+        status = Tools.get_pos_status(pos, self.view, settings)
 
         # Verify that we got the expected completions back.
         self.assertEqual(status, PosStatus.WRONG_TRIGGER)
@@ -147,7 +147,7 @@ class test_tools_command(TestCase):
         current_word = self.view.substr(self.view.word(pos))
         self.assertEqual(current_word, " >")
 
-        status = Tools.get_position_status(pos, self.view, settings)
+        status = Tools.get_pos_status(pos, self.view, settings)
 
         # Verify that we got the expected completions back.
         self.assertEqual(status, PosStatus.COMPLETION_NOT_NEEDED)
@@ -157,7 +157,7 @@ class test_tools_command(TestCase):
         current_word = self.view.substr(self.view.word(pos))
         self.assertEqual(current_word, ".\n")
 
-        status = Tools.get_position_status(pos, self.view, settings)
+        status = Tools.get_pos_status(pos, self.view, settings)
 
         # Verify that we got the expected completions back.
         self.assertEqual(status, PosStatus.WRONG_TRIGGER)

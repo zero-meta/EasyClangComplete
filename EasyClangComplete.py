@@ -132,7 +132,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             self.completer.error_vis.show_popup_if_needed(view, row)
 
     def on_modified_async(self, view):
-        """Called in a worker thread when view is modified
+        """ Called in a worker thread when view is modified
 
         Args:
             view (sublime.View): current view
@@ -144,7 +144,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             self.completer.error_vis.clear(view)
 
     def on_post_save_async(self, view):
-        """On save. Executed in a worker thread.
+        """ On save. Executed in a worker thread.
 
         Args:
             view (sublime.View): current view
@@ -171,6 +171,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
             self.completer.remove(view.buffer_id())
 
     def completion_finished(self, future):
+        """ Callback called when completion async function has returned. Checks
+        if job id equals the one that is expected now and updates the
+        completion list that is going to be used in on_query_completions
+
+        Args:
+            future (concurrent.Future): future holding completion result
+        """
         if future.done():
             (job_id, completions) = future.result()
             if job_id == self.current_job_id:
@@ -178,15 +185,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 EasyClangComplete.show_auto_complete(
                     sublime.active_window().active_view())
 
-    def show_auto_complete(view):
-        view.run_command('hide_auto_complete')
-        view.run_command('auto_complete', {
-            'disable_auto_insert': True,
-            'api_completions_only': False,
-            'next_competion_if_showing': False})
-
     def on_query_completions(self, view, prefix, locations):
-        """Function that is called when user queries completions in the code
+        """ Function that is called when user queries completions in the code
 
         Args:
             view (sublime.View): current view

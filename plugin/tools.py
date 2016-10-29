@@ -111,10 +111,23 @@ class SublBridge:
             log.debug(" adding clang completions to default ones")
             return completions
 
+    @staticmethod
+    def show_auto_complete(view):
+        """ Calling this function reopens completion popup,
+        subsequently calling EasyClangComplete.on_query_completions(...)
+        Args:
+            view (sublime.View): view to open completion window in
+        """
+        log.debug(" reload completion tooltip")
+        view.run_command('hide_auto_complete')
+        view.run_command('auto_complete', {
+            'disable_auto_insert': True,
+            'api_completions_only': False,
+            'next_competion_if_showing': False})
+
 
 class PosStatus:
-
-    """Enum class for position status
+    """ Enum class for position status
 
     Attributes:
         COMPLETION_NEEDED (int): completion needed
@@ -472,11 +485,13 @@ class Tools:
 
     @staticmethod
     def get_unique_str(init_string):
+        """ Generate md5 unique sting hash given init_string """
         import hashlib
         return hashlib.md5(init_string.encode('utf-8')).hexdigest()
 
     @staticmethod
     def get_position_hash(view, position_in_file):
+        """ Generate md5 unique sting hash from position in the file """
         unique_id = Tools.get_unique_str(
             view.file_name() + str(position_in_file))
         return unique_id

@@ -273,7 +273,7 @@ class Tools:
     syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
     valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
-    valid_syntax = ["C", "C++", "C Improved", "C++11"]
+    valid_syntax = ["C", "C Improved", "C99", "C++", "C++11"]
 
     SHOW_DEFAULT_COMPLETIONS = None
     HIDE_DEFAULT_COMPLETIONS = ([], sublime.INHIBIT_WORD_COMPLETIONS |

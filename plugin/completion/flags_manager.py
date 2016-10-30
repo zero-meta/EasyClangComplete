@@ -111,7 +111,7 @@ class FlagsManager:
         # initialize default flags
         self._initial_flags = list(compiler_variant.init_flags)
         current_lang = Tools.get_view_syntax(view)
-        if current_lang == 'C':
+        if current_lang == 'C' or current_lang == 'C99':
             self._initial_flags += settings.c_flags
         else:
             self._initial_flags += settings.cpp_flags

@@ -50,8 +50,6 @@ class Settings:
         "include_file_parent_folder",
         "max_tu_age",
         "search_clang_complete_file",
-        "std_flag_c",
-        "std_flag_cpp",
         "triggers",
         "use_libclang",
         "verbose",

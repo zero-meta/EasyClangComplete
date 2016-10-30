@@ -57,13 +57,26 @@ following:
     These includes will be included in every project you run.
 - Add `.clang_complete` file to the root of your project folder.
   + this file should contain all includes and macroses you want to use.
-  + see example [.clang_complete](.clang_complete) file.
-  + absolute paths start with `/`. All the others are treated as relative.
-- Add all the flags to pass to clang to `*.sublime-project` file.
-  + add all settings as a string list under `settings` -> `clang_flags`.
-  + See example [sublime-project](easy_clang_complete.sublime-project#L22)
-    file.
-  + absolute paths start with `/`. All the others are treated as relative.
+  + Example:
+  ```
+  -Isrc
+  -I/usr/include
+  -I/opt/ros/indigo/include
+  ```
+- Override flags setting in your project file! Just define the same setting in
+  project specific settings with either one of two prefixes: `"ecc_"` or
+  `"easy_clang_complete"`. See the project file in this repo for a working
+  example. Minimal example for clarity:
+  ```json
+      {
+        "settings":
+        {
+          "ecc_include_dirs":
+          ["-Isrc", "-I/usr/include"],
+          "easy_clang_complete_verbose": true
+        }
+      }
+  ```
 
 ## That's it! You're ready to use the plugin! ##
 

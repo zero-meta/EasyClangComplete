@@ -6,7 +6,7 @@ Follow the following steps to make sure everything runs smoothly!
 ## Install clang ##
 - **Ubuntu**: `sudo apt-get install clang`
 - **Windows**: install the latest release from `clang`
-  [website](http://llvm.org/releases/download.html)
+  [website](http://llvm.org/releases/download.html) (v >= 3.9)
 - **OSX**: ships `clang` by default. You are all set!
 - **Other Systems**: use your bundled package manager or install from `clang`
   [website](http://llvm.org/releases/download.html)
@@ -14,15 +14,8 @@ Follow the following steps to make sure everything runs smoothly!
 ## Configure your includes ##
 
 ### Are you using CMake? ###
-Then you're good to go! All the flags should be guessed automatically. The
-plugin will create a folder for your project in the temporary folder, will run
-`cmake -DCMAKE_EXPORT_COMPILE_COMMANDS <your_project_location>` to generate the
-compilation database and will parse it to get correct flags for your project.
-The flags will be saved to `.clang_complete` file near a `CMakeLists.txt` that
-contains a `project <name>` line.
-
-**WARNING**: this is in Beta state. Refer to issue [#19][cmake-issue] for
-discussions on the topic.
+Plugin automatically generates `.clang_complete` and uses it for building our
+code.
 
 ### Not using CMake? ###
 You will need a little bit of manual setup for now. `Clang` will automatically
@@ -46,24 +39,25 @@ following:
   project specific settings with either one of two prefixes: `"ecc_"` or
   `"easy_clang_complete"`. See the project file in this repo for a working
   example. Minimal example for clarity:
-      ```json
+  ```json
       {
         "settings":
         {
           "ecc_include_dirs":
           ["-Isrc", "-I/usr/include"],
+          "easy_clang_complete_verbose": true
         }
       }
-      ```
+  ```
 
-## You're good to go! ##
+## That's it! You're ready to use the plugin! ##
 
 ## More info here ##
 Get more info in a readme:
 https://github.com/niosus/EasyClangComplete/blob/master/README.md
 
-You can find all the relevant settings you can set here:
-https://github.com/niosus/EasyClangComplete/blob/master/README.md#settings-highlights
+Please see the default settings [file](EasyClangComplete.sublime-settings)
+shipped with the plugin for explanations and sane default values.
 
 ## Thanks ##
 It is really important for me that you are using the plugin. If you have

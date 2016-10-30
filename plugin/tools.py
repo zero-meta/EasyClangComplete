@@ -435,6 +435,9 @@ class Tools:
         """
         try:
             startupinfo = None
+            if isinstance(command, list):
+                command = subprocess.list2cmdline(command)
+                log.debug(" command: \n%s", command)
             if platform.system() == "Windows":
                 # Don't let console window pop-up briefly.
                 startupinfo = subprocess.STARTUPINFO()
@@ -498,3 +501,13 @@ class Tools:
     def get_position_identifier(view, position_in_file):
         """ Generate unique tuple for file and position in the file """
         return (view.buffer_id(), position_in_file)
+
+    @staticmethod
+    def find_flag_idx(flags, prefix):
+        """ Find index of flag with given prefix in list.
+        Returns: index of found flag or None if not found
+        """
+        for idx, flag in enumerate(flags):
+            if flag.startswith("-std"):
+                return idx
+        return None

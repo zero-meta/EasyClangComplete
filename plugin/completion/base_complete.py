@@ -109,7 +109,7 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def init(self, view, settings):
+    def init_for_view(self, view, settings):
         """
         Initialize the completer for this view. For real implementation see
         children.
@@ -119,17 +119,16 @@ class BaseCompleter:
             settings (Settings): plugin settings
 
         """
-        if not view:
-            return
         current_dir = path.dirname(view.file_name())
         search_scope = SearchScope(
             from_folder=current_dir,
             to_folder=settings.project_base_folder)
         self.flags_manager = FlagsManager(
-            use_cmake=settings.generate_flags_with_cmake,
-            flags_update_strategy=settings.cmake_flags_priority,
-            cmake_prefix_paths=settings.cmake_prefix_paths,
+            view=view,
+            settings=settings,
+            compiler_variant=self.compiler_variant,
             search_scope=search_scope)
+        log.debug(" flags_manager loaded")
 
     def complete(self, view, cursor_pos, current_job_id):
         """Function to generate completions. See children for implementation.

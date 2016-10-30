@@ -1,23 +1,26 @@
 {
-	// Where should clang search for headers
-	// These will be appended to build with `-I` flag each
-	// "$project_base_path" will be replaced with opened project path
-	// "$project_name" will be replaced with opened project name
-	// "$clang_version" will be replaced with numerical version str, e.g. 3.8.0
-	"include_dirs" : [
-		"/usr/include",
-		"$project_base_path/src",
-		"/workspace/$project_name/src",
-		"/usr/lib/clang/$clang_version/include" // example for Ubuntu 16.04
-		],
+	// Specify common flags that will be passed to clang for EVERY build.
+	// You can use wilcards:
+	// 	- $project_base_path -> will be replaced with the project path being built
+	// 	- $project_name -> replaced by name of the project being built
+	// 	- $clang_version -> replaced by the numeric version of clang in use
+	"common_flags" : [
+		// some example includes
+		"-isystem /usr/include",
+		"-I$project_base_path/src",
+		"-I/workspace/$project_name/src",
+		"-I/usr/lib/clang/$clang_version/include"
+	],
+	// C specific flags. Merged with common_flags for C files.
+	"c_flags" : [
+		"-std=c11"
+	],
+	// C++ specific flags. These are merged with common_flags for C++ files.
+	"cpp_flags" : [
+		"-std=c++11"
+	],
 
-	// set the default c standard library flag.
-	"std_flag_c" : "-std=c11",
-
-	// set the default c++ standard library flag.
-	"std_flag_cpp" : "-std=c++11",
-
-	// search for .clang_complete file up the tree. Use includes from it if found
+	// search for .clang_complete file up the tree. Use flags from it if found
 	"search_clang_complete_file": true,
 
 	// search for CMakeLists.txt with a "project" command in it. Run cmake on this

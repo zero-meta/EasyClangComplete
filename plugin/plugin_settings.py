@@ -37,13 +37,15 @@ class Settings:
     # refer to Preferences.sublime-settings for usage explanation
     NAMES_ENUM = [
         "autocomplete_all",
+        "c_flags",
         "clang_binary",
         "cmake_flags_priority",
         "cmake_prefix_paths",
+        "common_flags",
+        "cpp_flags",
         "errors_on_save",
         "generate_flags_with_cmake",
         "hide_default_completions",
-        "include_dirs",
         "include_file_folder",
         "include_file_parent_folder",
         "max_tu_age",
@@ -150,25 +152,6 @@ class Settings:
         if isinstance(self.max_tu_age, str):
             self.max_tu_age = Tools.seconds_from_string(self.max_tu_age)
 
-    def __expand_include(self, include):
-        """ Expand include. Make sure path is ok given a specific os and add
-        current project path if the include path is relative.
-
-        Args:
-            include (str): include in form -I<include>
-
-        Returns:
-            str: expanded include in form '-I "<include>"'
-        """
-        flag = None
-        path_to_add = include[2:].rstrip()
-        if path.isabs(path_to_add):
-            flag = '-I "{}"'.format(path.normpath(path_to_add))
-        else:
-            flag = '-I "{}"'.format(
-                path.join(self.project_base_folder, path_to_add))
-        return flag
-
     def is_valid(self):
         """Check settings validity. If any of the settings is None the settings
         are not valid.
@@ -188,23 +171,22 @@ class Settings:
             return False
         return True
 
-    def populate_include_dirs(self, view):
-        """ Populate the variables inside include dirs with real values
+    def populate_common_flags(self, view):
+        """ Populate the variables inside common_flags with real values
 
         Args:
             view (sublime.View): current view
 
         Returns:
-            str[]: directories where clang searches for header files
+            str[]: clang common flags with variables expanded
 
         """
         # init folders needed:
         file_current_folder = path.dirname(view.file_name())
         file_parent_folder = path.dirname(file_current_folder)
 
-        # initialize new include_dirs
-        include_dirs = set()
-        log.debug(" populating include dirs with current variables:")
+        common_flags = set()
+        log.debug(" populating common_flags with current variables:")
         log.debug(" project_base_name = %s", self.project_base_name)
         log.debug(" project_base_folder = %s", self.project_base_folder)
         log.debug(" file_parent_folder = %s", file_parent_folder)
@@ -212,24 +194,17 @@ class Settings:
         clang_ver_number_str = Tools.get_clang_version_str(self.clang_binary)
 
         # populate variables to real values
-        for include_dir in self.include_dirs:
-            include_dir = re.sub(r"\$project_base_path",
-                                 self.project_base_folder.replace('\\', '\\\\'),
-                                 include_dir)
-            include_dir = re.sub(r"\$project_name",
-                                 self.project_base_name.replace('\\', '\\\\'),
-                                 include_dir)
-            include_dir = re.sub(r"\$clang_version",
-                                 clang_ver_number_str,
-                                 include_dir)
-            include_dir = path.abspath(include_dir)
-            include_dirs.add(include_dir)
+        for flag in self.common_flags:
+            flag = re.sub(r"\$project_base_path",
+                          self.project_base_folder.replace('\\', '\\\\'), flag)
+            flag = re.sub(r"\$project_name",
+                          self.project_base_name.replace('\\', '\\\\'), flag)
+            flag = re.sub(r"\$clang_version", clang_ver_number_str, flag)
+            common_flags.add(flag)
 
         if self.include_file_folder:
-            include_dirs.add(file_current_folder)
+            common_flags.add("-I" + file_current_folder)
         if self.include_file_parent_folder:
-            include_dirs.add(file_parent_folder)
+            common_flags.add("-I" + file_parent_folder)
 
-        # print resulting include dirs
-        log.debug(" include_dirs = %s", include_dirs)
-        return include_dirs
+        return common_flags

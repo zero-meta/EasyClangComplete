@@ -87,7 +87,7 @@ class base_test_complete(object):
 
         clang_binary = settings.clang_binary
         completer = self.Completer(clang_binary)
-        completer.init(
+        completer.init_for_view(
             view=self.view,
             settings=settings)
 
@@ -185,7 +185,7 @@ class base_test_complete(object):
         settings = Settings()
         clang_binary = settings.clang_binary
         completer = self.Completer(clang_binary)
-        completer.init(
+        completer.init_for_view(
             view=self.view,
             settings=settings)
 
@@ -246,6 +246,7 @@ class base_test_complete(object):
             if line.startswith('-I'):
                 if real_line.endswith('lib') or real_line.endswith('lib"'):
                     found = True
+                    break
             line = file.readline()
         file.close()
         self.assertTrue(found)

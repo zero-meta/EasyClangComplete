@@ -8,6 +8,9 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 |:-------------------------------:|:-----------------------------------:|
 | [![Status][img-travis]][travis] | [![Status][img-appveyor]][appveyor] |
 
+*Sometimes, the build status is shown wrongly on Package Control website.
+Refer to GitHub page for actual build status.*
+
 [![Release][img-release]][release]
 [![Downloads][img-downloads]][downloads]
 [![Downloads Month][img-downloads-month]][downloads]

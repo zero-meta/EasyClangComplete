@@ -55,9 +55,9 @@ its parent. If you have a more sophisticated project you will need to help
 `clang` just a little bit. There are three ways to do it. Pick any of the
 following:
 
-- Set `include_dirs` setting in `User Settings`:
+- Set include dirs in `common_flags` setting in `User Settings`:
   + see default [settings](EasyClangComplete.sublime-settings) to get started.
-    These includes will be included in every project you run.
+    These flags will be included in every project you run.
 - Add `.clang_complete` file to the root of your project folder.
   + this file should contain all includes and macroses you want to use.
   + Example:
@@ -74,7 +74,7 @@ following:
       {
         "settings":
         {
-          "ecc_include_dirs":
+          "ecc_common_flags":
           ["-Isrc", "-I/usr/include"],
           "easy_clang_complete_verbose": true
         }

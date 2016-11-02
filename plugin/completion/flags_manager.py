@@ -24,7 +24,7 @@ class SearchScope:
 
     def __init__(self, from_folder=None, to_folder=None):
         """
-        Initialize the search scope. If eny of the folders in None,
+        Initialize the search scope. If any of the folders in None,
         set it to root
 
         Args:

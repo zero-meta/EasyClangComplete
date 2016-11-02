@@ -48,7 +48,7 @@ class Completer(BaseCompleter):
         max_tu_age (int): maximum translation unit age in seconds
         timer_period (int): period of timer in seconds
         tu_module (cindex.TranslationUnit): module for proper cindex
-        TUs (dict(utils.StampledTu)): dictionary of timestamped translation
+        TUs (dict(utils.StampedTu)): dictionary of timestamped translation
             units for each view id
     """
     rlock = RLock()

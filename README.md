@@ -68,7 +68,7 @@ following:
   ```
 - Override flags setting in your project file! Just define the same setting in
   project specific settings with either one of two prefixes: `"ecc_"` or
-  `"easy_clang_complete"`. See the project file in this repo for a working
+  `"easy_clang_complete_"`. See the project file in this repo for a working
   example. Minimal example for clarity:
   ```json
       {

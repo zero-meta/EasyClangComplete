@@ -6,7 +6,7 @@
 	// 	- $clang_version -> replaced by the numeric version of clang in use
 	"common_flags" : [
 		// some example includes
-		"-isystem /usr/include",
+		"-isystem/usr/include",
 		"-I$project_base_path/src",
 		"-I/workspace/$project_name/src",
 		"-I/usr/lib/clang/$clang_version/include"

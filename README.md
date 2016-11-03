@@ -2,7 +2,7 @@
 
 Sublime Text 3 plugin that offers clang-based auto-completion for C++
 
-![Example](autocomplete_show_off.gif)
+![Example](pics/autocomplete_show_off.gif)
 
 |           Linux / OSX           |               Windows               |
 |:-------------------------------:|:-----------------------------------:|

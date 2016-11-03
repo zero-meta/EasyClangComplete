@@ -22,7 +22,7 @@ Follow the following 3 steps to ensure the plugin works as expected!
 
 ## Configure your includes ##
 
-### Are you using CMake? ###
+### Using CMake? ###
 Plugin automatically finds `CMakeLists.txt` and generates `.clang_complete`
 from it for building our code.
 
@@ -31,7 +31,7 @@ You will need a little bit of manual setup for now. Please see the following
 [instructions][no_cmake].
 
 ## That's it! You're ready to use the plugin! ##
-
-# More on the plugin #
+For more information please refer to the [GitHub][github_page] page.
 
 [no_cmake]: https://github.com/niosus/EasyClangComplete#not-using-cmake
+[github_page]: https://github.com/niosus/EasyClangComplete

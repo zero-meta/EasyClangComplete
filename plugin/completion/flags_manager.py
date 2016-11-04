@@ -301,6 +301,8 @@ class FlagsManager:
             if flag_strategy == "merge":
                 # union of two flag arrays
                 curr_flags = self.flags_from_clang_file(File(file_path))
+                # FIXME: the order of the difference of sets is still a set, so
+                # the order of the flags is unspecified.
                 new_flags = curr_flags + list(set(new_flags) - set(curr_flags))
             # unhandled is only "overwrite". "ask" is not possible here.
         f = open(file_path, 'w')

@@ -150,6 +150,7 @@ out the current status click on relevant badge below:
 | [![Status][img-travis]][travis] | [![Status][img-appveyor]][appveyor] |
 
 # Support it! #
+[![Bountysource][img-bountysource]][bountysource-link]
 [![Flattr this git repo][img-flattr]][donate-flattr]
 [![Donate][img-paypal]][donate-paypal]
 

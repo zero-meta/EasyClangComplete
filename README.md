@@ -9,11 +9,10 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 | [![Status][img-travis]][travis] | [![Status][img-appveyor]][appveyor] |
 
 [![Release][img-release]][release]
-[![Downloads][img-downloads]][downloads]
 [![Downloads Month][img-downloads-month]][downloads]
 [![Codacy Badge][img-codacy]][codacy]
 [![MIT licensed][img-mit]](./LICENSE)
-[![Gitter][img-gitter]][gitter]
+[![Bountysource][img-bountysource]][bountysource-link]
 [![Flattr this git repo][img-flattr]][donate-flattr]
 [![Donate][img-paypal]][donate-paypal]
 
@@ -167,8 +166,9 @@ Please buy me a cup of tea if you appreciate the effort.
 [donate-flattr]: https://flattr.com/submit/auto?user_id=niosus&url=https://github.com/niosus/EasyClangComplete&title=EasyClangComplete&language=Python&tags=github&category=software
 [libclang-issue]: https://github.com/niosus/EasyClangComplete/issues/88
 [cmake-issue]: https://github.com/niosus/EasyClangComplete/issues/19
+[bountysource-link]: https://www.bountysource.com/teams/easyclangcomplete
 
-
+[img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg
 [img-appveyor]: https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true
 [img-travis]: https://travis-ci.org/niosus/EasyClangComplete.svg?branch=master
 [img-codacy]: https://goo.gl/PDVYTj

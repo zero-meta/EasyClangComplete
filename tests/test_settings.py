@@ -74,7 +74,7 @@ class test_settings(TestCase):
 
         current_folder = path.dirname(self.view.file_name())
         parent_folder = path.dirname(current_folder)
-        self.assertLess(len(initial_common_flags), len(dirs))
+        self.assertTrue(len(initial_common_flags) <= len(dirs))
         self.assertTrue(initial_common_flags[0] in dirs)
         self.assertFalse(initial_common_flags[1] in dirs)
         self.assertTrue(("-I" + current_folder) in dirs)

@@ -11,6 +11,7 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 [![Release][img-release]][release]
 [![Downloads Month][img-downloads-month]][downloads]
 [![Codacy Badge][img-codacy]][codacy]
+[![Coverage Badge][img-coverage]][coverage]
 [![MIT licensed][img-mit]](./LICENSE)
 [![Bountysource][img-bountysource]][bountysource-link]
 [![Flattr this git repo][img-flattr]][donate-flattr]
@@ -66,7 +67,7 @@ following:
   project specific settings with either one of two prefixes: `"ecc_"` or
   `"easy_clang_complete_"`. See the project file in this repo for a working
   example. Minimal example for clarity:
-  
+
   ```json
   {
     "settings":
@@ -162,7 +163,8 @@ Please buy me a cup of tea if you appreciate the effort.
 [downloads]: https://packagecontrol.io/packages/EasyClangComplete
 [travis]: https://travis-ci.org/niosus/EasyClangComplete
 [appveyor]: https://ci.appveyor.com/project/niosus/easyclangcomplete/branch/master
-[codacy]: https://goo.gl/h52rHl
+[codacy]: https://www.codacy.com/app/zabugr/EasyClangComplete/
+[coverage]: https://www.codacy.com/app/zabugr/EasyClangComplete/
 [gitter]: https://gitter.im/niosus/EasyClangComplete?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
 [donate-paypal]: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2QLY7J4Q944HS
 [donate-flattr]: https://flattr.com/submit/auto?user_id=niosus&url=https://github.com/niosus/EasyClangComplete&title=EasyClangComplete&language=Python&tags=github&category=software
@@ -173,7 +175,8 @@ Please buy me a cup of tea if you appreciate the effort.
 [img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg
 [img-appveyor]: https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true
 [img-travis]: https://travis-ci.org/niosus/EasyClangComplete.svg?branch=master
-[img-codacy]: https://goo.gl/PDVYTj
+[img-codacy]: https://img.shields.io/codacy/grade/254f8db44b004dffa76b8cebfece4c06.svg
+[img-coverage]: https://img.shields.io/codacy/coverage/254f8db44b004dffa76b8cebfece4c06.svg
 [img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?maxAge=3600
 [img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600
 [img-downloads-month]: https://img.shields.io/packagecontrol/dm/EasyClangComplete.svg?maxAge=2592000

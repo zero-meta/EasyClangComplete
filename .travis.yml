@@ -30,7 +30,6 @@ script:
     - sh travis.sh run_tests --coverage
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
             coverage xml -o coverage.xml;
-            ls -la;
       fi
     # testing syntax_test files
     # - sh travis.sh run_syntax_tests

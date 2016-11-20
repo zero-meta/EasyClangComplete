@@ -28,11 +28,12 @@ install:
 script:
     - ls
     - sh travis.sh run_tests --coverage
+    - coverage xml
     # testing syntax_test files
     # - sh travis.sh run_syntax_tests
 
 after_success:
-    - python-codacy-coverage -r .coverage
+    - python-codacy-coverage -r coverage.xml
 
 notifications:
     email: false

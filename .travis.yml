@@ -29,6 +29,9 @@ script:
     - ls
     - sh travis.sh run_tests --coverage
     - coverage xml
+    - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
+            ls -la;
+      fi
     # testing syntax_test files
     # - sh travis.sh run_syntax_tests
 

@@ -4,21 +4,21 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 
 ![Example](pics/autocomplete_show_off.gif)
 
-|           Linux / OSX           |               Windows               |
-|:-------------------------------:|:-----------------------------------:|
-| [![Status][img-travis]][travis] | [![Status][img-appveyor]][appveyor] |
-
 [![Release][img-release]][release]
-[![Downloads Month][img-downloads-month]][downloads]
+[![Travis Build][img-travis]][travis]
+[![Windows Build][img-appveyor]][appveyor]
 [![Codacy Badge][img-codacy]][codacy]
 [![Coverage Badge][img-coverage]][coverage]
+[![Downloads Month][img-downloads-month]][downloads]
 [![MIT licensed][img-mit]](./LICENSE)
+
+
+Plugin for easy-to-use, out of the box autocompletions for C and C++ for
+Sublime Text 3. Please [support](#support-it) the development if you like it.
+
 [![Bountysource][img-bountysource]][bountysource-link]
 [![Flattr this git repo][img-flattr]][donate-flattr]
 [![Donate][img-paypal]][donate-paypal]
-
-Plugin for easy-to-use, minimal-setup autocompletions for C++ for Sublime Text
-3. [Support](#support-it) it if you like it.
 
 # Jump right in! #
 Follow all the following steps to ensure the plugin works as expected!
@@ -147,9 +147,10 @@ I have tried to cover most crucial functionality with unit tests using
 Currently tests cover autocompletion of user struct and stl vector. To check
 out the current status click on relevant badge below:
 
-|           Linux / OSX           |               Windows               |
-|:-------------------------------:|:-----------------------------------:|
-| [![Status][img-travis]][travis] | [![Status][img-appveyor]][appveyor] |
+[![Travis Build][img-travis]][travis]
+[![Windows Build][img-appveyor]][appveyor]
+[![Codacy Badge][img-codacy]][codacy]
+[![Coverage Badge][img-coverage]][coverage]
 
 # Support it! #
 [![Bountysource][img-bountysource]][bountysource-link]
@@ -158,6 +159,9 @@ out the current status click on relevant badge below:
 
 Current sponsor of this project is my sleep.
 Please buy me a cup of tea if you appreciate the effort.
+
+Also, pull requests are welcome! And don't forget to tell people about this
+plugin! The more people use it - the merrier.
 
 [release]: https://github.com/niosus/EasyClangComplete/releases
 [downloads]: https://packagecontrol.io/packages/EasyClangComplete
@@ -173,8 +177,8 @@ Please buy me a cup of tea if you appreciate the effort.
 [bountysource-link]: https://www.bountysource.com/teams/easyclangcomplete
 
 [img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg
-[img-appveyor]: https://ci.appveyor.com/api/projects/status/4h4lfyomah06om2t/branch/master?svg=true
-[img-travis]: https://travis-ci.org/niosus/EasyClangComplete.svg?branch=master
+[img-appveyor]: https://img.shields.io/appveyor/ci/niosus/easyclangcomplete/master.svg?label=windows
+[img-travis]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?label=linux/osx
 [img-codacy]: https://img.shields.io/codacy/grade/254f8db44b004dffa76b8cebfece4c06.svg
 [img-coverage]: https://img.shields.io/codacy/coverage/254f8db44b004dffa76b8cebfece4c06.svg
 [img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?maxAge=3600

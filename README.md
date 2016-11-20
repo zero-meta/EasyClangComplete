@@ -1,20 +1,18 @@
 # EasyClangComplete #
 
-Sublime Text 3 plugin that offers clang-based auto-completion for C++
+Plugin for Sublime Text 3 for easy to use, out of the box autocompletions for C
+and C++.  Please [support](#support-it) the development if you like it.
 
 ![Example](pics/autocomplete_show_off.gif)
 
 [![Release][img-release]][release]
-[![Travis Build][img-travis]][travis]
+[![Travis Build][img-travis-linux]][travis]
+[![Travis Build][img-travis-osx]][travis]
 [![Windows Build][img-appveyor]][appveyor]
 [![Codacy Badge][img-codacy]][codacy]
 [![Coverage Badge][img-coverage]][coverage]
 [![Downloads Month][img-downloads-month]][downloads]
 [![MIT licensed][img-mit]](./LICENSE)
-
-
-Plugin for easy-to-use, out of the box autocompletions for C and C++ for
-Sublime Text 3. Please [support](#support-it) the development if you like it.
 
 [![Bountysource][img-bountysource]][bountysource-link]
 [![Flattr this git repo][img-flattr]][donate-flattr]
@@ -178,7 +176,8 @@ plugin! The more people use it - the merrier.
 
 [img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg
 [img-appveyor]: https://img.shields.io/appveyor/ci/niosus/easyclangcomplete/master.svg?label=windows
-[img-travis]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?label=linux/osx
+[img-travis-linux]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?label=linux
+[img-travis-osx]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?label=osx
 [img-codacy]: https://img.shields.io/codacy/grade/254f8db44b004dffa76b8cebfece4c06.svg
 [img-coverage]: https://img.shields.io/codacy/coverage/254f8db44b004dffa76b8cebfece4c06.svg
 [img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?maxAge=3600

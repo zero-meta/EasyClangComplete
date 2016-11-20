@@ -35,20 +35,37 @@ OSX_CLANG_VERSION_DICT = {
 log = logging.getLogger(__name__)
 
 
-class SublBridge:
+def singleton(class_):
+    """Singleton class wrapper.
 
-    """A small help class that bridges with sublime (maybe will grow)
+    Args:
+      class_ (Class): Class to wrap.
+
+    Returns:
+      class_: unique instance of object.
+    """
+    instances = {}
+
+    def getinstance(*args, **kwargs):
+        """Get instance of a class."""
+        if class_ not in instances:
+            instances[class_] = class_(*args, **kwargs)
+        return instances[class_]
+    return getinstance
+
+
+class SublBridge:
+    """A small help class that bridges with sublime (maybe will grow).
 
     Attributes:
         NO_DEFAULT_COMPLETIONS (TYPE): Description
     """
-
     NO_DEFAULT_COMPLETIONS = sublime.INHIBIT_WORD_COMPLETIONS \
         | sublime.INHIBIT_EXPLICIT_COMPLETIONS
 
     @staticmethod
     def active_view_id():
-        """ Get the id of the active view
+        """Get the id of the active view.
 
         Returns:
             int: buffer id of the active view
@@ -57,12 +74,11 @@ class SublBridge:
 
     @staticmethod
     def cursor_pos(view, pos=None):
-        """Get current cursor position. Returns position of the first cursor if
-        multiple are present
+        """Get current cursor position.
 
         Args:
             view (sublime.View): current view
-            pos (int, optional): given position. First selection by default
+            pos (int, optional): given position. First selection by default.
 
         Returns:
             (row, col): tuple of row and col for cursor position
@@ -81,7 +97,7 @@ class SublBridge:
 
     @staticmethod
     def next_line(view):
-        """Get next line as text
+        """Get next line as text.
 
         Args:
             view (sublime.View): current view
@@ -96,13 +112,13 @@ class SublBridge:
 
     @staticmethod
     def format_completions(completions, hide_default_completions):
-        """ Get completions. Manage hiding default ones.
+        """Get completions. Manage hiding default ones.
 
         Args:
             hide_default_completions (bool): True if we hide default ones
 
         Returns:
-            tupple: (completions, flags)
+            tuple: (completions, flags)
         """
         if hide_default_completions:
             log.debug(" hiding default completions")
@@ -113,8 +129,11 @@ class SublBridge:
 
     @staticmethod
     def show_auto_complete(view):
-        """ Calling this function reopens completion popup,
-        subsequently calling EasyClangComplete.on_query_completions(...)
+        """Calling this function reopens completion popup.
+
+        It therefore subsequently calls
+        EasyClangComplete.on_query_completions(...)
+
         Args:
             view (sublime.View): view to open completion window in
         """
@@ -127,7 +146,7 @@ class SublBridge:
 
 
 class PosStatus:
-    """ Enum class for position status
+    """Enum class for position status.
 
     Attributes:
         COMPLETION_NEEDED (int): completion needed
@@ -140,17 +159,19 @@ class PosStatus:
 
 
 class File:
-    """Class that handles a path to the file
-    """
-    __full_path = None
-    __last_seen_modification = 0
+    """Encapsulates a file."""
+    __modification_cache = {}
 
     def __init__(self, file_path=None):
-        """Initialize a new file and create if needed
+        """Initialize a new file and create it if needed.
 
         Args:
             file_path (str, optional): generate file object from this path
         """
+        # intialize full path
+        self.__full_path = None
+
+        # fill the object if possible
         if not file_path or not path:
             # leave the object unitialized
             return
@@ -175,31 +196,47 @@ class File:
         return path.dirname(self.__full_path)
 
     def loaded(self):
-        """Is the file loaded?
-        """
+        """Check if the file is loaded."""
         if self.__full_path:
             return True
         return False
 
-    def was_modified(self):
-        """Was the file modified since the last access?
+    @staticmethod
+    def is_unchanged(file_path):
+        """Check if file is unchanged since last access.
+
+        Args:
+            file_path (str): Path to a file.
 
         Returns:
-            bool: True if modified, False if not. Creation is modification.
+            bool: True if unchanged, False otherwise.
         """
-        if not self.loaded():
+        if not file_path:
             return False
-        actual_modification_time = path.getmtime(self.__full_path)
-        log.debug(" last mod: %s, actual mod: %s",
-                  self.__last_seen_modification, actual_modification_time)
-        if actual_modification_time > self.__last_seen_modification:
-            self.__last_seen_modification = actual_modification_time
-            return True
-        return False
+        actual_mod_time = path.getmtime(file_path)
+        if file_path not in File.__modification_cache:
+            log.debug(" never seen file '%s' before. Updating.", file_path)
+            File.__modification_cache[file_path] = actual_mod_time
+            return False
+        cached_mod_time = File.__modification_cache[file_path]
+        if actual_mod_time != cached_mod_time:
+            File.__modification_cache[file_path] = actual_mod_time
+            return False
+        return True
+
+    @staticmethod
+    def update_mod_time(file):
+        """Update modification time.
+
+        Args:
+            file (File): current file.
+        """
+        mod_time = path.getmtime(file.full_path())
+        File.__modification_cache[file.full_path()] = mod_time
 
     @staticmethod
     def search(file_name, from_folder, to_folder, search_content=None):
-        """search for a file up the tree
+        """Search for a file up the tree.
 
         Args:
             file_name (TYPE): Description
@@ -210,9 +247,12 @@ class File:
         Returns:
             File: found file
         """
+        # TODO(igor): should just take a SearchScope as input param
         log.debug(" searching '%s' from '%s' to '%s'",
                   file_name, from_folder, to_folder)
         current_folder = from_folder
+        if not path.exists(current_folder):
+            return File()
         one_past_stop_folder = path.dirname(to_folder)
         while current_folder != one_past_stop_folder:
             for file in listdir(current_folder):
@@ -238,7 +278,7 @@ class File:
 
     @staticmethod
     def contains(file_path, query):
-        """Contains line
+        """Check if file contains a line.
 
         Args:
             file_path (str): path to file
@@ -255,14 +295,44 @@ class File:
         return False
 
 
-class CompletionRequest(object):
+class SearchScope:
+    """Encapsulation of a search scope for code cleanness."""
+    from_folder = None
+    to_folder = None
 
-    """ An wrapper for completer request.
+    def __init__(self, from_folder=None, to_folder=None):
+        """Initialize the search scope.
+
+        If any of the folders in None, set it to root
+
+        Args:
+            from_folder (str, optional): search from this folder
+            to_folder (str, optional): search up to this folder
+        """
+        self.from_folder = from_folder
+        self.to_folder = to_folder
+        if not self.to_folder:
+            self.to_folder = path.abspath('/')
+        if not self.from_folder:
+            self.from_folder = path.abspath('/')
+
+    def valid(self):
+        """Check if the search scope valid.
+
+        Returns:
+            bool: True if valid, False otherwise
+        """
+        if self.from_folder and self.to_folder:
+            return True
+        return False
+
+
+class CompletionRequest(object):
+    """A wrapper for completer request.
 
     Provides a way to identify a completer request and provide some information
     used when creating the request.
     """
-
     def __init__(self, view, trigger_position):
         """
         Initializes the object.
@@ -275,20 +345,21 @@ class CompletionRequest(object):
         self._trigger_position = trigger_position
 
     def get_view(self):
-        """ Returns the view for which completion was requested. """
+        """Return the view for which completion was requested."""
         return self._view
 
     def get_trigger_position(self):
-        """ Returns position of the trigger for which completion was requested.
-        """
+        """Get position of the trigger for which completion was requested."""
         return self._trigger_position
 
     def get_identifier(self):
-        """ Generates unique tuple for file and trigger position """
+        """Generate unique tuple for file and trigger position."""
         return (self._view.buffer_id(), self._trigger_position)
 
     def is_suitable_for_view(self, view):
-        """ Returns True if specified view and its current position is deemed
+        """Check if view is suitable for this completion request.
+
+        Return True if specified view and its current position is deemed
         suitable for completions generated by this completion request. """
         if view != self._view:
             log.debug(" active view doesn't match completion view")
@@ -307,8 +378,7 @@ class CompletionRequest(object):
 
 
 class Tools:
-
-    """just a bunch of helpful tools to unclutter main file
+    """Just a bunch of helpful tools.
 
     Attributes:
         HIDE_DEFAULT_COMPLETIONS: a value to return from `on_query_completions`
@@ -332,7 +402,7 @@ class Tools:
 
     @staticmethod
     def get_temp_dir():
-        """ Create a temporary folder if needed and return it """
+        """Create a temporary folder if needed and return it."""
         tempdir = path.join(tempfile.gettempdir(), PKG_NAME)
         if not path.exists(tempdir):
             makedirs(tempdir)
@@ -340,7 +410,7 @@ class Tools:
 
     @staticmethod
     def get_view_syntax(view):
-        """Get syntax from view description
+        """Get syntax from view description.
 
         Args:
             view (sublime.View): Current view
@@ -361,7 +431,7 @@ class Tools:
 
     @staticmethod
     def has_valid_syntax(view):
-        """Check if syntax is valid for this plugin
+        """Check if syntax is valid for this plugin.
 
         Args:
             view (sublime.View): current view
@@ -378,8 +448,7 @@ class Tools:
 
     @staticmethod
     def is_valid_view(view):
-        """
-        Check whether the given view is one we can and want to handle.
+        """Check whether the given view is one we can and want to handle.
 
         Args:
             view (sublime.View): view to check
@@ -399,7 +468,7 @@ class Tools:
 
     @staticmethod
     def has_valid_extension(view):
-        """Test if the current file has a valid extension
+        """Test if the current file has a valid extension.
 
         Args:
             view (sublime.View): current view
@@ -416,7 +485,7 @@ class Tools:
 
     @staticmethod
     def seconds_from_string(time_str):
-        """ Get int seconds from string
+        """Get int seconds from string.
 
         Args:
             time_str (str): string in format 'HH:MM:SS'
@@ -429,7 +498,7 @@ class Tools:
 
     @staticmethod
     def get_pos_status(point, view, settings):
-        """Check if the cursor focuses a valid trigger
+        """Check if the cursor focuses a valid trigger.
 
         Args:
             point (int): position of the cursor in the file as defined by subl
@@ -476,7 +545,7 @@ class Tools:
 
     @staticmethod
     def run_command(command, shell=True):
-        """ Run a generic command in a subprocess
+        """Run a generic command in a subprocess.
 
         Args:
             command (str): command to run
@@ -507,7 +576,7 @@ class Tools:
 
     @staticmethod
     def get_clang_version_str(clang_binary):
-        """ Get Clang version string from subprocess run of "clang_binary -v"
+        """Get Clang version string from subprocess run of "clang_binary -v".
 
         Args:
             clang_binary (str): clang binary, e.g. "clang++-3.8"
@@ -544,13 +613,14 @@ class Tools:
 
     @staticmethod
     def get_unique_str(init_string):
-        """ Generate md5 unique sting hash given init_string """
+        """Generate md5 unique sting hash given init_string."""
         import hashlib
         return hashlib.md5(init_string.encode('utf-8')).hexdigest()
 
     @staticmethod
     def find_flag_idx(flags, prefix):
-        """ Find index of flag with given prefix in list.
+        """Find index of flag with given prefix in list.
+
         Returns: index of found flag or None if not found
         """
         for idx, flag in enumerate(flags):

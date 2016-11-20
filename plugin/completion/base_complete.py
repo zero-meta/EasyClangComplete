@@ -1,10 +1,9 @@
-"""Contains base class for completers
+"""Contains base class for completers.
 
 Attributes:
     log (logging.Logger): logger for this module
 
 """
-import re
 import logging
 
 from os import path
@@ -12,8 +11,13 @@ from os import path
 from .. import error_vis
 from .. import tools
 
-from .flags_manager import FlagsManager
-from .flags_manager import SearchScope
+from ..tools import SearchScope
+
+from ..flags_sources.cmake_file import CMakeFile
+from ..flags_sources.compilation_db import CompilationDb
+from ..flags_sources.flags_file import FlagsFile
+from ..flags_sources.flags_source import FlagsSource
+
 
 log = logging.getLogger(__name__)
 
@@ -21,15 +25,12 @@ Tools = tools.Tools
 
 
 class BaseCompleter:
-
-    """A base class for clang based completions
+    """A base class for clang based completions.
 
     Attributes:
         completions (list): current list of completions
         error_vis (plugin.CompileErrors): object of compile errors class
         compiler_variant (CompilerVariant): compiler specific options
-        flags_manager (FlagsManager): An object that manages all the flags and
-            how to load them from disk to memory.
         valid (bool): is completer valid
         version_str (str): version string of format "3.4" for clang v. 3.4
     """
@@ -37,12 +38,10 @@ class BaseCompleter:
     error_vis = None
     compiler_variant = None
 
-    flags_manager = None
-
     valid = False
 
     def __init__(self, clang_binary):
-        """Initialize the BaseCompleter
+        """Initialize the BaseCompleter.
 
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
@@ -61,7 +60,7 @@ class BaseCompleter:
         self.error_vis = error_vis.CompileErrors()
 
     def needs_init(self, view):
-        """ Check if the completer needs init.
+        """Check if the completer needs init.
 
         Args:
             view (sublime.View): current view
@@ -69,14 +68,7 @@ class BaseCompleter:
         Returns:
             bool: True if init needed, False if not
         """
-        # TODO: test this approach. Call it in main file
-        if not self.flags_manager:
-            log.debug(" flags handler not initialized. Do it.")
-            return True
-        if self.flags_manager.any_file_modified():
-            log.debug(" .clang_complete or CMakeLists.txt were modified. "
-                      "Need to reinit.")
-            return True
+        # TODO(igor): what if flag source has changed? Do we even need it now?
         if self.exists_for_view(view.buffer_id()):
             log.debug(" view %s, already has a completer", view.buffer_id())
             return False
@@ -84,10 +76,9 @@ class BaseCompleter:
         return True
 
     def remove(self, view_id):
-        """
-        Called when completion for this view is not needed anymore. For actual
-        implementation see children of this class.
+        """Call when completion for this view is not needed anymore.
 
+        For actual implementation see children of this class.
         Args:
             view_id (sublime.View): current view
 
@@ -97,9 +88,9 @@ class BaseCompleter:
         raise NotImplementedError("calling abstract method")
 
     def exists_for_view(self, view_id):
-        """
-        Check if completer for this view is initialized and is ready to
-        autocomplete. For real implementation see children.
+        """Check if completer for this view is initialized.
+
+        For real implementation see children.
 
         Args:
             view_id (int): view id
@@ -110,25 +101,65 @@ class BaseCompleter:
         raise NotImplementedError("calling abstract method")
 
     def init_for_view(self, view, settings):
-        """
-        Initialize the completer for this view. For real implementation see
-        children.
+        """Initialize the completer for this view.
+
+        For real implementation see children.
 
         Args:
             view (sublime.View): current view
             settings (Settings): plugin settings
 
         """
+        # initialize default flags (init_flags list needs to be copied).
+        initial_flags = list(self.compiler_variant.init_flags)
+        current_lang = Tools.get_view_syntax(view)
+        if current_lang == 'C' or current_lang == 'C99':
+            initial_flags += settings.c_flags
+        else:
+            initial_flags += settings.cpp_flags
+
+        include_prefixes = self.compiler_variant.include_prefixes
+        home_folder = path.expanduser('~')
+        initial_flags += FlagsSource.parse_flags(
+            home_folder, settings.common_flags, include_prefixes)
+        # get other flags from some flag source
+        current_flags = BaseCompleter.get_flags_from_source(
+            view, settings, include_prefixes)
+        self.clang_flags = initial_flags + current_flags
+
+    @staticmethod
+    def get_flags_from_source(view, settings, include_prefixes):
+        """Get flags from a flag source picked in settings.
+
+        Args:
+            view (View): Current view.
+            settings (SettingsStorage): Current settings.
+            include_prefixes (str[]): Valid include prefixes.
+
+        Returns:
+            str[]: Flags for this view.
+        """
+        prefix_paths = settings.cmake_prefix_paths
+        if prefix_paths is None:
+            prefix_paths = []
         current_dir = path.dirname(view.file_name())
         search_scope = SearchScope(
             from_folder=current_dir,
             to_folder=settings.project_folder)
-        self.flags_manager = FlagsManager(
-            view=view,
-            settings=settings,
-            compiler_variant=self.compiler_variant,
-            search_scope=search_scope)
-        log.debug(" flags_manager loaded")
+        for source in settings.flags_sources:
+            if source == "cmake":
+                flag_source = CMakeFile(include_prefixes, prefix_paths)
+            elif source == "compilation_db":
+                flag_source = CompilationDb(include_prefixes)
+            elif source == "clang_complete_file":
+                flag_source = FlagsFile(include_prefixes)
+            # try to get flags
+            flags = flag_source.get_flags(view.file_name(), search_scope)
+            if flags:
+                # don't load anything more if we have flags
+                log.debug(" flags generated with '%s' source.", source)
+                return flags
+        return []
 
     def complete(self, completion_request):
         """Function to generate completions. See children for implementation.
@@ -142,8 +173,10 @@ class BaseCompleter:
         raise NotImplementedError("calling abstract method")
 
     def update(self, view, show_errors):
-        """Update the completer for this view. This can increase consequent
-        completion speeds or is needed to just show errors.
+        """Update the completer for this view.
+
+        This can increase consequent completion speeds or is needed to just
+        show errors.
 
         Args:
             view (sublime.View): this view
@@ -155,7 +188,7 @@ class BaseCompleter:
         raise NotImplementedError("calling abstract method")
 
     def show_errors(self, view, output):
-        """ Show current complie errors
+        """Show current complie errors.
 
         Args:
             view (sublime.View): Current view

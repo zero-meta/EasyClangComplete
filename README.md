@@ -163,8 +163,8 @@ Please buy me a cup of tea if you appreciate the effort.
 [downloads]: https://packagecontrol.io/packages/EasyClangComplete
 [travis]: https://travis-ci.org/niosus/EasyClangComplete
 [appveyor]: https://ci.appveyor.com/project/niosus/easyclangcomplete/branch/master
-[codacy]: https://www.codacy.com/app/zabugr/EasyClangComplete/
-[coverage]: https://www.codacy.com/app/zabugr/EasyClangComplete/
+[codacy]: https://www.codacy.com/app/zabugr/EasyClangComplete/dashboard
+[coverage]: https://www.codacy.com/app/zabugr/EasyClangComplete/dashboard
 [gitter]: https://gitter.im/niosus/EasyClangComplete?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
 [donate-paypal]: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2QLY7J4Q944HS
 [donate-flattr]: https://flattr.com/submit/auto?user_id=niosus&url=https://github.com/niosus/EasyClangComplete&title=EasyClangComplete&language=Python&tags=github&category=software

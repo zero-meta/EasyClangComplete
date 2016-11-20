@@ -1,9 +1,8 @@
-"""module for compile error visualization
+"""Module for compile error visualization.
 
 Attributes:
     log (logging): this module logger
 """
-import re
 import logging
 from os import path
 
@@ -11,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 class CompileErrors:
-    """Comple errors is a class that encapsulates compile error visualization
+    """Comple errors is a class that encapsulates compile error visualization.
 
     Attributes:
         err_regions (dict): dictionary of error regions for view ids
@@ -23,8 +22,10 @@ class CompileErrors:
     err_regions = {}
 
     def generate(self, view, errors):
-        """Generate a dictionary that stores all errors along with their
-        positions and descriptions. Needed to show these errors on the screen.
+        """Generate a dictionary that stores all errors.
+
+        The errors are stored along with their positions and descriptions.
+        Needed to show these errors on the screen.
 
         Args:
             view (sublime.View): current view
@@ -53,7 +54,7 @@ class CompileErrors:
             log.info(" original exception: '%s'", repr(e))
 
     def add_error(self, view, error_dict):
-        """Put new compile error in the dictionary of errors
+        """Put new compile error in the dictionary of errors.
 
         Args:
             view (sublime.View): current view
@@ -71,7 +72,7 @@ class CompileErrors:
                 self.err_regions[view.buffer_id()][row] = [error_dict]
 
     def show_regions(self, view):
-        """Show current error regions
+        """Show current error regions.
 
         Args:
             view (sublime.View): Current view
@@ -85,7 +86,7 @@ class CompileErrors:
         view.add_regions(CompileErrors._TAG, regions, "string")
 
     def erase_regions(self, view):
-        """erase error regions for view
+        """Erase error regions for view.
 
         Args:
             view (sublime.View): erase regions for view
@@ -97,7 +98,7 @@ class CompileErrors:
         view.erase_regions(CompileErrors._TAG)
 
     def show_popup_if_needed(self, view, row):
-        """Show a popup if it is needed in this row
+        """Show a popup if it is needed in this row.
 
         Args:
             view (sublime.View): current view
@@ -114,7 +115,7 @@ class CompileErrors:
             log.debug(" no error regions for row: %s", row)
 
     def clear(self, view):
-        """Clear errors from dict for view
+        """Clear errors from dict for view.
 
         Args:
             view (sublime.View): current view
@@ -127,7 +128,7 @@ class CompileErrors:
         self.err_regions[view.buffer_id()].clear()
 
     def remove_region(self, view_id, row):
-        """remove a region for view_id in row
+        """Remove a region for view_id in row.
 
         Args:
             view_id (int): view id
@@ -144,7 +145,7 @@ class CompileErrors:
 
     @staticmethod
     def _as_html(errors_dict):
-        """Show error as html
+        """Show error as html.
 
         Args:
             errors_dict (dict): Current error
@@ -158,7 +159,7 @@ class CompileErrors:
 
     @staticmethod
     def _as_region_list(err_regions_dict):
-        """Make a list from error region dict
+        """Make a list from error region dict.
 
         Args:
             err_regions_dict (dict): dict of error regions for current view

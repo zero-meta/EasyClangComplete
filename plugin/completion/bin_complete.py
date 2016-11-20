@@ -1,4 +1,4 @@
-"""This module contains a class for clang binary based completion
+"""This module contains a class for clang binary based completion.
 
 Attributes:
     log (logging.Logger): logger for this module
@@ -13,7 +13,6 @@ import logging
 
 from os import path
 
-from .. import error_vis
 from ..tools import Tools
 from ..tools import SublBridge
 from .base_complete import BaseCompleter
@@ -25,8 +24,7 @@ log.debug(" reloading module")
 
 
 class Completer(BaseCompleter):
-
-    """Encapsulates completions based on the output from clang_binary
+    """Encapsulates completions based on the output from clang_binary.
 
     Attributes:
 
@@ -74,7 +72,7 @@ class Completer(BaseCompleter):
     opts_regex = re.compile("{#|#}")
 
     def __init__(self, clang_binary):
-        """Initialize the Completer
+        """Initialize the Completer.
 
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
@@ -92,7 +90,7 @@ class Completer(BaseCompleter):
             self.compiler_variant = ClangCompilerVariant()
 
     def remove(self, view_id):
-        """remove compile flags for view
+        """Remove compile flags for view.
 
         Args:
             view_id (int): current view id
@@ -101,7 +99,7 @@ class Completer(BaseCompleter):
             self.flags_dict[view_id] = []
 
     def exists_for_view(self, view_id):
-        """check if compile flags exist for view id
+        """Check if compile flags exist for view id.
 
         Args:
             view_id (int): current view id
@@ -157,7 +155,7 @@ class Completer(BaseCompleter):
         return (completion_request, completions)
 
     def update(self, view, show_errors):
-        """update build for current view
+        """Update build for current view.
 
         Args:
             view (sublime.View): this view
@@ -184,8 +182,7 @@ class Completer(BaseCompleter):
             self.show_errors(view, output_text)
 
     def run_clang_command(self, view, task_type, cursor_pos=0):
-        """
-        Construct and run clang command based on task
+        """Construct and run clang command based on task.
 
         Args:
             view (sublime.View): current view
@@ -224,7 +221,7 @@ class Completer(BaseCompleter):
 
     @staticmethod
     def _parse_completions(complete_results):
-        """Create snippet-like structures from a list of completions
+        """Create snippet-like structures from a list of completions.
 
         Args:
             complete_results (list): raw completions list
@@ -233,8 +230,7 @@ class Completer(BaseCompleter):
             list: updated completions
         """
         class Parser:
-
-            """Help class to parse completions with regex
+            """Help class to parse completions with regex.
 
             Attributes:
                 place_holders (int): number of place holders in use
@@ -244,7 +240,9 @@ class Completer(BaseCompleter):
                 self.place_holders = 0
 
             def tokenize_params(self, match):
-                """Create tockens from a match. Used as part or re.sub function
+                """Create tockens from a match.
+
+                Used as part or re.sub function.
 
                 Args:
                     match (re.match): current match
@@ -262,8 +260,9 @@ class Completer(BaseCompleter):
 
             @staticmethod
             def make_pretty(match):
-                """Process raw match and remove ugly placeholders. Needed to
-                have a human readable text for each completion.
+                """Process raw match and remove ugly placeholders.
+
+                Needed to have a human readable text for each completion.
 
                 Args:
                     match (re.match): current completion

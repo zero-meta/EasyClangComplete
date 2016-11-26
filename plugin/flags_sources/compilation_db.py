@@ -107,6 +107,7 @@ class CompilationDb(FlagsSource):
         """
         import json
         data = None
+
         with open(database_file.full_path()) as data_file:
             data = json.load(data_file)
         if not data:

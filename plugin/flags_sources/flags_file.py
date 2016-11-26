@@ -68,7 +68,6 @@ class FlagsFile(FlagsSource):
         flags_file_same = File.is_unchanged(cached_flags_path)
         if flags_file_path_same and flags_file_same:
             log.debug(" [clang_complete_file]:[unchanged]: load cached")
-            log.debug(" [clang_complete_file]: cache: %s", self._cache)
             return self._cache[cached_flags_path]
         log.debug(" [clang_complete_file]:[changed]: load new")
         if cached_flags_path and cached_flags_path in self._cache:
@@ -102,5 +101,4 @@ class FlagsFile(FlagsSource):
             content = f.readlines()
             flags = FlagsSource.parse_flags(
                 file.folder(), content, self._include_prefixes)
-        log.debug(" .clang_complete contains flags: %s", flags)
         return flags

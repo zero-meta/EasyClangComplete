@@ -1,4 +1,4 @@
-"""This module contains class for libclang based completions
+"""This module contains class for libclang based completions.
 
 Attributes:
     cindex_dict (dict): dict of cindex entries for each version of clang
@@ -14,12 +14,8 @@ from .compiler_variant import LibClangCompilerVariant
 from ..tools import Tools
 from ..tools import SublBridge
 from ..tools import PKG_NAME
-from ..utils.stamped_tu import StampedTu
 
-
-from threading import Timer
 from threading import RLock
-
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -43,23 +39,11 @@ class Completer(BaseCompleter):
 
     Attributes:
         rlock (threading.Rlock): recursive mutex
-        timer (threading.Timer): timer object to schedule tu removal
-        max_tu_age (int): maximum translation unit age in seconds
-        timer_period (int): period of timer in seconds
         tu_module (cindex.TranslationUnit): module for proper cindex
-        TUs (dict(utils.StampedTu)): dictionary of timestamped translation
-            units for each view id
+        tu (cindex.TranslationUnit): current translation unit
     """
+    name = "lib"
     rlock = RLock()
-
-    tu_module = None
-
-    TUs = {}
-
-    timer = None
-    max_tu_age = None
-    timer_period = 60  # seconds
-    ignore_list = []
 
     def __init__(self, clang_binary):
         """Initialize the Completer from clang binary, reading its version.
@@ -72,20 +56,34 @@ class Completer(BaseCompleter):
         """
         super().__init__(clang_binary)
 
-        # slightly more complicated name retrieving to allow for more complex
-        # version strings, e.g. 3.8.0
-        cindex_module_name = Completer._cindex_for_version(self.version_str)
+        # Create compiler options of specific variant of the compiler.
+        self.compiler_variant = LibClangCompilerVariant()
 
-        if cindex_module_name:
+        # init tu related variables
+        with Completer.rlock:
+            self.tu_module = None
+            self.tu = None
+
+            # slightly more complicated name retrieving to allow for more
+            # complex version strings, e.g. 3.8.0
+            cindex_module_name = Completer._cindex_for_version(
+                self.version_str)
+
+            if not cindex_module_name:
+                log.critical(" No cindex module for clang version: %s",
+                             self.version_str)
+                return
+
             # import cindex bundled with this plugin. We cannot use the default
             # one because sublime uses python 3, but there are no python
             # bindings for python 3
-            log.debug(
-                " using bundled cindex: %s", cindex_module_name)
+            log.debug(" using bundled cindex: %s", cindex_module_name)
             cindex = importlib.import_module(cindex_module_name)
-            Completer.ignore_list = [cindex.CursorKind.DESTRUCTOR,
-                                     cindex.CursorKind.CLASS_DECL,
-                                     cindex.CursorKind.ENUM_CONSTANT_DECL]
+
+            # initialize ignore list to account for private methods etc.
+            self.ignore_list = [cindex.CursorKind.DESTRUCTOR,
+                                cindex.CursorKind.CLASS_DECL,
+                                cindex.CursorKind.ENUM_CONSTANT_DECL]
 
             # load clang helper class
             clang_utils = importlib.import_module(clang_utils_module_name)
@@ -98,7 +96,8 @@ class Completer(BaseCompleter):
                 if libclang_dir:
                     cindex.Config.set_library_path(libclang_dir)
 
-            Completer.tu_module = cindex.TranslationUnit
+            self.tu_module = cindex.TranslationUnit
+            self.tu = None
             # check if we can build an index. If not, set valid to false
             try:
                 cindex.Index.create()
@@ -107,54 +106,15 @@ class Completer(BaseCompleter):
                 log.error(" error: %s", e)
                 self.valid = False
 
-        # Create compiler options of specific variant of the compiler.
-        self.compiler_variant = LibClangCompilerVariant()
-
-    def remove(self, view_id):
-        """Remove tu for this view. Happens when we don't need it anymore.
-
-        Args:
-            view_id (int): view id
-
-        Returns: view id
-        """
-        with self.rlock:
-            if view_id not in self.TUs:
-                log.error(" no tu for view id: %s, so not removing", view_id)
-                return
-            log.debug(" removing translation unit for view id: %s", view_id)
-            del self.TUs[view_id]
-            return view_id
-
-    def exists_for_view(self, view_id):
-        """Find if there is a completer for the view.
-
-        Args:
-            view_id (int): current view id
-
-        Returns:
-            bool: has completer
-        """
-        with self.rlock:
-            if view_id in self.TUs:
-                self.TUs[view_id].touch()
-                return True
-            return False
-
-    def init_for_view(self, view, settings):
+    def parse_tu(self, view):
         """Initialize the completer. Builds the view.
 
         Args:
             view (sublime.View): current view
-            settings (Settings): plugin settings
-
         """
         # Return early if this is an invalid view.
         if not Tools.is_valid_view(view):
             return
-
-        # call initializer from the super class
-        super().init_for_view(view, settings)
 
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
@@ -168,9 +128,9 @@ class Completer(BaseCompleter):
         if v_id == 0:
             log.warning(" this is default id. View is closed. Abort!")
             return
-        with self.rlock:
+        with Completer.rlock:
             try:
-                TU = Completer.tu_module
+                TU = self.tu_module
                 start = time.time()
                 log.debug(" compilation started for view id: %s", v_id)
                 trans_unit = TU.from_source(
@@ -179,19 +139,11 @@ class Completer(BaseCompleter):
                     unsaved_files=files,
                     options=TU.PARSE_PRECOMPILED_PREAMBLE |
                     TU.PARSE_CACHE_COMPLETION_RESULTS)
-                self.TUs[v_id] = StampedTu(trans_unit)
+                self.tu = trans_unit
                 end = time.time()
                 log.debug(" compilation done in %s seconds", end - start)
-                if settings.errors_on_save:
-                    self.show_errors(view, self.TUs[v_id].tu().diagnostics)
             except Exception as e:
                 log.error(" error while compiling: %s", e)
-
-        # start timer if it is not set yet
-        self.max_tu_age = settings.max_tu_age
-        if not self.timer:
-            self.timer = Timer(Completer.timer_period, self.__remove_old_TUs)
-            self.timer.start()
 
     def complete(self, completion_request):
         """Called asynchronously to create a list of autocompletions.
@@ -210,15 +162,11 @@ class Completer(BaseCompleter):
 
         v_id = view.buffer_id()
 
-        with self.rlock:
-            # do nothing if there in no translation_unit present
-            if v_id not in self.TUs:
-                log.error(" cannot complete. No TU for view %s", v_id)
-                return (None, None)
+        with Completer.rlock:
             # execute clang code completion
             start = time.time()
             log.debug(" started code complete for view %s", v_id)
-            complete_obj = self.TUs[v_id].tu().codeComplete(
+            complete_obj = self.tu.codeComplete(
                 view.file_name(),
                 row, col,
                 unsaved_files=files)
@@ -230,7 +178,11 @@ class Completer(BaseCompleter):
         else:
             point = completion_request.get_trigger_position()
             trigger = view.substr(point - 2) + view.substr(point - 1)
-            completions = Completer._parse_completions(complete_obj, trigger)
+            if trigger != "::":
+                excluded = self.ignore_list
+            else:
+                excluded = self.ignore_list[:-1]
+            completions = Completer._parse_completions(complete_obj, excluded)
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
 
@@ -250,47 +202,20 @@ class Completer(BaseCompleter):
         """
         v_id = view.buffer_id()
         log.debug(" view is %s", v_id)
-        if v_id in self.TUs:
-            with self.rlock:
-                log.debug(" reparsing translation_unit for view %s", v_id)
-                start = time.time()
-                self.TUs[v_id].tu().reparse()
-                end = time.time()
-                log.debug(" reparsed in %s seconds", end - start)
-                if show_errors:
-                    self.show_errors(view, self.TUs[v_id].tu().diagnostics)
-                return True
+        with Completer.rlock:
+            if not self.tu:
+                log.debug(" translation unit does not exist. Creating.")
+                self.parse_tu(view)
+            log.debug(" reparsing translation_unit for view %s", v_id)
+            start = time.time()
+            self.tu.reparse()
+            end = time.time()
+            log.debug(" reparsed in %s seconds", end - start)
+            if show_errors:
+                self.show_errors(view, self.tu.diagnostics)
+            return True
         log.error(" no translation unit for view id %s", v_id)
         return False
-
-    def __remove_old_TUs(self):
-        """Remove old translation units and restart timer."""
-        # first restart timer
-        self.timer.cancel()
-        self.timer = Timer(Completer.timer_period, self.__remove_old_TUs)
-        self.timer.start()
-
-        # now do some work if needed
-        if not self.max_tu_age:
-            return
-
-        log.debug(" removing TUs older than: %s secs.", self.max_tu_age)
-        with self.rlock:
-            old_TUs = []
-            for key, tu in self.TUs.items():
-                if tu.is_older_than(self.max_tu_age):
-                    old_TUs.append(key)
-            current_id = SublBridge.active_view_id()
-            if len(old_TUs) < 1:
-                log.debug(" no old TUs.")
-                return
-            for key in old_TUs:
-                if key == current_id:
-                    # don't delete the tu if this view is focused
-                    log.debug(" TU for view %s is old but active: [skip]", key)
-                    continue
-                log.debug(" TU for view %s is old [delete]", key)
-                del self.TUs[key]
 
     @staticmethod
     def _cindex_for_version(version):
@@ -331,28 +256,25 @@ class Completer(BaseCompleter):
         return True
 
     @staticmethod
-    def _parse_completions(complete_results, trigger):
+    def _parse_completions(complete_results, excluded):
         """Create snippet-like structures from a list of completions.
 
         Args:
             complete_results (list): raw completions list
+            excluded (list): list of excluded classes of completions
 
         Returns:
             list: updated completions
         """
         completions = []
-        if trigger != "::":
-            excluded = Completer.ignore_list
-        else:
-            excluded = Completer.ignore_list[:-1]
 
+        # sort results according to their clang based priority
         sorted_results = sorted(complete_results.results,
                                 key=lambda x: x.string.priority)
 
         for c in sorted_results:
             if not Completer._is_valid_result(c, excluded):
                 continue
-
             hint = ''
             contents = ''
             place_holders = 1

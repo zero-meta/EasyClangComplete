@@ -1,44 +1,20 @@
 """Tests for settings."""
-import sublime
-import time
 from os import path
-from unittest import TestCase
 
 from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
+from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 
 
-class test_settings(TestCase):
-    """Tests for settings."""
-    def setUp(self):
-        """Set up testing environment."""
-        self.view = None
-        # make sure we have a window to work with
-        s = sublime.load_settings("Preferences.sublime-settings")
-        s.set("close_windows_when_empty", False)
+class test_settings(GuiTestWrapper):
+    """Test settings."""
 
-    def setUpView(self, filename):
-        """Utility method to set up a view for a given file.
-
-        Args:
-            filename (str): The filename to open in a new view.
-        """
-        # Open the view.
-        file_path = path.join(path.dirname(__file__), filename)
-        self.view = sublime.active_window().open_file(file_path)
-        self.view.settings().set("disable_easy_clang_complete", True)
-
-        # Ensure it's loaded.
-        while self.view.is_loading():
-            time.sleep(0.1)
-
-    def tearDown(self):
-        """Cleanup method run after every test."""
-        # If we have a view, close it.
-        if self.view:
-            self.view.set_scratch(True)
-            self.view.window().focus_view(self.view)
-            self.view.window().run_command("close_file")
-            self.view = None
+    def test_setup_view(self):
+        """Test that setup view correctly sets up the view."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.check_view(file_name)
+        self.tear_down()
 
     def test_init(self):
         """Test that settings are correctly initialized."""
@@ -62,8 +38,10 @@ class test_settings(TestCase):
     def test_populate_flags(self):
         """Testing include population."""
         # open any existing file
-        self.tearDown()
-        self.setUpView(path.join('test_files', 'test_wrong_triggers.cpp'))
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_wrong_triggers.cpp')
+        self.set_up_view(file_name)
         # now test the things
         manager = SettingsManager()
         settings = manager.user_settings()
@@ -80,3 +58,4 @@ class test_settings(TestCase):
         self.assertFalse(initial_common_flags[1] in dirs)
         self.assertTrue(("-I" + current_folder) in dirs)
         self.assertTrue(("-I" + parent_folder) in dirs)
+        self.tear_down()

@@ -225,14 +225,15 @@ class File:
         return True
 
     @staticmethod
-    def update_mod_time(file):
+    def update_mod_time(full_path):
         """Update modification time.
 
         Args:
-            file (File): current file.
+            full_path (str): current full path to file.
         """
-        mod_time = path.getmtime(file.full_path())
-        File.__modification_cache[file.full_path()] = mod_time
+        log.debug(" updating modification time for file '%s'", full_path)
+        mod_time = path.getmtime(full_path)
+        File.__modification_cache[full_path] = mod_time
 
     @staticmethod
     def search(file_name, from_folder, to_folder, search_content=None):
@@ -554,6 +555,7 @@ class Tools:
             str: raw command output
         """
         try:
+            stdin = None
             startupinfo = None
             if isinstance(command, list):
                 command = subprocess.list2cmdline(command)
@@ -563,7 +565,9 @@ class Tools:
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                 startupinfo.wShowWindow = subprocess.SW_HIDE
+                stdin = subprocess.PIPE
             output = subprocess.check_output(command,
+                                             stdin=stdin,
                                              stderr=subprocess.STDOUT,
                                              shell=shell,
                                              startupinfo=startupinfo)

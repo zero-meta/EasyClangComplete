@@ -1,18 +1,14 @@
 """Tests for autocompletion."""
 import sublime
-import time
 import platform
 from os import path
-from unittest import TestCase
 
 from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
-from EasyClangComplete.plugin.completion import bin_complete
-from EasyClangComplete.plugin.completion import lib_complete
 from EasyClangComplete.plugin.tools import CompletionRequest
-from EasyClangComplete.plugin.tools import PKG_NAME
+from EasyClangComplete.plugin.view_config import ViewConfigManager
 
-CompleterBin = bin_complete.Completer
-CompleterLib = lib_complete.Completer
+
+from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 
 
 def has_libclang():
@@ -28,49 +24,18 @@ def has_libclang():
     return True
 
 
-class base_test_complete(object):
+class BaseTestCompleter(object):
     """
     Base class for tests that are independent of the Completer implementation.
 
     Attributes:
         view (sublime.View): view
-        Completer (type): Completer class to use
+        use_libclang (bool): decides if we use libclang in tests
     """
-    def setUp(self):
-        """Setup method run before every test."""
-        # Ensure we have a window to work with.
-        s = sublime.load_settings("Preferences.sublime-settings")
-        s.set("close_windows_when_empty", False)
-        s = sublime.load_settings(PKG_NAME + ".sublime-settings")
-        s.set("verbose", True)
-        s.set("cmake_flags_priority", "overwrite")
 
-        self.view = None
+    use_libclang = None
 
-    def tearDown(self):
-        """Cleanup method run after every test."""
-        # If we have a view, close it.
-        if self.view:
-            self.view.set_scratch(True)
-            self.view.window().focus_view(self.view)
-            self.view.window().run_command("close_file")
-            self.view = None
-
-    def setUpView(self, filename):
-        """Utility method to set up a view for a given file.
-
-        Args:
-            filename (str): The filename to open in a new view.
-        """
-        # Open the view.
-        file_path = path.join(path.dirname(__file__), filename)
-        self.view = sublime.active_window().open_file(file_path)
-
-        # Ensure it's loaded.
-        while self.view.is_loading():
-            time.sleep(0.1)
-
-    def setUpCompleter(self):
+    def set_up_completer(self):
         """Utility method to set up a completer for the current view.
 
         Returns:
@@ -78,58 +43,44 @@ class base_test_complete(object):
         """
         manager = SettingsManager()
         settings = manager.settings_for_view(self.view)
+        settings.use_libclang = self.use_libclang
 
-        clang_binary = settings.clang_binary
-        completer = self.Completer(clang_binary)
-        completer.init_for_view(self.view, settings=settings)
+        view_config_manager = ViewConfigManager()
+        view_config = view_config_manager.load_for_view(self.view, settings)
+        completer = view_config.completer
         return completer
-
-    def getRow(self, row):
-        """Get text of a particular row.
-
-        Args:
-            row (int): number of row
-
-        Returns:
-            str: row contents
-        """
-        return self.view.substr(self.view.line(self.view.text_point(row, 0)))
 
     def test_setup_view(self):
         """Test that setup view correctly sets up the view."""
-        self.setUpView(path.join('test_files', 'test.cpp'))
-
         file_name = path.join(path.dirname(__file__),
                               'test_files',
                               'test.cpp')
-        self.assertEqual(self.view.file_name(), file_name)
-        file = open(file_name, 'r')
-        row = 0
-        line = file.readline()
-        while line:
-            self.assertEqual(line[:-1], self.getRow(row))
-            row += 1
-            line = file.readline()
-        file.close()
+        self.check_view(file_name)
+        self.tear_down()
 
     def test_init(self):
         """Test that the completer is properly initialized."""
-        self.setUpView(path.join('test_files', 'test.cpp'))
-        completer = self.setUpCompleter()
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+        completer = self.set_up_completer()
 
-        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
         self.assertIsNotNone(completer.version_str)
+        self.tear_down()
 
     def test_complete(self):
         """Test autocompletion for user type."""
-        self.setUpView(path.join('test_files', 'test.cpp'))
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
 
-        completer = self.setUpCompleter()
-        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
+        completer = self.set_up_completer()
 
         # Check the current cursor position is completable.
-        self.assertEqual(self.getRow(5), "  a.")
-        pos = self.view.text_point(5, 4)
+        self.assertEqual(self.get_row(8), "  a.")
+        pos = self.view.text_point(8, 4)
         current_word = self.view.substr(self.view.word(pos))
         self.assertEqual(current_word, ".\n")
 
@@ -139,18 +90,78 @@ class base_test_complete(object):
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
-        expected = ['a\tint a', 'a']
+        expected = ['foo\tvoid foo(double a)', 'foo(${1:double a})']
+
         self.assertIn(expected, completions)
+        self.tear_down()
+
+    def test_excluded_private(self):
+        """Test autocompletion for user type."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+
+        completer = self.set_up_completer()
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(8), "  a.")
+        pos = self.view.text_point(8, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
+
+        # Load the completions.
+        request = CompletionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
+
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['foo\tvoid foo(double a)', 'foo(${1:double a})']
+        unexpected = ['foo\tvoid foo(int a)', 'foo(${1:int a})']
+        if self.use_libclang:
+            self.assertIn(expected, completions)
+            self.assertNotIn(unexpected, completions)
+        self.tear_down()
+
+    def test_excluded_destructor(self):
+        """Test autocompletion for user type."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+
+        completer = self.set_up_completer()
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(8), "  a.")
+        pos = self.view.text_point(8, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
+
+        # Load the completions.
+        request = CompletionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
+
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        destructor = ['~A\tvoid ~A()', '~A()']
+        if self.use_libclang:
+            self.assertNotIn(destructor, completions)
+        else:
+            self.assertIn(destructor, completions)
+        self.tear_down()
 
     def test_complete_vector(self):
         """Test that we can complete vector members."""
-        self.setUpView(path.join('test_files', 'test_vector.cpp'))
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_vector.cpp')
+        self.set_up_view(file_name)
 
-        completer = self.setUpCompleter()
-        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
+        completer = self.set_up_completer()
 
         # Check the current cursor position is completable.
-        self.assertEqual(self.getRow(3), "  vec.")
+        self.assertEqual(self.get_row(3), "  vec.")
         pos = self.view.text_point(3, 6)
         current_word = self.view.substr(self.view.word(pos))
         self.assertEqual(current_word, ".\n")
@@ -163,9 +174,11 @@ class base_test_complete(object):
         self.assertIsNotNone(completions)
         if platform.system() == "Windows":
             # disable the windows tests for now until AppVeyor fixes things
+            self.tear_down()
             return
         expected = ['begin\titerator begin()', 'begin()']
         self.assertIn(expected, completions)
+        self.tear_down()
 
     def test_unsaved_views(self):
         """Test that we gracefully handle unsaved views."""
@@ -176,24 +189,22 @@ class base_test_complete(object):
         # Manually set up a completer.
         manager = SettingsManager()
         settings = manager.settings_for_view(self.view)
-        clang_binary = settings.clang_binary
-        completer = self.Completer(clang_binary)
-        completer.init_for_view(
-            view=self.view,
-            settings=settings)
-
-        # Verify that the completer ignores the scratch view.
-        self.assertFalse(completer.exists_for_view(self.view.buffer_id()))
+        view_config_manager = ViewConfigManager()
+        view_config = view_config_manager.load_for_view(self.view, settings)
+        self.assertIsNone(view_config)
+        self.tear_down()
 
     def test_cooperation_with_default_completions(self):
         """Empty clang completions should not hide default completions."""
-        self.setUpView(path.join('test_files', 'test_errors.cpp'))
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_errors.cpp')
+        self.set_up_view(file_name)
 
-        completer = self.setUpCompleter()
-        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
+        self.set_up_completer()
 
         # Undefined foo object has no completions.
-        self.assertEqual(self.getRow(1), "  foo.")
+        self.assertEqual(self.get_row(1), "  foo.")
         pos = self.view.text_point(1, 6)
         current_word = self.view.substr(self.view.word(pos))
         self.assertEqual(current_word, ".\n")
@@ -201,14 +212,17 @@ class base_test_complete(object):
         # Trigger default completions popup.
         self.view.run_command('auto_complete')
         self.assertTrue(self.view.is_auto_complete_visible())
+        self.tear_down()
 
 
-class test_bin_complete(base_test_complete, TestCase):
+class TestBinCompleter(BaseTestCompleter, GuiTestWrapper):
     """Test class for the binary based completer."""
-    Completer = CompleterBin
+
+    use_libclang = False
 
 
 if has_libclang():
-    class test_lib_complete(base_test_complete, TestCase):
+    class TestLibCompleter(BaseTestCompleter, GuiTestWrapper):
         """Test class for the library based completer."""
-        Completer = CompleterLib
+
+        use_libclang = True

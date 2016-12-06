@@ -25,6 +25,7 @@ class Wildcards:
     PROJECT_PATH = "$project_base_path"
     PROJECT_NAME = "$project_name"
     CLANG_VERSION = "$clang_version"
+    HOME = "~"
 
 
 class SettingsStorage:
@@ -69,7 +70,8 @@ class SettingsStorage:
         self._wildcard_values = {
             Wildcards.PROJECT_PATH: "",
             Wildcards.PROJECT_NAME: "",
-            Wildcards.CLANG_VERSION: ""
+            Wildcards.CLANG_VERSION: "",
+            Wildcards.HOME: ""
         }
         self.__load_vars_from_settings(settings_handle,
                                        project_specific=False)
@@ -166,8 +168,13 @@ class SettingsStorage:
                     continue
                 if not source_dict[option]:
                     continue
-                self.flags_sources[idx][option] =\
-                    self.__replace_wildcard_if_needed(source_dict[option])
+                if isinstance(source_dict[option], str):
+                    self.flags_sources[idx][option] =\
+                        self.__replace_wildcard_if_needed(source_dict[option])
+                elif isinstance(source_dict[option], list):
+                    for i, entry in enumerate(source_dict[option]):
+                        self.flags_sources[idx][option][i] =\
+                            self.__replace_wildcard_if_needed(entry)
 
     def __populate_common_flags(self, view):
         """Populate the variables inside common_flags with real values.
@@ -196,7 +203,6 @@ class SettingsStorage:
         Returns:
             str: line with replaced wildcards
         """
-        # create a copy of a line
         res = str(line)
         # replace all wildcards in the line
         for wildcard, value in self._wildcard_values.items():
@@ -207,6 +213,8 @@ class SettingsStorage:
 
     def __update_widcard_values(self, view):
         """Update values for wildcard variables."""
+        from os.path import expanduser
+        self._wildcard_values[Wildcards.HOME] = expanduser("~")
         variables = view.window().extract_variables()
         if 'folder' in variables:
             project_folder = variables['folder'].replace('\\', '\\\\')

@@ -136,7 +136,14 @@ class CMakeFile(FlagsSource):
             # sometimes there are variables missing to carry out the build. We
             # can set them here from the settings.
             my_env = os.environ.copy()
-            my_env['CMAKE_PREFIX_PATH'] = ":".join(prefix_paths)
+            log.debug(" prefix paths: %s", prefix_paths)
+            merged_paths = ""
+            for prefix_path in prefix_paths:
+                merged_paths += prefix_path + ":"
+            merged_paths = merged_paths[:-1]
+            log.debug(" merged paths: %s", merged_paths)
+            my_env['CMAKE_PREFIX_PATH'] = merged_paths
+            log.debug(" CMAKE_PREFIX_PATH: %s", my_env['CMAKE_PREFIX_PATH'])
             log.info(' running command: %s', cmake_cmd)
             output = subprocess.check_output(cmake_cmd,
                                              stderr=subprocess.STDOUT,

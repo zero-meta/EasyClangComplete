@@ -18,5 +18,16 @@
 	{
 			"ecc_use_libclang": true,
 			"easy_clang_complete_verbose": true,
+			"ecc_flags_sources": [
+	    {
+	    	"file": "CMakeLists.txt",
+	      "prefix_paths": [
+	      	"/opt/ros/indigo",
+	      	"~/Code/catkin_ws/devel",
+	      	"$project_base_path/catkin_ws/devel"
+	      ]
+	    },
+	    {"file": ".clang_complete"}
+	  ],
 	}
 }

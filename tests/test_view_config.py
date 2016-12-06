@@ -57,15 +57,17 @@ class TestViewConfig(GuiTestWrapper):
 
         self.assertIsNotNone(view_config.completer)
         completer = view_config.completer
-        self.assertEqual(len(completer.clang_flags), 12)
+        self.assertEqual(len(completer.clang_flags), 13)
         # test from the start
-        self.assertEqual(completer.clang_flags[0], '-x')
-        self.assertEqual(completer.clang_flags[1], 'c++')
-        self.assertEqual(completer.clang_flags[2], '-std=c++11')
+        self.assertEqual(completer.clang_flags[0], '-c')
+        self.assertEqual(completer.clang_flags[1], '-fsyntax-only')
+        self.assertEqual(completer.clang_flags[2], '-x')
+        self.assertEqual(completer.clang_flags[3], 'c++')
+        self.assertEqual(completer.clang_flags[4], '-std=c++11')
         # test last one
         expected = path.join(path.dirname(
             path.dirname(__file__)), 'local_folder')
-        self.assertEqual(completer.clang_flags[11], '-I' + expected)
+        self.assertEqual(completer.clang_flags[12], '-I' + expected)
         self.tear_down()
 
     def test_unsaved_views(self):
@@ -161,6 +163,7 @@ class TestViewConfigManager(GuiTestWrapper):
         settings.use_libclang = False
         view_config = config_manager.load_for_view(self.view, settings)
         self.assertEqual(view_config.completer.name, "bin")
+        config_manager.clear_for_view(self.view.buffer_id())
         self.tear_down()
 
     def test_remove(self):
@@ -189,11 +192,13 @@ class TestViewConfigManager(GuiTestWrapper):
         manager = SettingsManager()
         config_manager = ViewConfigManager()
         settings = manager.settings_for_view(self.view)
-        settings.max_tu_age = 3  # seconds
+        settings.max_cache_age = 3  # seconds
+        initial_period = ViewConfigManager._ViewConfigManager__timer_period
         ViewConfigManager._ViewConfigManager__timer_period = 1
         view_config = config_manager.load_for_view(self.view, settings)
         self.assertIsNotNone(view_config)
         time.sleep(4)
         view_config = config_manager.get_from_cache(self.view)
         self.assertIsNone(view_config)
+        ViewConfigManager._ViewConfigManager__timer_period = initial_period
         self.tear_down()

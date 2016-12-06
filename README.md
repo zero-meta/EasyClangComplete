@@ -6,15 +6,11 @@ and C++.
 ![Example](pics/autocomplete_show_off.gif)
 
 [![Release][img-release]][release]
+[![Downloads Month][img-downloads-month]][downloads]
 [![Travis Build][img-travis]][travis]
 [![Windows Build][img-appveyor]][appveyor]
 [![Codacy Badge][img-codacy]][codacy]
 [![Coverage Badge][img-coverage]][coverage]
-[![Downloads Month][img-downloads-month]][downloads]
-[![MIT licensed][img-mit]](./LICENSE)
-
-[![Bountysource][img-bountysource]][bountysource-link]
-[![Flattr this git repo][img-flattr]][donate-flattr]
 [![Donate][img-paypal]][donate-paypal]
 
 # Jump right in! #
@@ -169,9 +165,9 @@ Code style:
 Please ensure, that your code conforms to this.
 
 # Support it! #
-[![Bountysource][img-bountysource]][bountysource-link]
-[![Flattr this git repo][img-flattr]][donate-flattr]
 [![Donate][img-paypal]][donate-paypal]
+[![Flattr this git repo][img-flattr]][donate-flattr]
+[![Bountysource][img-bountysource]][bountysource-link]
 
 Current sponsor of this project is my sleep.
 Please buy me a cup of tea if you appreciate the effort.
@@ -192,16 +188,16 @@ plugin! The more people use it - the merrier.
 [cmake-issue]: https://github.com/niosus/EasyClangComplete/issues/19
 [bountysource-link]: https://www.bountysource.com/teams/easyclangcomplete
 
-[img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg
-[img-appveyor]: https://img.shields.io/appveyor/ci/niosus/easyclangcomplete/master.svg?label=windows
-[img-travis]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?label=linux|osx
-[img-codacy]: https://img.shields.io/codacy/grade/254f8db44b004dffa76b8cebfece4c06.svg
-[img-coverage]: https://img.shields.io/codacy/coverage/254f8db44b004dffa76b8cebfece4c06.svg
-[img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?maxAge=3600
-[img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600
-[img-downloads-month]: https://img.shields.io/packagecontrol/dm/EasyClangComplete.svg?maxAge=2592000
-[img-subl]: https://img.shields.io/badge/Sublime%20Text-3-green.svg
-[img-mit]: https://img.shields.io/badge/license-MIT-blue.svg
-[img-paypal]: https://img.shields.io/badge/Donate-PayPal-blue.svg
-[img-flattr]: https://img.shields.io/badge/Donate-Flattr-blue.svg
-[img-gitter]: https://badges.gitter.im/niosus/EasyClangComplete.svg
+[img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg?style=flat-square
+[img-appveyor]: https://img.shields.io/appveyor/ci/niosus/easyclangcomplete/master.svg?style=flat-square&label=windows
+[img-travis]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?style=flat-square&label=linux|osx
+[img-codacy]: https://img.shields.io/codacy/grade/254f8db44b004dffa76b8cebfece4c06.svg?style=flat-square
+[img-coverage]: https://img.shields.io/codacy/coverage/254f8db44b004dffa76b8cebfece4c06.svg?style=flat-square
+[img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?maxAge=3600&style=flat-square
+[img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600&style=flat-square
+[img-downloads-month]: https://img.shields.io/packagecontrol/dm/EasyClangComplete.svg?maxAge=2592000&style=flat-square
+[img-subl]: https://img.shields.io/badge/Sublime%20Text-3-green.svg?style=flat-square
+[img-mit]: https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
+[img-paypal]: https://img.shields.io/badge/Donate-PayPal-blue.svg?style=flat-square
+[img-flattr]: https://img.shields.io/badge/Donate-Flattr-blue.svg?style=flat-square
+[img-gitter]: https://badges.gitter.im/niosus/EasyClangComplete.svg?style=flat-square

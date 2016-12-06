@@ -19,7 +19,7 @@ class BaseCompleter:
         error_vis (plugin.CompileErrors): object of compile errors class
         compiler_variant (CompilerVariant): compiler specific options
         valid (bool): is completer valid
-        version_str (str): version string of format "3.4" for clang v. 3.4
+        version_str (str): version string of format "3.4.0"
     """
     name = "base"
     version_str = None
@@ -51,14 +51,6 @@ class BaseCompleter:
 
         Args:
             completion_request (CompletionRequest): request object
-
-        Raises:
-            NotImplementedError: Guarantees we do not call this abstract method
-        """
-        raise NotImplementedError("calling abstract method")
-
-    def remove(self):
-        """Free memory used by completer.
 
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method

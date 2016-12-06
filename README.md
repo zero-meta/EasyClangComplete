@@ -151,7 +151,13 @@ Most crucial functionality is covered with unit tests using
 
 ## Contributing ##
 Contributions are welcome! Look at the issue list. If there is something you
-think you can tackle, write about it in that issue and submit a PR.
+think you can tackle, write about it in that issue and submit a Pull Request.
+
+There are two branches:
+- `master`: should be stable and generally following the last release. Used for
+  bug fixing.
+- `dev`: used to develop new features. Merges with master right before a new
+  release.
 
 Code style:
 - Line width is `80` characters

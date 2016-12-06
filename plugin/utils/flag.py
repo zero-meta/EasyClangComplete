@@ -2,7 +2,12 @@
 
 
 class Flag:
-    """Utility class for storing possibly separated flag."""
+    """Utility class for storing possibly separated flag.
+
+    Attributes:
+        SEPARABLE_PREFIXES (str[]): Full list of prefixes that may take a
+                                    second part as an input.
+    """
 
     def __init__(self, part_1, part_2=None):
         """Initialize a flag with two parts.
@@ -63,12 +68,6 @@ class Flag:
 
         Returns (Flag[]): A list of flags containing two parts if needed.
         """
-        # FIXME(igor): probably need to get it from `clang -help`
-        separable_prefixes = ["-I", "/I", "-isystem",
-                              "-Xclang",
-                              "-cxx-isystem", "-F",
-                              "-isysroot", "-iprefix", "-x"]
-
         flags = []
         skip = False
         for i, entry in enumerate(all_split_line):
@@ -77,10 +76,56 @@ class Flag:
             if skip:
                 skip = False
                 continue
-            if entry in separable_prefixes:
+            if entry in Flag.SEPARABLE_PREFIXES:
                 # add both this and next part to a flag
                 flags.append(Flag(all_split_line[i], all_split_line[i + 1]))
                 skip = True
                 continue
             flags.append(Flag(entry))
         return flags
+
+
+    # generated from `clang -help` with regex: ([-/][\w-]+)\s\<\w+\>\s
+    SEPARABLE_PREFIXES = ["-arcmt-migrate-report-output",
+                          "-cxx-isystem",
+                          "-dependency-dot",
+                          "-dependency-file",
+                          "-fmodules-user-build-path",
+                          "-F",
+                          "-idirafter",
+                          "-iframework",
+                          "-imacros",
+                          "-include-pch",
+                          "-include",
+                          "-iprefix",
+                          "-iquote",
+                          "-isysroot",
+                          "-isystem",
+                          "-ivfsoverlay",
+                          "-iwithprefixbefore",
+                          "-iwithprefix",
+                          "-iwithsysroot",
+                          "-I",
+                          "-meabi",
+                          "-MF",
+                          "-mllvm",
+                          "-Xclang",
+                          "-module-dependency-dir",
+                          "-MQ",
+                          "-mthread-model",
+                          "-MT",
+                          "-o",
+                          "-serialize-diagnostics",
+                          "-working-directory",
+                          "-Xanalyzer",
+                          "-Xassembler",
+                          "-Xlinker",
+                          "-Xpreprocessor",
+                          "-x",
+                          "-z",
+                          "/FI",
+                          "/I",
+                          "/link",
+                          "/Tc",
+                          "/Tp",
+                          "/U"]

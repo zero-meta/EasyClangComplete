@@ -6,8 +6,7 @@ and C++.
 ![Example](pics/autocomplete_show_off.gif)
 
 [![Release][img-release]][release]
-[![Travis Build][img-travis-linux]][travis]
-[![Travis Build][img-travis-osx]][travis]
+[![Travis Build][img-travis]][travis]
 [![Windows Build][img-appveyor]][appveyor]
 [![Codacy Badge][img-codacy]][codacy]
 [![Coverage Badge][img-coverage]][coverage]
@@ -19,9 +18,9 @@ and C++.
 [![Donate][img-paypal]][donate-paypal]
 
 # Jump right in! #
-Follow all the following steps to ensure the plugin works as expected!
+You are just three simple steps away!
 
-## Install this plugin ##
+## 1. Install this plugin ##
 - Best is to use [Package Control](https://packagecontrol.io/installation)
   + <kbd>CTRL</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and install
     `EasyClangComplete`
@@ -29,7 +28,7 @@ Follow all the following steps to ensure the plugin works as expected!
   + download one of the releases from
     [here](https://github.com/niosus/EasyClangComplete/releases).
 
-## Install clang ##
+## 2. Install clang ##
 - **Ubuntu**: `sudo apt-get install clang`
 - **Windows**: install the latest release from `clang`
   [website](http://llvm.org/releases/download.html) (v >= 3.9)
@@ -37,7 +36,7 @@ Follow all the following steps to ensure the plugin works as expected!
 - on other systems refer to their package managers or install from `clang`
   [website](http://llvm.org/releases/download.html)
 
-## Configure your includes ##
+## 3. Configure your includes ##
 
 ### Using CMake? ###
 Plugin will run cmake on a proper `CMakeLists.txt` in your project folder and
@@ -65,11 +64,10 @@ Pick *ANY* of the following:
     These flags will be included in every project you run.
 - Add `.clang_complete` file to the root of your project folder.
   + This file should contain all includes and macroses you want to use.
-  + Example:
+  + Example file contents:
   ```
   -Isrc
   -I/usr/include
-  -I/opt/ros/indigo/include
   ```
 - Override `"common_flags"` setting in your project file! Just define the same
   setting in project specific settings with either one of two prefixes:
@@ -190,8 +188,7 @@ plugin! The more people use it - the merrier.
 
 [img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg
 [img-appveyor]: https://img.shields.io/appveyor/ci/niosus/easyclangcomplete/master.svg?label=windows
-[img-travis-linux]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?label=linux
-[img-travis-osx]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?label=osx
+[img-travis]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?label=linux|osx
 [img-codacy]: https://img.shields.io/codacy/grade/254f8db44b004dffa76b8cebfece4c06.svg
 [img-coverage]: https://img.shields.io/codacy/coverage/254f8db44b004dffa76b8cebfece4c06.svg
 [img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?maxAge=3600

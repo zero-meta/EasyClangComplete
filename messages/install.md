@@ -1,7 +1,7 @@
 Sublime Text 3 plugin that offers clang-based auto-completion for C++
 
 # Let't get started! #
-You're just two simple steps away from having code completions!
+You're just two simple steps away!
 
 ## 1. Install clang ##
 - **Ubuntu**: `sudo apt-get install clang`
@@ -23,7 +23,7 @@ project folder and will load it to complete your code. If you want to specify a 
 ```json
 "flags_sources": [
     {"file": "compile_commands.json", "search_in": "<YOUR_PATH>"},
-  ],
+]
 ```
 
 ### None of the above? ###

@@ -5,7 +5,7 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 ![Example](../pics/autocomplete_show_off.gif)
 
 # Simple setup! #
-Follow the following 3 simple steps to ensure the plugin works as expected!
+You are just three simple steps away!
 
 ## 1. Install this plugin ##
 - Best is to use [Package Control](https://packagecontrol.io/installation)
@@ -35,7 +35,7 @@ If you want to specify a custom path to a comilation database you can do it in s
 ```json
 "flags_sources": [
     {"file": "compile_commands.json", "search_in": "<YOUR_PATH>"},
-  ],
+]
 ```
 
 ### None of the above? ###

@@ -65,6 +65,7 @@ class Flag:
         """
         # FIXME(igor): probably need to get it from `clang -help`
         separable_prefixes = ["-I", "/I", "-isystem",
+                              "-Xclang",
                               "-cxx-isystem", "-F",
                               "-isysroot", "-iprefix", "-x"]
 

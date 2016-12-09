@@ -82,9 +82,10 @@ class Completer(BaseCompleter):
             cindex = importlib.import_module(cindex_module_name)
 
             # initialize ignore list to account for private methods etc.
-            self.ignore_list = [cindex.CursorKind.DESTRUCTOR,
-                                cindex.CursorKind.CLASS_DECL,
-                                cindex.CursorKind.ENUM_CONSTANT_DECL]
+            self.default_ignore_list = [cindex.CursorKind.DESTRUCTOR]
+            self.bigger_ignore_list = self.default_ignore_list +\
+                [cindex.CursorKind.CLASS_DECL,
+                 cindex.CursorKind.ENUM_CONSTANT_DECL]
 
             # load clang helper class
             clang_utils = importlib.import_module(clang_utils_module_name)
@@ -180,9 +181,9 @@ class Completer(BaseCompleter):
             point = completion_request.get_trigger_position()
             trigger = view.substr(point - 2) + view.substr(point - 1)
             if trigger != "::":
-                excluded = self.ignore_list
+                excluded = self.bigger_ignore_list
             else:
-                excluded = self.ignore_list[:-1]
+                excluded = self.default_ignore_list
             completions = Completer._parse_completions(complete_obj, excluded)
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)

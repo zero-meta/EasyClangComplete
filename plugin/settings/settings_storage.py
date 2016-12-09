@@ -220,7 +220,7 @@ class SettingsStorage:
             project_folder = variables['folder'].replace('\\', '\\\\')
             self._wildcard_values[Wildcards.PROJECT_PATH] = project_folder
         if 'project_name' in variables:
-            project_name = variables['project_name'].replace('\\', '\\\\')
+            project_name = path.splitext(variables['project_name'])[0]
             self._wildcard_values[Wildcards.PROJECT_NAME] = project_name
 
         # duplicate as fields

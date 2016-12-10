@@ -14,6 +14,8 @@ from os import path
 
 import subprocess
 import logging
+import re
+import os
 
 log = logging.getLogger(__name__)
 
@@ -28,24 +30,27 @@ class CMakeFile(FlagsSource):
     """Manages generating a compilation database with cmake.
 
     Attributes:
-        cache (dict): Cache of database filenames for each analyzed
+        _cache (dict): Cache of database filenames for each analyzed
             CMakeLists.txt file and of CMakeLists.txt file paths for each
             analyzed view path.
     """
     _FILE_NAME = 'CMakeLists.txt'
-    _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
+    _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {flags} "{path}"'
+    _DEP_REGEX = re.compile('\"(.+\..+)\"')
 
-    def __init__(self, include_prefixes, prefix_paths):
+    def __init__(self, include_prefixes, prefix_paths, flags):
         """Initialize a cmake-based flag storage.
 
         Args:
             include_prefixes (str[]): A List of valid include prefixes.
             prefix_paths (str[]): A list of paths to append to
                 CMAKE_PREFIX_PATH before invoking cmake.
+            flags (str[]): flags to pass to CMake
         """
         super().__init__(include_prefixes)
         self._cache = CMakeFileCache()
         self.__cmake_prefix_paths = prefix_paths
+        self.__cmake_flags = flags
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -62,9 +67,8 @@ class CMakeFile(FlagsSource):
         """
         # prepare search scope
         search_scope = self._update_search_scope(search_scope, file_path)
-        # check if we have a hashed version TODO(igor): probably can be
-        # simplified. Why do we need to load cached? should we just test if
-        # currently found one is in cache?
+        # TODO(igor): probably can be simplified. Why do we need to load
+        # cached? should we just test if currently found one is in cache?
         log.debug(" [cmake]:[get]: for file %s", file_path)
         cached_cmake_path = self._get_cached_from(file_path)
         log.debug(" [cmake]:[cached]: '%s'", cached_cmake_path)
@@ -80,8 +84,13 @@ class CMakeFile(FlagsSource):
         path_unchanged = (current_cmake_path == cached_cmake_path)
         file_unchanged = File.is_unchanged(cached_cmake_path)
         if path_unchanged and file_unchanged:
-            log.debug(" [cmake]:[unchanged]: use existing db.")
-            if cached_cmake_path in self._cache:
+            use_cached = True
+            if CMakeFile.__need_cmake_rerun(cached_cmake_path):
+                use_cached = False
+            if cached_cmake_path not in self._cache:
+                use_cached = False
+            if use_cached:
+                log.debug(" [cmake]:[unchanged]: use existing db.")
                 db_file_path = self._cache[cached_cmake_path]
                 db = CompilationDb(self._include_prefixes)
                 db_search_scope = SearchScope(
@@ -91,7 +100,8 @@ class CMakeFile(FlagsSource):
         log.debug(" [cmake]:[generate new db]")
         db_file = CMakeFile.__compile_cmake(
             cmake_file=File(current_cmake_path),
-            prefix_paths=self.__cmake_prefix_paths)
+            prefix_paths=self.__cmake_prefix_paths,
+            flags=self.__cmake_flags)
         if not db_file:
             return None
         if file_path:
@@ -105,7 +115,22 @@ class CMakeFile(FlagsSource):
         return flags
 
     @staticmethod
-    def __compile_cmake(cmake_file, prefix_paths):
+    def unique_folder_name(cmake_path):
+        """Get unique build folder name.
+
+        Args:
+            cmake_path (str): Path to CMakeLists of this project.
+
+        Returns:
+            str: Path to a unique temp folder.
+        """
+        unique_proj_str = Tools.get_unique_str(cmake_path)
+        tempdir = path.join(
+            Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
+        return tempdir
+
+    @staticmethod
+    def __compile_cmake(cmake_file, prefix_paths, flags):
         """Compile cmake given a CMakeLists.txt file.
 
         This returns  a new compilation database path to further parse the
@@ -116,22 +141,24 @@ class CMakeFile(FlagsSource):
         Args:
             cmake_file (tools.file): file object for CMakeLists.txt file
             prefix_paths (str[]): paths to add to CMAKE_PREFIX_PATH before
-            running `cmake`
+                                  running `cmake`
+            flags (str[]): flags to pass to cmake
         """
         if not cmake_file or not cmake_file.loaded():
             return None
 
-        import os
-        import shutil
         if not prefix_paths:
             prefix_paths = []
-        cmake_cmd = CMakeFile._CMAKE_MASK.format(path=cmake_file.folder())
-        unique_proj_str = Tools.get_unique_str(cmake_file.full_path())
-        tempdir = path.join(
-            Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
-        # ensure a clean build
-        shutil.rmtree(tempdir, ignore_errors=True)
-        os.makedirs(tempdir)
+        if not flags:
+            flags = []
+        cmake_cmd = CMakeFile._CMAKE_MASK.format(
+            flags=" ".join(flags),
+            path=cmake_file.folder())
+        tempdir = CMakeFile.unique_folder_name(cmake_file.full_path())
+        try:
+            os.makedirs(tempdir)
+        except OSError:
+            log.debug(" Folder %s exists.", tempdir)
         try:
             # sometimes there are variables missing to carry out the build. We
             # can set them here from the settings.
@@ -160,4 +187,49 @@ class CMakeFile(FlagsSource):
         if not path.exists(database_path):
             log.error(" cmake has finished, but no compilation database.")
             return None
+        # update the dependency modification time
+        dep_file_path = path.join(tempdir, 'CMakeFiles', 'Makefile.cmake')
+        if path.exists(dep_file_path):
+            for dep_path in CMakeFile.__get_cmake_deps(dep_file_path):
+                File.update_mod_time(dep_path)
         return File(database_path)
+
+    @staticmethod
+    def __get_cmake_deps(deps_file):
+        """Parse dependencies from Makefile.cmake.
+
+        Args:
+            deps_file (str): Full path to Makefile.cmake file.
+
+        Returns:
+            str[]: List of full paths to dependency files.
+        """
+        folder = path.dirname(path.dirname(deps_file))
+        deps = []
+        with open(deps_file, 'r') as f:
+            content = f.read()
+            found = CMakeFile._DEP_REGEX.findall(content)
+            for dep in found:
+                if not path.isabs(dep):
+                    dep = path.join(folder, dep)
+                deps.append(dep)
+        return deps
+
+    @staticmethod
+    def __need_cmake_rerun(cmake_path):
+        tempdir = CMakeFile.unique_folder_name(cmake_path)
+        if not path.exists(tempdir):
+            # temp folder not there. We need to run cmake to generate one.
+            return True
+        dep_file_path = path.join(tempdir, 'CMakeFiles', 'Makefile.cmake')
+        if not path.exists(dep_file_path):
+            # no file that manages dependencies, we need to run cmake.
+            return True
+
+        # now check if the deps actually changed since we last saw them
+        for dep_file in CMakeFile.__get_cmake_deps(dep_file_path):
+            if not path.exists(dep_file):
+                return True
+            if not File.is_unchanged(dep_file):
+                return True
+        return False

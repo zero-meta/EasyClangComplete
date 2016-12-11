@@ -26,13 +26,13 @@
       // override "flags_sources" setting in this project.
       "ecc_flags_sources": [
         // cmake entry
-        { "file": "CMakeLists.txt",
-          "prefix_paths": [
-            "/opt/ros/indigo",
-            "~/Code/catkin_ws/devel",
-            "$project_base_path/catkin_ws/devel"
-          ],
-          "flags": ["-DCMAKE_BUILD_TYPE=Release", "-D XXXX=ON"] },
+        {
+          "file": "CMakeLists.txt",
+          "flags": ["-DCMAKE_BUILD_TYPE=Release", "-D XXXX=ON"],
+          "prefix_paths": [ "/opt/ros/indigo",
+                            "~/Code/catkin_ws/devel",
+                            "$project_base_path/catkin_ws/devel" ]
+        },
         // .clang_complete entry
         { "file": ".clang_complete" }
       ],

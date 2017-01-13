@@ -219,6 +219,9 @@ class Completer(BaseCompleter):
                 log.debug(" translation unit does not exist. Creating.")
                 self.parse_tu(view)
             log.debug(" reparsing translation_unit for view %s", v_id)
+            if not self.tu:
+                log.error(" translation unit is not available. Not reparsing.")
+                return False
             start = time.time()
             self.tu.reparse()
             end = time.time()

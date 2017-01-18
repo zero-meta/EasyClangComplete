@@ -215,7 +215,8 @@ class Completer(BaseCompleter):
         v_id = view.buffer_id()
         log.debug(" view is %s", v_id)
         with Completer.rlock:
-            if not self.tu:
+            # fix issue #191 - avoid crashing when renaming file
+            if not self.tu or not self.tu.cursor.location.file:
                 log.debug(" translation unit does not exist. Creating.")
                 self.parse_tu(view)
             log.debug(" reparsing translation_unit for view %s", v_id)

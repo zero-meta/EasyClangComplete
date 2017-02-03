@@ -8,6 +8,7 @@ import importlib
 import sublime
 import time
 import logging
+import html
 
 from .base_complete import BaseCompleter
 from .compiler_variant import LibClangCompilerVariant
@@ -88,6 +89,9 @@ class Completer(BaseCompleter):
                 [cindex.CursorKind.CLASS_DECL,
                  cindex.CursorKind.ENUM_CONSTANT_DECL]
 
+            self.function_kinds_list = [cindex.CursorKind.FUNCTION_DECL,
+                                        cindex.CursorKind.CXX_METHOD]
+
             # load clang helper class
             clang_utils = importlib.import_module(clang_utils_module_name)
             ClangUtils = clang_utils.ClangUtils
@@ -143,7 +147,8 @@ class Completer(BaseCompleter):
                     args=self.clang_flags,
                     unsaved_files=files,
                     options=TU.PARSE_PRECOMPILED_PREAMBLE |
-                    TU.PARSE_CACHE_COMPLETION_RESULTS)
+                    TU.PARSE_CACHE_COMPLETION_RESULTS |
+                    TU.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION)
                 self.tu = trans_unit
             except Exception as e:
                 log.error(" error while compiling: %s", e)
@@ -197,6 +202,115 @@ class Completer(BaseCompleter):
             completions = Completer._parse_completions(complete_obj, excluded)
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
+
+    @staticmethod
+    def location_from_type(clangType):
+        """ Return location from type.
+
+            Return proper location from type.
+            Remove all inderactions like pointers etc.
+
+        """
+        cursor = clangType.get_declaration()
+        if cursor and cursor.location and cursor.location.file:
+            return cursor.location
+
+        cursor = clangType.get_pointee().get_declaration()
+        if cursor and cursor.location and cursor.location.file:
+            return cursor.location
+
+        return None
+
+    @staticmethod
+    def link_from_location(location, text):
+        """Provide link to given cursor.
+
+            Transforms SourceLocation object into html string
+
+        """
+        result = ""
+        if location and location.file and location.file.name:
+            result += "<a href=\""
+            result += location.file.name
+            result += ":"
+            result += str(location.line)
+            result += ":"
+            result += str(location.column)
+            result += "\">" + text + "</a>"
+        else:
+            result += text
+        return result
+
+    def build_info_details(self, cursor):
+        """Provide information about given cursor.
+
+        Builds detailed information about cursor.
+
+        """
+        result = ""
+        if cursor.result_type.spelling:
+            result += self.link_from_location(
+                        self.location_from_type(cursor.result_type),
+                        html.escape(cursor.result_type.spelling))
+        elif cursor.type.spelling:
+            result += self.link_from_location(
+                        self.location_from_type(cursor.type),
+                        html.escape(cursor.type.spelling))
+
+        result += ' '
+
+        if cursor.location:
+            result += self.link_from_location(cursor.location,
+                                              html.escape(cursor.spelling))
+        else:
+            result += html.escape(cursor.spelling)
+
+        args = []
+        for arg in cursor.get_arguments():
+            if arg.spelling:
+                args.append(arg.type.spelling + ' ' + arg.spelling)
+            else:
+                args.append(arg.type.spelling + ' ')
+
+        if cursor.kind in self.function_kinds_list:
+            result += '('
+            if len(args):
+                result += html.escape(', '.join(args))
+            result += ')'
+
+        if cursor.is_static_method():
+            result = "static " + result
+        if cursor.is_const_method():
+            result += " const"
+
+        if cursor.brief_comment:
+            result += "<br><br><b>"
+            result += cursor.brief_comment + "</b>"
+
+        return result
+
+    def info(self, tooltip_request):
+        """Provide information about object in given location.
+
+        Using the current translation unit it queries libclang for available
+        information about cursor.
+
+        """
+        with Completer.rlock:
+            if not self.tu:
+                return (tooltip_request, "")
+            view = tooltip_request.get_view()
+            (row, col) = SublBridge.cursor_pos(
+                view, tooltip_request.get_trigger_position())
+
+            cur = self.tu.cursor.from_location(self.tu, self.tu.get_location(
+                view.file_name(), (row, col)))
+            result = ""
+            if (cur and cur.kind.is_declaration() == False and
+                cur.referenced and cur.referenced.kind.is_declaration()):
+                result = self.build_info_details(cur.referenced)
+
+        return (tooltip_request, result)
 
     def update(self, view, show_errors):
         """Reparse the translation unit.
@@ -293,6 +407,7 @@ class Completer(BaseCompleter):
                 continue
             hint = ''
             contents = ''
+            trigger = ''
             place_holders = 1
             for chunk in c.string:
                 if not chunk:

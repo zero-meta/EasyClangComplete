@@ -1,8 +1,9 @@
 """This module contains class for libclang based completions.
 
 Attributes:
-    cindex_dict (dict): dict of cindex entries for each version of clang
-    log (logging.Logger): logger for this module
+    cindex_dict (dict): dict of cindex entries for each version of clang.
+    clang_utils_module_name (str): Name of the module for clang tools.
+    log (logging.Logger): logger for this module.
 """
 import importlib
 import sublime
@@ -40,9 +41,15 @@ class Completer(BaseCompleter):
     """Encapsulates completions based on libclang.
 
     Attributes:
+        default_ignore_list (str[]): base list of cursor kinds to ignore
+        bigger_ignore_list (str[]): extended list of cursor kinds to ignore.
+            This list is used when completion is triggered with `::`.
+        compiler_variant: Compiler variant currently in use.
+        function_kinds_list (str[]): Defines what we think is a function.
         rlock (threading.Rlock): recursive mutex
-        tu_module (cindex.TranslationUnit): module for proper cindex
         tu (cindex.TranslationUnit): current translation unit
+        tu_module (cindex.TranslationUnit): module for proper cindex
+        valid (bool): Will be False if we fail to build proper clang index.
     """
     name = "lib"
     rlock = RLock()
@@ -118,6 +125,9 @@ class Completer(BaseCompleter):
 
         Args:
             view (sublime.View): current view
+
+        Raises:
+            ValueError: if file name does not exist - throw exception.
         """
         # Return early if this is an invalid view.
         if not Tools.is_valid_view(view):
@@ -160,6 +170,13 @@ class Completer(BaseCompleter):
 
         Using the current translation unit it queries libclang for the
         possible completions.
+
+        Args:
+            completion_request (tools.CompletionRequest): completion request
+                holding information about the view and needed location.
+
+        Raises:
+            ValueError: if file name does not exist - throw exception.
 
         """
         view = completion_request.get_view()
@@ -204,11 +221,14 @@ class Completer(BaseCompleter):
         return (completion_request, completions)
 
     @staticmethod
-    def location_from_type(clangType):
-        """ Return location from type.
+    def _location_from_type(clangType):
+        """Return location from type.
 
-            Return proper location from type.
-            Remove all inderactions like pointers etc.
+        Return proper location from type.
+        Remove all inderactions like pointers etc.
+
+        Args:
+            clangType (cindex.Type): clang type.
 
         """
         cursor = clangType.get_declaration()
@@ -222,11 +242,14 @@ class Completer(BaseCompleter):
         return None
 
     @staticmethod
-    def link_from_location(location, text):
+    def _link_from_location(location, text):
         """Provide link to given cursor.
 
-            Transforms SourceLocation object into html string
+        Transforms SourceLocation object into html string.
 
+        Args:
+            location (Cursor.location): Current location.
+            text (str): Text to be added as info.
         """
         result = ""
         if location and location.file and location.file.name:
@@ -241,27 +264,33 @@ class Completer(BaseCompleter):
             result += text
         return result
 
-    def build_info_details(self, cursor):
+    def _build_info_details(self, cursor):
         """Provide information about given cursor.
 
         Builds detailed information about cursor.
 
+        Args:
+            cursor (Cursor): Current cursor.
+
         """
         result = ""
         if cursor.result_type.spelling:
-            result += self.link_from_location(
-                        self.location_from_type(cursor.result_type),
-                        html.escape(cursor.result_type.spelling))
+            cursor_type = cursor.result_type
         elif cursor.type.spelling:
-            result += self.link_from_location(
-                        self.location_from_type(cursor.type),
-                        html.escape(cursor.type.spelling))
+            cursor_type = cursor.type
+        else:
+            log.warning("No spelling for type provided in info.")
+            return ""
+
+        result += self._link_from_location(
+            self._location_from_type(cursor_type),
+            html.escape(cursor_type.spelling))
 
         result += ' '
 
         if cursor.location:
-            result += self.link_from_location(cursor.location,
-                                              html.escape(cursor.spelling))
+            result += self._link_from_location(cursor.location,
+                                               html.escape(cursor.spelling))
         else:
             result += html.escape(cursor.spelling)
 
@@ -295,7 +324,12 @@ class Completer(BaseCompleter):
         Using the current translation unit it queries libclang for available
         information about cursor.
 
+        Args:
+            tooltip_request (tools.CompletionRequest): A request for action
+                from the plugin.
+
         """
+        empty_info = (tooltip_request, "")
         with Completer.rlock:
             if not self.tu:
                 return (tooltip_request, "")
@@ -303,14 +337,14 @@ class Completer(BaseCompleter):
             (row, col) = SublBridge.cursor_pos(
                 view, tooltip_request.get_trigger_position())
 
-            cur = self.tu.cursor.from_location(self.tu, self.tu.get_location(
-                view.file_name(), (row, col)))
-            result = ""
-            if (cur and cur.kind.is_declaration() == False and
-                cur.referenced and cur.referenced.kind.is_declaration()):
-                result = self.build_info_details(cur.referenced)
-
-        return (tooltip_request, result)
+            cursor = self.tu.cursor.from_location(
+                self.tu, self.tu.get_location(view.file_name(), (row, col)))
+            if not cursor or cursor.kind.is_declaration():
+                return empty_info
+            if cursor.referenced and cursor.referenced.kind.is_declaration():
+                info_details = self._build_info_details(cursor.referenced)
+                return (tooltip_request, info_details)
+            return empty_info
 
     def update(self, view, show_errors):
         """Reparse the translation unit.
@@ -369,7 +403,7 @@ class Completer(BaseCompleter):
            Remove excluded types and unaccessible members.
 
         Args:
-            completion_result (): completion result from libclang
+            completion_result: completion result from libclang
             excluded_kinds (list): list of CursorKind types that shouldn't be
                                    added to completion list
 

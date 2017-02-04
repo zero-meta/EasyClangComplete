@@ -1,13 +1,15 @@
 """This module contains class for libclang based completions.
 
 Attributes:
-    cindex_dict (dict): dict of cindex entries for each version of clang
-    log (logging.Logger): logger for this module
+    cindex_dict (dict): dict of cindex entries for each version of clang.
+    clang_utils_module_name (str): Name of the module for clang tools.
+    log (logging.Logger): logger for this module.
 """
 import importlib
 import sublime
 import time
 import logging
+import html
 
 from .base_complete import BaseCompleter
 from .compiler_variant import LibClangCompilerVariant
@@ -39,9 +41,15 @@ class Completer(BaseCompleter):
     """Encapsulates completions based on libclang.
 
     Attributes:
+        default_ignore_list (str[]): base list of cursor kinds to ignore
+        bigger_ignore_list (str[]): extended list of cursor kinds to ignore.
+            This list is used when completion is triggered with `::`.
+        compiler_variant: Compiler variant currently in use.
+        function_kinds_list (str[]): Defines what we think is a function.
         rlock (threading.Rlock): recursive mutex
-        tu_module (cindex.TranslationUnit): module for proper cindex
         tu (cindex.TranslationUnit): current translation unit
+        tu_module (cindex.TranslationUnit): module for proper cindex
+        valid (bool): Will be False if we fail to build proper clang index.
     """
     name = "lib"
     rlock = RLock()
@@ -88,6 +96,9 @@ class Completer(BaseCompleter):
                 [cindex.CursorKind.CLASS_DECL,
                  cindex.CursorKind.ENUM_CONSTANT_DECL]
 
+            self.function_kinds_list = [cindex.CursorKind.FUNCTION_DECL,
+                                        cindex.CursorKind.CXX_METHOD]
+
             # load clang helper class
             clang_utils = importlib.import_module(clang_utils_module_name)
             ClangUtils = clang_utils.ClangUtils
@@ -114,6 +125,9 @@ class Completer(BaseCompleter):
 
         Args:
             view (sublime.View): current view
+
+        Raises:
+            ValueError: if file name does not exist - throw exception.
         """
         # Return early if this is an invalid view.
         if not Tools.is_valid_view(view):
@@ -143,7 +157,8 @@ class Completer(BaseCompleter):
                     args=self.clang_flags,
                     unsaved_files=files,
                     options=TU.PARSE_PRECOMPILED_PREAMBLE |
-                    TU.PARSE_CACHE_COMPLETION_RESULTS)
+                    TU.PARSE_CACHE_COMPLETION_RESULTS |
+                    TU.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION)
                 self.tu = trans_unit
             except Exception as e:
                 log.error(" error while compiling: %s", e)
@@ -155,6 +170,13 @@ class Completer(BaseCompleter):
 
         Using the current translation unit it queries libclang for the
         possible completions.
+
+        Args:
+            completion_request (tools.CompletionRequest): completion request
+                holding information about the view and needed location.
+
+        Raises:
+            ValueError: if file name does not exist - throw exception.
 
         """
         view = completion_request.get_view()
@@ -197,6 +219,136 @@ class Completer(BaseCompleter):
             completions = Completer._parse_completions(complete_obj, excluded)
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
+
+    @staticmethod
+    def _location_from_type(clangType):
+        """Return location from type.
+
+        Return proper location from type.
+        Remove all inderactions like pointers etc.
+
+        Args:
+            clangType (cindex.Type): clang type.
+
+        """
+        cursor = clangType.get_declaration()
+        if cursor and cursor.location and cursor.location.file:
+            return cursor.location
+
+        cursor = clangType.get_pointee().get_declaration()
+        if cursor and cursor.location and cursor.location.file:
+            return cursor.location
+
+        return None
+
+    @staticmethod
+    def _link_from_location(location, text):
+        """Provide link to given cursor.
+
+        Transforms SourceLocation object into html string.
+
+        Args:
+            location (Cursor.location): Current location.
+            text (str): Text to be added as info.
+        """
+        result = ""
+        if location and location.file and location.file.name:
+            result += "<a href=\""
+            result += location.file.name
+            result += ":"
+            result += str(location.line)
+            result += ":"
+            result += str(location.column)
+            result += "\">" + text + "</a>"
+        else:
+            result += text
+        return result
+
+    def _build_info_details(self, cursor):
+        """Provide information about given cursor.
+
+        Builds detailed information about cursor.
+
+        Args:
+            cursor (Cursor): Current cursor.
+
+        """
+        result = ""
+        if cursor.result_type.spelling:
+            cursor_type = cursor.result_type
+        elif cursor.type.spelling:
+            cursor_type = cursor.type
+        else:
+            log.warning("No spelling for type provided in info.")
+            return ""
+
+        result += self._link_from_location(
+            self._location_from_type(cursor_type),
+            html.escape(cursor_type.spelling))
+
+        result += ' '
+
+        if cursor.location:
+            result += self._link_from_location(cursor.location,
+                                               html.escape(cursor.spelling))
+        else:
+            result += html.escape(cursor.spelling)
+
+        args = []
+        for arg in cursor.get_arguments():
+            if arg.spelling:
+                args.append(arg.type.spelling + ' ' + arg.spelling)
+            else:
+                args.append(arg.type.spelling + ' ')
+
+        if cursor.kind in self.function_kinds_list:
+            result += '('
+            if len(args):
+                result += html.escape(', '.join(args))
+            result += ')'
+
+        if cursor.is_static_method():
+            result = "static " + result
+        if cursor.is_const_method():
+            result += " const"
+
+        if cursor.brief_comment:
+            result += "<br><br><b>"
+            result += cursor.brief_comment + "</b>"
+
+        return result
+
+    def info(self, tooltip_request):
+        """Provide information about object in given location.
+
+        Using the current translation unit it queries libclang for available
+        information about cursor.
+
+        Args:
+            tooltip_request (tools.CompletionRequest): A request for action
+                from the plugin.
+
+        Returns:
+            (tools.CompletionRequest, str): completion request along with the
+                info details read from the translation unit.
+
+        """
+        empty_info = (tooltip_request, "")
+        with Completer.rlock:
+            if not self.tu:
+                return (tooltip_request, "")
+            view = tooltip_request.get_view()
+            (row, col) = SublBridge.cursor_pos(
+                view, tooltip_request.get_trigger_position())
+
+            cursor = self.tu.cursor.from_location(
+                self.tu, self.tu.get_location(view.file_name(), (row, col)))
+            if not cursor or cursor.kind.is_declaration():
+                return empty_info
+            if cursor.referenced and cursor.referenced.kind.is_declaration():
+                info_details = self._build_info_details(cursor.referenced)
+                return (tooltip_request, info_details)
+            return empty_info
 
     def update(self, view, show_errors):
         """Reparse the translation unit.
@@ -255,7 +407,7 @@ class Completer(BaseCompleter):
            Remove excluded types and unaccessible members.
 
         Args:
-            completion_result (): completion result from libclang
+            completion_result: completion result from libclang
             excluded_kinds (list): list of CursorKind types that shouldn't be
                                    added to completion list
 
@@ -293,6 +445,7 @@ class Completer(BaseCompleter):
                 continue
             hint = ''
             contents = ''
+            trigger = ''
             place_holders = 1
             for chunk in c.string:
                 if not chunk:

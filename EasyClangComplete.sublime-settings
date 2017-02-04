@@ -83,4 +83,8 @@
   // Remove cache data older than specified time.
   // Format: <hours>:<minutes>:<seconds>: "HH:MM:SS".
   "max_cache_age": "00:30:00",
+
+  // Show additional information on hover over function call/variable etc.
+  // This replaces default sublime on hover behaviour
+  "show_type_info": true
 }

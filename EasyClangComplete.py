@@ -210,6 +210,37 @@ class EasyClangComplete(sublime_plugin.EventListener):
         elif future.cancelled():
             log.debug(" could not remove config -> cancelled")
 
+    @staticmethod
+    def on_open_declaration(location):
+        """Callback called when link to type is clicked in info popup
+
+        Opens location with type declaration
+
+        """
+        sublime.active_window().open_file(location, sublime.ENCODED_POSITION)
+
+    def info_finished(self, future):
+        """Callback called when additional information for tag is available.
+
+        Creates popup containing information about text under the cursor
+
+        """
+        if not future.done():
+            return
+        (tooltip_request, result) = future.result()
+        if result == "":
+            return
+        if not tooltip_request:
+            return
+        if tooltip_request.get_identifier() != self.current_job_id:
+            return
+        view = tooltip_request.get_view()
+        view.show_popup(result,
+                           location = tooltip_request.get_trigger_position(),
+                           flags = sublime.HIDE_ON_MOUSE_MOVE_AWAY,
+                           max_width = 1000,
+                           on_navigate = self.on_open_declaration)
+
     def completion_finished(self, future):
         """Callback called when completion async function has returned.
 
@@ -236,6 +267,31 @@ class EasyClangComplete(sublime_plugin.EventListener):
             # we only want to trigger the autocompletion popup if there
             # are new completions to show there. Otherwise let it be.
             SublBridge.show_auto_complete(active_view)
+
+    def on_hover(self, view, point, hover_zone):
+        """Function that is called when mouse pointer hovers over text.
+
+        Triggers showing popup with additional information about element under
+        cursor.
+
+        """
+        if not Tools.is_valid_view(view):
+            return
+
+        settings = self.settings_manager.settings_for_view(view)
+        if settings.show_type_info == False:
+            return
+        if hover_zone != sublime.HOVER_TEXT:
+            return
+        tooltip_request = tools.CompletionRequest(view, point)
+        view_config = self.view_config_manager.get_from_cache(view)
+        if not view_config:
+            return
+        self.current_job_id = tooltip_request.get_identifier()
+        future = EasyClangComplete.thread_pool.submit(
+            view_config.completer.info, tooltip_request)
+        future.add_done_callback(self.info_finished)
+
 
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code.

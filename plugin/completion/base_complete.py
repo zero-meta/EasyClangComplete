@@ -51,7 +51,7 @@ class BaseCompleter:
         """Function to generate completions. See children for implementation.
 
         Args:
-            completion_request (CompletionRequest): request object
+            completion_request (ActionRequest): request object
 
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method
@@ -65,7 +65,7 @@ class BaseCompleter:
         information about cursor.
 
         Args:
-            tooltip_request (tools.CompletionRequest): A request for action
+            tooltip_request (tools.ActionRequest): A request for action
                 from the plugin.
 
         Raises:

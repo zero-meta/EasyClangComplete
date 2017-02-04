@@ -167,7 +167,7 @@ class Completer(BaseCompleter):
         possible completions.
 
         Args:
-            completion_request (tools.CompletionRequest): completion request
+            completion_request (tools.ActionRequest): completion request
                 holding information about the view and needed location.
 
         Raises:
@@ -222,11 +222,11 @@ class Completer(BaseCompleter):
         information about cursor.
 
         Args:
-            tooltip_request (tools.CompletionRequest): A request for action
+            tooltip_request (tools.ActionRequest): A request for action
                 from the plugin.
 
         Returns:
-            (tools.CompletionRequest, str): completion request along with the
+            (tools.ActionRequest, str): completion request along with the
                 info details read from the translation unit.
 
         """

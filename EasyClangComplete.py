@@ -57,6 +57,7 @@ def plugin_loaded():
 
 class CleanCmakeCommand(sublime_plugin.TextCommand):
     """Command that cleans cmake build directory."""
+
     def run(self, edit):
         """Run clean command.
 
@@ -212,7 +213,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     @staticmethod
     def on_open_declaration(location):
-        """Callback called when link to type is clicked in info popup
+        """Callback called when link to type is clicked in info popup.
 
         Opens location with type declaration
 
@@ -236,10 +237,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return
         view = tooltip_request.get_view()
         view.show_popup(result,
-                           location = tooltip_request.get_trigger_position(),
-                           flags = sublime.HIDE_ON_MOUSE_MOVE_AWAY,
-                           max_width = 1000,
-                           on_navigate = self.on_open_declaration)
+                        location=tooltip_request.get_trigger_position(),
+                        flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY,
+                        max_width=1000,
+                        on_navigate=self.on_open_declaration)
 
     def completion_finished(self, future):
         """Callback called when completion async function has returned.
@@ -279,11 +280,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return
 
         settings = self.settings_manager.settings_for_view(view)
-        if settings.show_type_info == False:
+        if not settings.show_type_info:
             return
         if hover_zone != sublime.HOVER_TEXT:
             return
-        tooltip_request = tools.CompletionRequest(view, point)
+        tooltip_request = tools.ActionRequest(view, point)
         view_config = self.view_config_manager.get_from_cache(view)
         if not view_config:
             return
@@ -291,7 +292,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
         future = EasyClangComplete.thread_pool.submit(
             view_config.completer.info, tooltip_request)
         future.add_done_callback(self.info_finished)
-
 
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code.
@@ -311,7 +311,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         log.debug(" on_query_completions view id %s", view.buffer_id())
         log.debug(" prefix: %s, locations: %s" % (prefix, locations))
         trigger_pos = locations[0] - len(prefix)
-        completion_request = tools.CompletionRequest(view, trigger_pos)
+        completion_request = tools.ActionRequest(view, trigger_pos)
         current_pos_id = completion_request.get_identifier()
         log.debug(" this position has identifier: '%s'", current_pos_id)
 

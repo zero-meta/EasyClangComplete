@@ -58,6 +58,21 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
+    def info(self, tooltip_request):
+        """Provide information about object in given location.
+
+        Using the current translation unit it queries libclang for available
+        information about cursor.
+
+        Args:
+            tooltip_request (tools.CompletionRequest): A request for action
+                from the plugin.
+
+        Raises:
+            NotImplementedError: Guarantees we do not call this abstract method
+        """
+        raise NotImplementedError("calling abstract method")
+
     def update(self, view, show_errors):
         """Update the completer for this view.
 

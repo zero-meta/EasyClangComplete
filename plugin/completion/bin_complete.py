@@ -104,6 +104,33 @@ class Completer(BaseCompleter):
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
 
+    def info(self, tooltip_request):
+        """Provide information about object in given location.
+
+        Using the current translation unit it queries libclang for available
+        information about cursor.
+
+        Args:
+            tooltip_request (tools.CompletionRequest): A request for action
+                from the plugin.
+
+        Returns:
+            (tools.CompletionRequest, str): completion request along with the
+                info details read from the translation unit.
+        """
+        # This is a dummy implementation.
+        msg = """
+        EasyClangComplete:
+        "use_libclang" is false
+        "show_type_info" is true.
+
+        Unfortunately, there is no way to show type info
+        if you are not using libclang.
+
+        Please use libclang or set "show_type_info" to false.
+        """
+        sublime.error_message(msg)
+
     def update(self, view, show_errors):
         """Update build for current view.
 

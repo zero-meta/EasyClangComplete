@@ -6,6 +6,7 @@ Attributes:
 import platform
 import logging
 import subprocess
+import html
 
 from os import path
 
@@ -119,3 +120,102 @@ class ClangUtils:
         # if we haven't found anything there is nothing to return
         log.error(" no libclang found at all")
         return None
+
+    @staticmethod
+    def location_from_type(clangType):
+        """Return location from type.
+
+        Return proper location from type.
+        Remove all inderactions like pointers etc.
+
+        Args:
+            clangType (cindex.Type): clang type.
+
+        """
+        cursor = clangType.get_declaration()
+        if cursor and cursor.location and cursor.location.file:
+            return cursor.location
+
+        cursor = clangType.get_pointee().get_declaration()
+        if cursor and cursor.location and cursor.location.file:
+            return cursor.location
+
+        return None
+
+    @staticmethod
+    def link_from_location(location, text):
+        """Provide link to given cursor.
+
+        Transforms SourceLocation object into html string.
+
+        Args:
+            location (Cursor.location): Current location.
+            text (str): Text to be added as info.
+        """
+        result = ""
+        if location and location.file and location.file.name:
+            result += "<a href=\""
+            result += location.file.name
+            result += ":"
+            result += str(location.line)
+            result += ":"
+            result += str(location.column)
+            result += "\">" + text + "</a>"
+        else:
+            result += text
+        return result
+
+    @staticmethod
+    def build_info_details(cursor, function_kinds_list):
+        """Provide information about given cursor.
+
+        Builds detailed information about cursor.
+
+        Args:
+            cursor (Cursor): Current cursor.
+
+        """
+        result = ""
+        if cursor.result_type.spelling:
+            cursor_type = cursor.result_type
+        elif cursor.type.spelling:
+            cursor_type = cursor.type
+        else:
+            log.warning("No spelling for type provided in info.")
+            return ""
+
+        result += ClangUtils.link_from_location(
+            ClangUtils.location_from_type(cursor_type),
+            html.escape(cursor_type.spelling))
+
+        result += ' '
+
+        if cursor.location:
+            result += ClangUtils.link_from_location(cursor.location,
+                                               html.escape(cursor.spelling))
+        else:
+            result += html.escape(cursor.spelling)
+
+        args = []
+        for arg in cursor.get_arguments():
+            if arg.spelling:
+                args.append(arg.type.spelling + ' ' + arg.spelling)
+            else:
+                args.append(arg.type.spelling + ' ')
+
+        if cursor.kind in function_kinds_list:
+            result += '('
+            if len(args):
+                result += html.escape(', '.join(args))
+            result += ')'
+
+        if cursor.is_static_method():
+            result = "static " + result
+        if cursor.is_const_method():
+            result += " const"
+
+        if cursor.brief_comment:
+            result += "<br><br><b>"
+            result += cursor.brief_comment + "</b>"
+
+        return result

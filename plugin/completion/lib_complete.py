@@ -9,13 +9,13 @@ import importlib
 import sublime
 import time
 import logging
-import html
 
 from .base_complete import BaseCompleter
 from .compiler_variant import LibClangCompilerVariant
 from ..tools import Tools
 from ..tools import SublBridge
 from ..tools import PKG_NAME
+from ..clang.utils import ClangUtils
 
 from threading import RLock
 from os import path
@@ -24,17 +24,15 @@ log = logging.getLogger(__name__)
 log.debug(" reloading module")
 
 cindex_dict = {
-    '3.2': PKG_NAME + ".clang.cindex32",
-    '3.3': PKG_NAME + ".clang.cindex33",
-    '3.4': PKG_NAME + ".clang.cindex34",
-    '3.5': PKG_NAME + ".clang.cindex35",
-    '3.6': PKG_NAME + ".clang.cindex36",
-    '3.7': PKG_NAME + ".clang.cindex37",
-    '3.8': PKG_NAME + ".clang.cindex38",
-    '3.9': PKG_NAME + ".clang.cindex39"
+    '3.2': PKG_NAME + ".plugin.clang.cindex32",
+    '3.3': PKG_NAME + ".plugin.clang.cindex33",
+    '3.4': PKG_NAME + ".plugin.clang.cindex34",
+    '3.5': PKG_NAME + ".plugin.clang.cindex35",
+    '3.6': PKG_NAME + ".plugin.clang.cindex36",
+    '3.7': PKG_NAME + ".plugin.clang.cindex37",
+    '3.8': PKG_NAME + ".plugin.clang.cindex38",
+    '3.9': PKG_NAME + ".plugin.clang.cindex39"
 }
-
-clang_utils_module_name = PKG_NAME + ".clang.utils"
 
 
 class Completer(BaseCompleter):
@@ -99,9 +97,6 @@ class Completer(BaseCompleter):
             self.function_kinds_list = [cindex.CursorKind.FUNCTION_DECL,
                                         cindex.CursorKind.CXX_METHOD]
 
-            # load clang helper class
-            clang_utils = importlib.import_module(clang_utils_module_name)
-            ClangUtils = clang_utils.ClangUtils
             # If we haven't already initialized the clang Python bindings, try
             # to figure out the path libclang.
             if not cindex.Config.loaded:
@@ -220,104 +215,6 @@ class Completer(BaseCompleter):
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
 
-    @staticmethod
-    def _location_from_type(clangType):
-        """Return location from type.
-
-        Return proper location from type.
-        Remove all inderactions like pointers etc.
-
-        Args:
-            clangType (cindex.Type): clang type.
-
-        """
-        cursor = clangType.get_declaration()
-        if cursor and cursor.location and cursor.location.file:
-            return cursor.location
-
-        cursor = clangType.get_pointee().get_declaration()
-        if cursor and cursor.location and cursor.location.file:
-            return cursor.location
-
-        return None
-
-    @staticmethod
-    def _link_from_location(location, text):
-        """Provide link to given cursor.
-
-        Transforms SourceLocation object into html string.
-
-        Args:
-            location (Cursor.location): Current location.
-            text (str): Text to be added as info.
-        """
-        result = ""
-        if location and location.file and location.file.name:
-            result += "<a href=\""
-            result += location.file.name
-            result += ":"
-            result += str(location.line)
-            result += ":"
-            result += str(location.column)
-            result += "\">" + text + "</a>"
-        else:
-            result += text
-        return result
-
-    def _build_info_details(self, cursor):
-        """Provide information about given cursor.
-
-        Builds detailed information about cursor.
-
-        Args:
-            cursor (Cursor): Current cursor.
-
-        """
-        result = ""
-        if cursor.result_type.spelling:
-            cursor_type = cursor.result_type
-        elif cursor.type.spelling:
-            cursor_type = cursor.type
-        else:
-            log.warning("No spelling for type provided in info.")
-            return ""
-
-        result += self._link_from_location(
-            self._location_from_type(cursor_type),
-            html.escape(cursor_type.spelling))
-
-        result += ' '
-
-        if cursor.location:
-            result += self._link_from_location(cursor.location,
-                                               html.escape(cursor.spelling))
-        else:
-            result += html.escape(cursor.spelling)
-
-        args = []
-        for arg in cursor.get_arguments():
-            if arg.spelling:
-                args.append(arg.type.spelling + ' ' + arg.spelling)
-            else:
-                args.append(arg.type.spelling + ' ')
-
-        if cursor.kind in self.function_kinds_list:
-            result += '('
-            if len(args):
-                result += html.escape(', '.join(args))
-            result += ')'
-
-        if cursor.is_static_method():
-            result = "static " + result
-        if cursor.is_const_method():
-            result += " const"
-
-        if cursor.brief_comment:
-            result += "<br><br><b>"
-            result += cursor.brief_comment + "</b>"
-
-        return result
-
     def info(self, tooltip_request):
         """Provide information about object in given location.
 
@@ -346,7 +243,8 @@ class Completer(BaseCompleter):
             if not cursor or cursor.kind.is_declaration():
                 return empty_info
             if cursor.referenced and cursor.referenced.kind.is_declaration():
-                info_details = self._build_info_details(cursor.referenced)
+                info_details = ClangUtils.build_info_details(
+                    cursor.referenced, self.function_kinds_list)
                 return (tooltip_request, info_details)
             return empty_info
 

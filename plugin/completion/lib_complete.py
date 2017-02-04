@@ -328,6 +328,10 @@ class Completer(BaseCompleter):
             tooltip_request (tools.CompletionRequest): A request for action
                 from the plugin.
 
+        Returns:
+            (tools.CompletionRequest, str): completion request along with the
+                info details read from the translation unit.
+
         """
         empty_info = (tooltip_request, "")
         with Completer.rlock:

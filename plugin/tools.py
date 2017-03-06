@@ -29,7 +29,9 @@ OSX_CLANG_VERSION_DICT = {
     '6.1': '3.6',
     '7.0': '3.7',
     '7.3': '3.8',
-    '8.0': '3.8'
+    '8.0': '3.9',
+    '8.1': '3.9',
+    '8.2': '3.9'
 }
 
 log = logging.getLogger(__name__)
@@ -351,6 +353,7 @@ class ActionRequest(object):
     Provides a way to identify an action request and provide some information
     used when creating the request.
     """
+
     def __init__(self, view, trigger_position):
         """Initialize the object.
 
@@ -644,7 +647,15 @@ class Tools:
             if version_str > "3.8" and platform.system() == "Darwin":
                 # info from this table: https://gist.github.com/yamaya/2924292
                 osx_version = version_str[:3]
-                version_str = OSX_CLANG_VERSION_DICT[osx_version]
+                try:
+                    version_str = OSX_CLANG_VERSION_DICT[osx_version]
+                except Exception as e:
+                    error_msg = """{}
+                    Version '{}' of apple-clang is not supported yet.
+                    Please open an issue for it.""".format(
+                        "EasyClangComplete", osx_version)
+                    sublime.error_message(error_msg)
+                    raise e
                 info = {"platform": platform.system()}
                 log.warning(
                     " OSX version %s reported. Reducing it to %s. Info: %s",

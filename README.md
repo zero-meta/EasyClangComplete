@@ -168,6 +168,7 @@ Please ensure, that your code conforms to this.
 [![Donate][img-paypal]][donate-paypal]
 [![Flattr this git repo][img-flattr]][donate-flattr]
 [![Bountysource][img-bountysource]][bountysource-link]
+[![Beerpay][img-beerpay]][beerpay]
 
 Current sponsor of this project is my sleep.
 Please buy me a cup of tea if you appreciate the effort.
@@ -187,7 +188,9 @@ plugin! The more people use it - the merrier.
 [libclang-issue]: https://github.com/niosus/EasyClangComplete/issues/88
 [cmake-issue]: https://github.com/niosus/EasyClangComplete/issues/19
 [bountysource-link]: https://www.bountysource.com/teams/easyclangcomplete
+[beerpay]: https://beerpay.io/niosus/EasyClangComplete
 
+[img-beerpay]: https://beerpay.io/niosus/EasyClangComplete/badge.svg?style=flat-square
 [img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg?style=flat-square
 [img-appveyor]: https://img.shields.io/appveyor/ci/niosus/easyclangcomplete/master.svg?style=flat-square&label=windows
 [img-travis]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?style=flat-square&label=linux%20|%20osx

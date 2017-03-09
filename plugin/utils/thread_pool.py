@@ -73,14 +73,24 @@ class ThreadPool:
         self.__thread_pool = futures.ThreadPoolExecutor(
             max_workers=max_workers)
 
-    def restart_timer(self):
+    def new_job(self, job):
+        """Add a new job to be submitted.
+
+        Args:
+            job (ThreadJob): A job to be run asyncronously.
+        """
+        with ThreadPool.__lock:
+            ThreadPool.__jobs_to_run[job.name] = job
+            self.__restart_timer()
+
+    def __restart_timer(self):
         """Restart timer because there was a change in jobs."""
         if self.__timer:
             self.__timer.cancel()
-        self.__timer = Timer(self.__delay, self.submit_jobs)
+        self.__timer = Timer(self.__delay, self.__submit_jobs)
         self.__timer.start()
 
-    def submit_jobs(self):
+    def __submit_jobs(self):
         """Submit jobs that survived the delay."""
         with ThreadPool.__lock:
             for job in ThreadPool.__jobs_to_run.values():
@@ -93,16 +103,6 @@ class ThreadPool:
             log.debug(" running %s jobs", self.__running_jobs_count)
             if self.__running_jobs_count > 0:
                 self.__start_progress_animation()
-
-    def new_job(self, job):
-        """Add a new job to be submitted.
-
-        Args:
-            job (ThreadJob): A job to be run asyncronously.
-        """
-        with ThreadPool.__lock:
-            ThreadPool.__jobs_to_run[job.name] = job
-            self.restart_timer()
 
     def __start_progress_animation(self):
         """Start progress animation thread."""
@@ -122,8 +122,8 @@ class ThreadPool:
                 try:
                     self.__progress_thread.join()
                     self.__progress_thread = None
-                except TypeError:
-                    log.warning(" cannot join progress thread which is None")
+                except AttributeError:
+                    log.error(" cannot join progress thread which is None")
 
     def __animate_progress(self):
         """Function that changes the status message, i.e animates progress."""

@@ -6,6 +6,9 @@ Attributes:
         to the one of llvm clang.
         Taken from here: https://gist.github.com/yamaya/2924292
     PKG_NAME (str): this package name
+    READY_MSG (str): a message to show in status bar if ECC is ready
+    PROGRESS_MSG (str): a mask for a progress message to show in status bar
+    PROGRESS_MSG (str): unicode string of chars to show progress with
 """
 from os import path
 from os import makedirs
@@ -20,6 +23,11 @@ import subprocess
 import re
 
 PKG_NAME = path.basename(path.dirname(path.dirname(__file__)))
+
+READY_MSG = 'ECC: [     READY      ]'
+PROGRESS_MSG = 'ECC: [{}]'
+PROGRESS_CHARS = u'⣾⣽⣻⢿⡿⣟⣯⣷'
+
 
 OSX_CLANG_VERSION_DICT = {
     '4.2': '3.2',
@@ -69,13 +77,13 @@ class SublBridge:
     def set_status(message):
         """Set status message for the current view."""
         view = sublime.active_window().active_view()
-        view.set_status("ECC", message)
+        view.set_status("000_ECC", message)
 
     @staticmethod
     def erase_status():
         """Erase status message for the current view."""
         view = sublime.active_window().active_view()
-        view.erase_status("ECC")
+        view.erase_status("000_ECC")
 
     @staticmethod
     def active_view_id():
@@ -694,3 +702,12 @@ class Tools:
             if flag.startswith(prefix):
                 return idx
         return None
+
+    @staticmethod
+    def generate_next_progress_message():
+        """Get next progress animation message."""
+        from random import sample
+        mod = len(PROGRESS_CHARS)
+        rands = [PROGRESS_CHARS[x % mod] for x in sample(range(100), 10)]
+        msg = PROGRESS_MSG.format(''.join(rands))
+        return msg

@@ -9,7 +9,10 @@ from threading import Timer
 from threading import RLock
 from threading import Thread
 
+from EasyClangComplete.plugin.tools import Tools
 from EasyClangComplete.plugin.tools import SublBridge
+
+from EasyClangComplete.plugin.tools import READY_MSG
 
 log = logging.getLogger(__name__)
 
@@ -54,11 +57,9 @@ class ThreadPool:
 
     __lock = RLock()
     __jobs_to_run = {}
-    __indicator_thread = None
+    __progress_thread = None
     __running_jobs_count = 0
     __show_animation = False
-
-    CHARS = u'⣾⣽⣻⢿⡿⣟⣯⣷'
 
     def __init__(self, max_workers, run_delay=0.1):
         """Create a thread pool.
@@ -106,9 +107,9 @@ class ThreadPool:
     def __start_progress_animation(self):
         """Start progress animation thread."""
         self.__show_animation = True
-        if not self.__indicator_thread:
-            self.__indicator_thread = Thread(target=self.__animate_progress)
-            self.__indicator_thread.start()
+        if not self.__progress_thread:
+            self.__progress_thread = Thread(target=self.__animate_progress)
+            self.__progress_thread.start()
 
     def __stop_progress_animation(self, future):
         """Stop progress animation thread if there are no running jobs."""
@@ -118,22 +119,16 @@ class ThreadPool:
             if self.__running_jobs_count < 1:
                 log.debug(" Stopping progress thread.")
                 self.__show_animation = False
-                self.__indicator_thread.join()
-                self.__indicator_thread = None
+                try:
+                    self.__progress_thread.join()
+                    self.__progress_thread = None
+                except TypeError as e:
+                    log.warning(" cannot join progress thread which is None")
 
     def __animate_progress(self):
         """Function that changes the status message, i.e animates progress."""
         import time
         while self.__show_animation:
-            SublBridge.set_status(ThreadPool.__get_progress_message())
+            SublBridge.set_status(Tools.generate_next_progress_message())
             time.sleep(0.1)
-        SublBridge.erase_status()
-
-    @staticmethod
-    def __get_progress_message():
-        """Get next progress animation message."""
-        from random import sample
-        mod = len(ThreadPool.CHARS)
-        rands = [ThreadPool.CHARS[x % mod] for x in sample(range(100), 10)]
-        msg = 'ECC: processing [' + ''.join(rands) + '] '
-        return msg
+        SublBridge.set_status(READY_MSG)

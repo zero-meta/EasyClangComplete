@@ -122,7 +122,7 @@ class ThreadPool:
                 try:
                     self.__progress_thread.join()
                     self.__progress_thread = None
-                except TypeError as e:
+                except TypeError:
                     log.warning(" cannot join progress thread which is None")
 
     def __animate_progress(self):

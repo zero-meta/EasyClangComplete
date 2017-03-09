@@ -124,7 +124,7 @@ class ThreadPool:
     def __animate_progress(self):
         """Function that changes the status message, i.e animates progress."""
         import time
-        while(self.__show_animation):
+        while self.__show_animation:
             SublBridge.set_status(ThreadPool.__get_progress_message())
             time.sleep(0.1)
         SublBridge.erase_status()

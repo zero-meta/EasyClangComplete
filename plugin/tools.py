@@ -66,6 +66,18 @@ class SublBridge:
         | sublime.INHIBIT_EXPLICIT_COMPLETIONS
 
     @staticmethod
+    def set_status(message):
+        """Set status message for the current view."""
+        view = sublime.active_window().active_view()
+        view.set_status("ECC", message)
+
+    @staticmethod
+    def erase_status():
+        """Erase status message for the current view."""
+        view = sublime.active_window().active_view()
+        view.erase_status("ECC")
+
+    @staticmethod
     def active_view_id():
         """Get the id of the active view.
 

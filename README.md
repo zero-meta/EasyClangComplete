@@ -132,11 +132,15 @@ this plugin more.
 The trick with multiple `clang.cindex` files is inspired by this repo:
 [clangHelper](https://github.com/griebd/clangHelper). Thanks for inspiration!
 
+The progress indicator idea is from
+[ColorSublime](https://github.com/Colorsublime/Colorsublime-Plugin) plugin.
+
 If you are an experienced python developer and find that something in my code
 sucks completely - **DO** tell me. Python is not my main language and I am
 always willing to learn.
 
-Some functionality is there only because of the help of the following users (in no particualr order):
+Some functionality is there only because of the help of the following users (in
+no particualr order):
 
 @Ventero, @riazanovskiy, @rchl, @Mischa-Alff, @jdumas, @simia, @tastytea,
 @brupelo, @randy3k, @david9991.

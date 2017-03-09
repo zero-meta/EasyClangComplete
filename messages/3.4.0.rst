@@ -9,6 +9,10 @@ Bug fixes and improvements
 - install message is now written in reStructuredText and not in Markdown.
   This message too.
 
+Restart
+-------
+Please restart Sublime Text if something does not work after the update.
+
 Support it
 ----------
 💜 this plugin? Consider buying me a 🍵

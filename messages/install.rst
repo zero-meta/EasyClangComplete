@@ -45,10 +45,12 @@ just a little bit. There are three ways to do it.
 Pick **ANY** of the following:
 
 - Set include dirs in ``"common_flags"`` setting in ``User Settings``.
-- Override ``"common_flags"`` setting in your project file! Just define the same
-  setting in project specific settings with either one of two prefixes:
-  ``"ecc_"`` or ``"easy_clang_complete_"``. See the project file in this repo
-  for a working example. Minimal example for clarity::
+- Override ``"common_flags"`` setting in your project file, i.e. one that has
+  extension: ``*.sublime-project``. Just define the same setting in project
+  specific settings with either one of two prefixes: ``"ecc_"`` or
+  ``"easy_clang_complete_"`` to override a corresponding setting in your user
+  settings. See the project file in this repo for a working example. Minimal
+  example for clarity::
 
     {
       "settings":
@@ -58,10 +60,10 @@ Pick **ANY** of the following:
       }
     }
 
-- Add ``.clang_complete`` file to the root of your project folder.
-
-  + This file should contain all includes and macroses you want to use.
-  + Example::
+- It is recommended to use one of the above, but if you already have a file with
+  flags, you can add ``.clang_complete`` file to the root of your project
+  folder. This file adds additional flags to the ones defined with in
+  ``"common_flags"``. Example::
 
     -Isrc
     -I/usr/include

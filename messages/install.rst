@@ -59,6 +59,7 @@ Pick **ANY** of the following:
     }
 
 - Add ``.clang_complete`` file to the root of your project folder.
+
   + This file should contain all includes and macroses you want to use.
   + Example::
 

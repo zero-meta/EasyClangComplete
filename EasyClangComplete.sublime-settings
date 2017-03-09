@@ -28,6 +28,14 @@
   "cpp_flags" : [
     "-std=c++11"
   ],
+  // Objective-C specific flags. Prepend common_flags for Objective-C files.
+  "objective_c_flags" : [
+    "-std=c11"
+  ],
+  // Objective-C++ specific flags. Prepend common_flags for Objective-C++ files.
+  "objective_cpp_flags" : [
+    "-std=c++11"
+  ],
 
   // Define how we search needed flags. Prioritized from top to bottom.
   // Possible entries for "file":

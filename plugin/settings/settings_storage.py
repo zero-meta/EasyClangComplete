@@ -56,6 +56,8 @@ class SettingsStorage:
         "include_file_folder",
         "include_file_parent_folder",
         "max_cache_age",
+        "objective_c_flags",
+        "objective_cpp_flags",
         "triggers",
         "use_libclang",
         "verbose",

@@ -279,7 +279,15 @@ class ViewConfig(object):
         """
         current_lang = Tools.get_view_lang(view)
         lang_flags = []
-        if current_lang == 'C':
+        if current_lang == "Objective-C":
+            if need_lang_flags:
+                lang_flags += ["-x"] + ["objective-c"]
+            lang_flags = settings.objective_c_flags
+        elif current_lang == "Objective-C++":
+            if need_lang_flags:
+                lang_flags += ["-x"] + ["objective-c++"]
+            lang_flags = settings.objective_cpp_flags
+        elif current_lang == 'C':
             if need_lang_flags:
                 lang_flags += ["-x"] + ["c"]
             lang_flags += settings.c_flags

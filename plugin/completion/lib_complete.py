@@ -266,9 +266,19 @@ class Completer(BaseCompleter):
         v_id = view.buffer_id()
         log.debug(" view is %s", v_id)
         with Completer.rlock:
-            # fix issue #191 - avoid crashing when renaming file
-            if not self.tu or not self.tu.cursor.location.file:
+            if not self.tu:
                 log.debug(" translation unit does not exist. Creating.")
+                self.parse_tu(view)
+            if self.tu.cursor.displayname != view.file_name():
+                # In case the file was renamed, the translation unit still has
+                # the old name in it and crashes the plugin host. We need to
+                # completely recreate a translation unit if the filename has
+                # changed. Addressed in issue #191.
+                log.debug(" translation unit file does not match view one")
+                log.debug(" names: '%s' vs '%s'",
+                          self.tu.cursor.displayname,
+                          view.file_name())
+                log.debug(" recreate translation unit completely")
                 self.parse_tu(view)
             log.debug(" reparsing translation_unit for view %s", v_id)
             if not self.tu:

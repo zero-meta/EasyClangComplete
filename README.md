@@ -3,7 +3,7 @@
 Plugin for Sublime Text 3 for easy to use, out of the box autocompletions for C
 and C++.
 
-![Example](pics/autocomplete_show_off.gif)
+![Example](pics/autocomplete.gif)
 
 [![Release][img-release]][release]
 [![Downloads Month][img-downloads-month]][downloads]

@@ -97,6 +97,10 @@ class Completer(BaseCompleter):
             self.function_kinds_list = [cindex.CursorKind.FUNCTION_DECL,
                                         cindex.CursorKind.CXX_METHOD]
 
+            self.objc_message_kinds_list = [
+                cindex.CursorKind.OBJC_MESSAGE_EXPR,
+            ]
+
             # If we haven't already initialized the clang Python bindings, try
             # to figure out the path libclang.
             if not cindex.Config.loaded:
@@ -242,6 +246,10 @@ class Completer(BaseCompleter):
                 self.tu, self.tu.get_location(view.file_name(), (row, col)))
             if not cursor or cursor.kind.is_declaration():
                 return empty_info
+            if cursor.kind in self.objc_message_kinds_list:
+                info_details = ClangUtils.build_objc_message_info_details(
+                    cursor)
+                return (tooltip_request, info_details)
             if cursor.referenced and cursor.referenced.kind.is_declaration():
                 info_details = ClangUtils.build_info_details(
                     cursor.referenced, self.function_kinds_list)

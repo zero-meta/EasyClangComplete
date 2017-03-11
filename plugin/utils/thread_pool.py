@@ -3,6 +3,7 @@
 Attributes:
     log (logging.Logger): Logger for current module.
 """
+import time
 import logging
 from concurrent import futures
 from threading import Timer
@@ -57,9 +58,11 @@ class ThreadPool:
 
     __lock = RLock()
     __jobs_to_run = {}
-    __progress_thread = None
     __running_jobs_count = 0
     __show_animation = False
+
+    __progress_update_delay = 0.1
+    __progress_idle_delay = 0.3
 
     def __init__(self, max_workers, run_delay=0.1):
         """Create a thread pool.
@@ -72,6 +75,11 @@ class ThreadPool:
         self.__delay = run_delay
         self.__thread_pool = futures.ThreadPoolExecutor(
             max_workers=max_workers)
+
+        # start animation thread
+        self.__progress_thread = Thread(target=self.__animate_progress,
+                                        daemon=True)
+        self.__progress_thread.start()
 
     def new_job(self, job):
         """Add a new job to be submitted.
@@ -102,14 +110,7 @@ class ThreadPool:
             ThreadPool.__jobs_to_run.clear()
             log.debug(" running %s jobs", self.__running_jobs_count)
             if self.__running_jobs_count > 0:
-                self.__start_progress_animation()
-
-    def __start_progress_animation(self):
-        """Start progress animation thread."""
-        self.__show_animation = True
-        if not self.__progress_thread:
-            self.__progress_thread = Thread(target=self.__animate_progress)
-            self.__progress_thread.start()
+                self.__show_animation = True
 
     def __stop_progress_animation(self, future):
         """Stop progress animation thread if there are no running jobs."""
@@ -117,18 +118,16 @@ class ThreadPool:
             self.__running_jobs_count -= 1
             log.debug(" Jobs still running: %s", self.__running_jobs_count)
             if self.__running_jobs_count < 1:
-                log.debug(" Stopping progress thread.")
+                log.debug(" Stopping progress animation.")
                 self.__show_animation = False
-                try:
-                    self.__progress_thread.join()
-                    self.__progress_thread = None
-                except AttributeError:
-                    log.error(" cannot join progress thread which is None")
 
     def __animate_progress(self):
         """Function that changes the status message, i.e animates progress."""
-        import time
-        while self.__show_animation:
-            SublBridge.set_status(Tools.generate_next_progress_message())
-            time.sleep(0.1)
-        SublBridge.set_status(READY_MSG)
+        while True:
+            if self.__show_animation:
+                SublBridge.set_status(Tools.generate_next_progress_message())
+                time.sleep(ThreadPool.__progress_update_delay)
+            else:
+                SublBridge.set_status(READY_MSG)
+                time.sleep(ThreadPool.__progress_idle_delay)
+

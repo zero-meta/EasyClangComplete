@@ -61,7 +61,7 @@
   "errors_on_save": true,
 
   // triggers for auto-completion
-  "triggers" : [ ".", "->", "::"],
+  "triggers" : [ ".", "->", "::", " "],
 
   // use libclang. If set to false will use clang_binary and parse the output of
   // `clang_binary -Xclang -code-complete-at...` instead.

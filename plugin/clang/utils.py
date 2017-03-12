@@ -274,7 +274,6 @@ class ClangUtils:
         else:
             result += html.escape(method_cursor.spelling)
 
-        args = []
         method_params_index = 1
         for arg in method_cursor.get_arguments():
             result += ":(" + arg.type.spelling + ")"

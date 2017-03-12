@@ -52,7 +52,6 @@
 
 @implementation Interface (Category)
   -(void)categoryMethodVoidNoParameters{}
-  -(void)foo:(BOOL)b1 boolParam2:(BOOL)b2
 @end
 
 /// Just a bunch of calls used to help manually test tooltip popups
@@ -79,14 +78,13 @@ int main(int argc, const char * argv[])
 
   [interface performSelector:@selector(interfaceMethodVoidNoParameters)];
 
-  [interface foo:YES boolParam2:NO];
-
   id<Protocol> protocol = nil;
   [protocol protocolMethodVoidNoParameters];
   [protocol protocolMethodBoolNoParameters];
   [protocol protocolMethodVoidOneStringParameter:nil];
   [protocol protocolMethodVoidTwoStringParameters:nil stringParam2:nil];
 
+  interface.
   NSLog(@"Hello world");
 
   return 0;

@@ -194,6 +194,140 @@ class BaseTestCompleter(object):
         self.tear_down_completer()
         self.tear_down()
 
+    def test_complete_objc_property(self):
+        """Test that we can complete Objective C properties."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_property.m')
+        self.set_up_view(file_name)
+
+        completer = self.set_up_completer()
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(6), "  foo.")
+        pos = self.view.text_point(6, 6)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
+
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
+
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['boolProperty\tBOOL boolProperty', 'boolProperty']
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_complete_objc_void_method(self):
+        """Test that we can complete Objective C void methods."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_void_method.m')
+        self.set_up_view(file_name)
+
+        completer = self.set_up_completer()
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(6), "  [foo ")
+        pos = self.view.text_point(6, 7)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, " \n")
+
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
+
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['voidMethod\tvoid voidMethod', 'voidMethod']
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_complete_objc_method_one_parameter(self):
+        """Test that we can complete Objective C methods with one parameter."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_method_one_parameter.m')
+        self.set_up_view(file_name)
+
+        completer = self.set_up_completer()
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(6), "  [foo ")
+        pos = self.view.text_point(6, 7)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, " \n")
+
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
+
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['oneParameterMethod:\tvoid oneParameterMethod:(BOOL)',
+                    'oneParameterMethod:${1:(BOOL)}']
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_complete_objc_method_multiple_parameters(self):
+        """Test that we can complete Objective C methods with 2+ parameters."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_method_two_parameters.m')
+        self.set_up_view(file_name)
+
+        completer = self.set_up_completer()
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(6), "  [foo ")
+        pos = self.view.text_point(6, 7)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, " \n")
+
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
+
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = [
+            'bar:strParam:\tNSInteger * bar:(BOOL) strParam:(NSString *)',
+                    'bar:${1:(BOOL)} strParam:${2:(NSString *)}']
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_complete_objcpp_(self):
+        """Test that we can complete code in Objective-C++ files."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_objective_cpp.mm')
+        self.set_up_view(file_name)
+
+        completer = self.set_up_completer()
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(3), "  str.")
+        pos = self.view.text_point(3, 6)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
+
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
+
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = [
+            'clear\tvoid clear()', 'clear()']
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
+
     def test_unsaved_views(self):
         """Test that we gracefully handle unsaved views."""
         # Construct an unsaved scratch view.

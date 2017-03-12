@@ -360,7 +360,7 @@ class Completer(BaseCompleter):
                     continue
                 hint += chunk.spelling
                 if chunk.isKindTypedText():
-                    trigger = chunk.spelling
+                    trigger += chunk.spelling
                 if chunk.isKindResultType():
                     hint += ' '
                     continue

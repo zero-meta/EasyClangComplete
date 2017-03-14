@@ -10,10 +10,7 @@ from threading import Timer
 from threading import RLock
 from threading import Thread
 
-from EasyClangComplete.plugin.tools import Tools
-from EasyClangComplete.plugin.tools import SublBridge
-
-from EasyClangComplete.plugin.tools import READY_MSG
+from EasyClangComplete.plugin.tools import ProgressStatus
 
 log = logging.getLogger(__name__)
 
@@ -110,6 +107,7 @@ class ThreadPool:
             ThreadPool.__jobs_to_run.clear()
             log.debug(" running %s jobs", self.__running_jobs_count)
             if self.__running_jobs_count > 0:
+                ProgressStatus.showing = True
                 self.__show_animation = True
 
     def __stop_progress_animation(self, future):
@@ -125,9 +123,9 @@ class ThreadPool:
         """Function that changes the status message, i.e animates progress."""
         while True:
             if self.__show_animation:
-                SublBridge.set_status(Tools.generate_next_progress_message())
+                ProgressStatus.show_next_message()
                 time.sleep(ThreadPool.__progress_update_delay)
             else:
-                SublBridge.set_status(READY_MSG)
+                ProgressStatus.show_ready_message()
                 time.sleep(ThreadPool.__progress_idle_delay)
 

@@ -38,6 +38,7 @@ SettingsManager = settings_manager.SettingsManager
 ViewConfigManager = view_config.ViewConfigManager
 SublBridge = tools.SublBridge
 Tools = tools.Tools
+ProgressStatus = tools.ProgressStatus
 PosStatus = tools.PosStatus
 CMakeFile = flags_sources.cmake_file.CMakeFile
 CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
@@ -139,15 +140,18 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # disable on_activated_async when running tests
         if view.settings().get("disable_easy_clang_complete"):
             return
-        if Tools.is_valid_view(view):
-            log.debug(" on_activated_async view id %s", view.buffer_id())
-            settings = self.settings_manager.settings_for_view(view)
-            # All is taken care of. The view is built if needed.
-            job = ThreadJob(name=EasyClangComplete.UPDATE_JOB_TAG,
-                            callback=EasyClangComplete.config_updated,
-                            function=self.view_config_manager.load_for_view,
-                            args=[view, settings])
-            EasyClangComplete.thread_pool.new_job(job)
+        if not Tools.is_valid_view(view):
+            ProgressStatus.erase_status()
+            return
+        ProgressStatus.showing = True
+        log.debug(" on_activated_async view id %s", view.buffer_id())
+        settings = self.settings_manager.settings_for_view(view)
+        # All is taken care of. The view is built if needed.
+        job = ThreadJob(name=EasyClangComplete.UPDATE_JOB_TAG,
+                        callback=EasyClangComplete.config_updated,
+                        function=self.view_config_manager.load_for_view,
+                        args=[view, settings])
+        EasyClangComplete.thread_pool.new_job(job)
 
     def on_selection_modified(self, view):
         """Called when selection is modified. Executed in gui thread.

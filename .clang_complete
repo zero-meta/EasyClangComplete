@@ -1,4 +1,7 @@
 -I/home/igor/.config/sublime-text-3/Packages/EasyClangComplete/src blah
 -I/home/igor/.config/sublime-text-3/Packages/EasyClangComplete
 -Ilocal_folder
--std=c++11
+-IC:\GNUstep\GNUstep\System\Library\Headers
+-IC:\GNUstep\include
+-I/usr/include/GNUstep
+-Wabi

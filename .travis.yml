@@ -20,6 +20,7 @@ before_install:
             sudo apt-get update -qq -y;
             sudo apt-get install -yqq clang-3.4;
             sudo pip install coverage codacy-coverage;
+            sudo apt-get install -yqq gnustep-devel;
       fi
 
 install:

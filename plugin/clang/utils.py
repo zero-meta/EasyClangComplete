@@ -67,6 +67,14 @@ class ClangUtils:
 
     @staticmethod
     def try_load_from_user_hint(libclang_path):
+        """Load library hinted by the user.
+
+        Args:
+            libclang_path (str): full path to the libclang library file.
+
+        Returns:
+            str: folder of the libclang library or None if not found.
+        """
         if path.exists(libclang_path):
             return path.dirname(libclang_path)
 

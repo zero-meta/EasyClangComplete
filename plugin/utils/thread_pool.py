@@ -3,10 +3,17 @@
 Attributes:
     log (logging.Logger): Logger for current module.
 """
+import time
 import logging
 from concurrent import futures
 from threading import Timer
 from threading import RLock
+from threading import Thread
+
+from EasyClangComplete.plugin.tools import Tools
+from EasyClangComplete.plugin.tools import SublBridge
+
+from EasyClangComplete.plugin.tools import READY_MSG
 
 log = logging.getLogger(__name__)
 
@@ -51,8 +58,13 @@ class ThreadPool:
 
     __lock = RLock()
     __jobs_to_run = {}
+    __running_jobs_count = 0
+    __show_animation = False
 
-    def __init__(self, max_workers, run_delay=0.05):
+    __progress_update_delay = 0.1
+    __progress_idle_delay = 0.3
+
+    def __init__(self, max_workers, run_delay=0.1):
         """Create a thread pool.
 
         Args:
@@ -64,21 +76,10 @@ class ThreadPool:
         self.__thread_pool = futures.ThreadPoolExecutor(
             max_workers=max_workers)
 
-    def restart_timer(self):
-        """Restart timer because there was a change in jobs."""
-        if self.__timer:
-            self.__timer.cancel()
-        self.__timer = Timer(self.__delay, self.submit_jobs)
-        self.__timer.start()
-
-    def submit_jobs(self):
-        """Submit jobs that survived the delay."""
-        with ThreadPool.__lock:
-            for job in ThreadPool.__jobs_to_run.values():
-                log.debug("submitting job: %s", job)
-                future = self.__thread_pool.submit(job.function, *job.args)
-                future.add_done_callback(job.callback)
-            ThreadPool.__jobs_to_run.clear()
+        # start animation thread
+        self.__progress_thread = Thread(target=self.__animate_progress,
+                                        daemon=True)
+        self.__progress_thread.start()
 
     def new_job(self, job):
         """Add a new job to be submitted.
@@ -88,4 +89,45 @@ class ThreadPool:
         """
         with ThreadPool.__lock:
             ThreadPool.__jobs_to_run[job.name] = job
-            self.restart_timer()
+            self.__restart_timer()
+
+    def __restart_timer(self):
+        """Restart timer because there was a change in jobs."""
+        if self.__timer:
+            self.__timer.cancel()
+        self.__timer = Timer(self.__delay, self.__submit_jobs)
+        self.__timer.start()
+
+    def __submit_jobs(self):
+        """Submit jobs that survived the delay."""
+        with ThreadPool.__lock:
+            for job in ThreadPool.__jobs_to_run.values():
+                log.debug("submitting job: %s", job)
+                future = self.__thread_pool.submit(job.function, *job.args)
+                future.add_done_callback(job.callback)
+                future.add_done_callback(self.__stop_progress_animation)
+                self.__running_jobs_count += 1
+            ThreadPool.__jobs_to_run.clear()
+            log.debug(" running %s jobs", self.__running_jobs_count)
+            if self.__running_jobs_count > 0:
+                self.__show_animation = True
+
+    def __stop_progress_animation(self, future):
+        """Stop progress animation thread if there are no running jobs."""
+        with ThreadPool.__lock:
+            self.__running_jobs_count -= 1
+            log.debug(" Jobs still running: %s", self.__running_jobs_count)
+            if self.__running_jobs_count < 1:
+                log.debug(" Stopping progress animation.")
+                self.__show_animation = False
+
+    def __animate_progress(self):
+        """Function that changes the status message, i.e animates progress."""
+        while True:
+            if self.__show_animation:
+                SublBridge.set_status(Tools.generate_next_progress_message())
+                time.sleep(ThreadPool.__progress_update_delay)
+            else:
+                SublBridge.set_status(READY_MSG)
+                time.sleep(ThreadPool.__progress_idle_delay)
+

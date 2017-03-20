@@ -366,8 +366,9 @@ class ViewConfigManager(object):
                     self.__remove_old_config, v_id, settings.max_cache_age)
             # now return the needed config
             return res
-        except AttributeError:
-            log.error(" view became invalid in process of loading config.")
+        except AttributeError as e:
+            log.error(" view became invalid in process of loading config: %s",
+                      e.msg)
             return None
 
     def clear_for_view(self, v_id):

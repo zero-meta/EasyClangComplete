@@ -92,9 +92,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
     """
     thread_pool = ThreadPool(max_workers=4)
 
-    current_job_id = None
-    current_completions = []
-
     CLEAR_JOB_TAG = "clear"
     COMPLETE_JOB_TAG = "complete"
     UPDATE_JOB_TAG = "update"
@@ -108,6 +105,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # By default be verbose and limit on settings change if verbose flag is
         # not set.
         logging.basicConfig(level=logging.DEBUG)
+
+        # init instance variables to reasonable defaults
+        self.current_completions = None
+        self.current_job_id = None
 
     def on_plugin_loaded(self):
         """Called upon plugin load event."""
@@ -201,6 +202,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
                             function=self.view_config_manager.load_for_view,
                             args=[view, settings])
             EasyClangComplete.thread_pool.new_job(job)
+            # invalidate current completions
+            self.current_completions = None
 
     def on_close(self, view):
         """Called on closing the view.

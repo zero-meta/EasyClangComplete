@@ -90,5 +90,10 @@
 
   // On some esoteric systems we cannot find libclang properly.
   // If you know where your libclang is - set the full path here.
-  "libclang_path": "<some_path_here>"
+  "libclang_path": "<some_path_here>",
+
+  // Pick the progress style. There are currently these styles available:
+  // - "ColorSublime" : '⣾⣽⣻⢿⡿⣟⣯⣷'
+  // - "Moon"         : '🌑🌒🌓🌔🌕🌖🌗🌘'
+  "progress_style": "Moon"
 }

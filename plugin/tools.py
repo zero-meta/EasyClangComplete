@@ -64,50 +64,6 @@ def singleton(class_):
     return getinstance
 
 
-class ProgressStatus(object):
-    """docstring for ProgressStatus"""
-
-    MSG_TAG = '000_ECC'
-    MSG_MASK = 'ECC: [{}]'
-    MSG_READY_CHAR = u'✔'
-
-    MSG_CHARS = u'🌑🌒🌓🌔🌕🌖🌗🌘'
-
-    showing = False
-
-    idx = 0
-
-    @staticmethod
-    def set_status(message):
-        """Set status message for the current view."""
-        view = sublime.active_window().active_view()
-        view.set_status(ProgressStatus.MSG_TAG, message)
-
-    @staticmethod
-    def erase_status():
-        """Erase status message for the current view."""
-        ProgressStatus.showing = False
-        view = sublime.active_window().active_view()
-        view.erase_status(ProgressStatus.MSG_TAG)
-
-    @staticmethod
-    def show_ready_message():
-        """Show ready message."""
-        if not ProgressStatus.showing:
-            return
-        ProgressStatus.set_status(
-            ProgressStatus.MSG_MASK.format(ProgressStatus.MSG_READY_CHAR))
-
-    @staticmethod
-    def show_next_message():
-        """Show next progress message."""
-        if not ProgressStatus.showing:
-            return
-        mod = len(ProgressStatus.MSG_CHARS)
-        ProgressStatus.idx = (ProgressStatus.idx + 1) % mod
-        ProgressStatus.set_status(ProgressStatus.MSG_MASK.format(
-            ProgressStatus.MSG_CHARS[ProgressStatus.idx]))
-
 class SublBridge:
     """A small help class that bridges with sublime (maybe will grow).
 

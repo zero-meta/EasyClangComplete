@@ -44,6 +44,10 @@ class SettingsStorage:
 
     PREFIXES = ["ecc_", "easy_clang_complete_"]
 
+    COLOR_SUBLIME_STYLE_TAG = "ColorSublime"
+    MOON_STYLE_TAG = "Moon"
+
+    PROGRESS_STYLES = [COLOR_SUBLIME_STYLE_TAG, MOON_STYLE_TAG]
     # refer to Preferences.sublime-settings for usage explanation
     NAMES_ENUM = [
         "autocomplete_all",
@@ -62,6 +66,7 @@ class SettingsStorage:
         "verbose",
         "show_type_info",
         "libclang_path",
+        "progress_style",
     ]
 
     CLANG_VERSION = None
@@ -121,6 +126,9 @@ class SettingsStorage:
             if value is None:
                 log.critical(" no setting '%s' found!", key)
                 return False
+        if self.progress_style not in SettingsStorage.PROGRESS_STYLES:
+            log.critical(" progress style %s is not one of '%s'",
+                         self.progress_style, SettingsStorage.PROGRESS_STYLES)
         for source_dict in self.flags_sources:
             if "file" not in source_dict:
                 log.critical(" no 'file' in a flags source: %s", source_dict)

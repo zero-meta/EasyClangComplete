@@ -19,7 +19,9 @@ from .plugin import error_vis
 from .plugin import view_config
 from .plugin import flags_sources
 from .plugin.utils import thread_pool
+from .plugin.utils import progress_status
 from .plugin.settings import settings_manager
+from .plugin.settings import settings_storage
 from .plugin.completion import lib_complete
 from .plugin.completion import bin_complete
 
@@ -32,13 +34,16 @@ imp.reload(bin_complete)
 imp.reload(view_config)
 imp.reload(thread_pool)
 imp.reload(flags_sources)
+imp.reload(progress_status)
 
 # some aliases
 SettingsManager = settings_manager.SettingsManager
+SettingsStorage = settings_manager.SettingsStorage
 ViewConfigManager = view_config.ViewConfigManager
 SublBridge = tools.SublBridge
 Tools = tools.Tools
-ProgressStatus = tools.ProgressStatus
+MoonProgressStatus = progress_status.MoonProgressStatus
+ColorSublimeProgressStatus = progress_status.ColorSublimeProgressStatus
 PosStatus = tools.PosStatus
 CMakeFile = flags_sources.cmake_file.CMakeFile
 CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
@@ -131,6 +136,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
         off_level = logging.NOTSET if user_settings.verbose else logging.DEBUG
         logging.disable(level=off_level)
 
+        # set progress status
+        progress_style_tag = user_settings.progress_style
+        if progress_style_tag == SettingsStorage.MOON_STYLE_TAG:
+            progress_style = MoonProgressStatus()
+        else:
+            progress_style = ColorSublimeProgressStatus()
+        EasyClangComplete.thread_pool.progress_status = progress_style
+
     def on_activated_async(self, view):
         """Called upon activating a view. Execution in a worker thread.
 
@@ -142,9 +155,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if view.settings().get("disable_easy_clang_complete"):
             return
         if not Tools.is_valid_view(view):
-            ProgressStatus.erase_status()
+            EasyClangComplete.thread_pool.progress_status.erase_status()
             return
-        ProgressStatus.showing = True
+        EasyClangComplete.thread_pool.progress_status.showing = True
         log.debug(" on_activated_async view id %s", view.buffer_id())
         settings = self.settings_manager.settings_for_view(view)
         # All is taken care of. The view is built if needed.

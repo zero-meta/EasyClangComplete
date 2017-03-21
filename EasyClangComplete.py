@@ -38,7 +38,7 @@ imp.reload(progress_status)
 
 # some aliases
 SettingsManager = settings_manager.SettingsManager
-SettingsStorage = settings_manager.SettingsStorage
+SettingsStorage = settings_storage.SettingsStorage
 ViewConfigManager = view_config.ViewConfigManager
 SublBridge = tools.SublBridge
 Tools = tools.Tools

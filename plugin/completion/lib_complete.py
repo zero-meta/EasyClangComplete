@@ -53,7 +53,7 @@ class Completer(BaseCompleter):
     name = "lib"
     rlock = RLock()
 
-    def __init__(self, clang_binary, version_str):
+    def __init__(self, clang_binary, version_str, libclang_path):
         """Initialize the Completer from clang binary, reading its version.
 
         Picks an according cindex for the found version.
@@ -61,6 +61,8 @@ class Completer(BaseCompleter):
         Args:
             clang_binary (str): string for clang binary e.g. 'clang++-3.8'
             version_str (str): string for clang version e.g. '3.8.0'
+            libclang_path (str): in case a user knows the path to libclang
+                he can provide it here. Does not have to be valid.
 
         """
         super().__init__(clang_binary, version_str)
@@ -102,7 +104,8 @@ class Completer(BaseCompleter):
             # to figure out the path libclang.
             if not cindex.Config.loaded:
                 # This will return something like /.../lib/clang/3.x.0
-                libclang_dir = ClangUtils.find_libclang_dir(clang_binary)
+                libclang_dir = ClangUtils.find_libclang_dir(
+                    clang_binary, libclang_path)
                 if libclang_dir:
                     cindex.Config.set_library_path(libclang_dir)
 

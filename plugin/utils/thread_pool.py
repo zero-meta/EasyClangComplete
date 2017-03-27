@@ -10,11 +10,6 @@ from threading import Timer
 from threading import RLock
 from threading import Thread
 
-from EasyClangComplete.plugin.tools import Tools
-from EasyClangComplete.plugin.tools import SublBridge
-
-from EasyClangComplete.plugin.tools import READY_MSG
-
 log = logging.getLogger(__name__)
 
 
@@ -57,6 +52,8 @@ class ThreadPool:
     """
 
     __lock = RLock()
+    __progress_lock = RLock()
+
     __jobs_to_run = {}
     __running_jobs_count = 0
     __show_animation = False
@@ -77,9 +74,21 @@ class ThreadPool:
             max_workers=max_workers)
 
         # start animation thread
+        self.__progress_status = None
         self.__progress_thread = Thread(target=self.__animate_progress,
                                         daemon=True)
         self.__progress_thread.start()
+
+    @property
+    def progress_status(self):
+        """Return current progress status."""
+        return self.__progress_status
+
+    @progress_status.setter
+    def progress_status(self, val):
+        """Set progress status instance."""
+        with self.__progress_lock:
+            self.__progress_status = val
 
     def new_job(self, job):
         """Add a new job to be submitted.
@@ -110,6 +119,7 @@ class ThreadPool:
             ThreadPool.__jobs_to_run.clear()
             log.debug(" running %s jobs", self.__running_jobs_count)
             if self.__running_jobs_count > 0:
+                self.__progress_status.showing = True
                 self.__show_animation = True
 
     def __stop_progress_animation(self, future):
@@ -124,10 +134,15 @@ class ThreadPool:
     def __animate_progress(self):
         """Function that changes the status message, i.e animates progress."""
         while True:
-            if self.__show_animation:
-                SublBridge.set_status(Tools.generate_next_progress_message())
-                time.sleep(ThreadPool.__progress_update_delay)
-            else:
-                SublBridge.set_status(READY_MSG)
-                time.sleep(ThreadPool.__progress_idle_delay)
-
+            sleep_time = ThreadPool.__progress_idle_delay
+            with self.__progress_lock:
+                if not self.__progress_status:
+                    sleep_time = ThreadPool.__progress_idle_delay
+                elif self.__show_animation:
+                    self.__progress_status.show_next_message()
+                    sleep_time = ThreadPool.__progress_update_delay
+                else:
+                    self.__progress_status.show_ready_message()
+                    sleep_time = ThreadPool.__progress_idle_delay
+            # allow some time for progress status to be updated
+            time.sleep(sleep_time)

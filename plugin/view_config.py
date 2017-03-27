@@ -255,7 +255,8 @@ class ViewConfig(object):
         if settings.use_libclang:
             log.info(" init completer based on libclang")
             completer = lib_complete.Completer(settings.clang_binary,
-                                               settings.clang_version)
+                                               settings.clang_version,
+                                               settings.libclang_path)
             if not completer.valid:
                 log.error(" cannot initialize completer with libclang.")
                 log.info(" falling back to using clang in a subprocess.")

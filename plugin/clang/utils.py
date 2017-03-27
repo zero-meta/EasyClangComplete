@@ -66,11 +66,26 @@ class ClangUtils:
         return None
 
     @staticmethod
-    def find_libclang_dir(clang_binary):
+    def try_load_from_user_hint(libclang_path):
+        """Load library hinted by the user.
+
+        Args:
+            libclang_path (str): full path to the libclang library file.
+
+        Returns:
+            str: folder of the libclang library or None if not found.
+        """
+        if path.exists(libclang_path):
+            return path.dirname(libclang_path)
+
+    @staticmethod
+    def find_libclang_dir(clang_binary, libclang_path):
         """Find directory with libclang.
 
         Args:
             clang_binary (str): clang binary to call
+            libclang_path (str): libclang path provided by user.
+                Does not have to be valid.
 
         Returns:
             str: folder with libclang
@@ -81,7 +96,17 @@ class ClangUtils:
         log.debug(" python version: %s", platform.python_version())
         current_system = platform.system()
         log.debug(" we are on '%s'", platform.system())
+        log.debug(" user provided libclang_path: %s", libclang_path)
         # Get version string for help finding the proper libclang library on Linux
+        if libclang_path:
+            # User thinks he knows better. Let him try his luck.
+            libclang_dir = ClangUtils.try_load_from_user_hint(libclang_path)
+            if libclang_dir:
+                # It was found! No need to search any further!
+                ClangUtils.libclang_name = path.basename(libclang_path)
+                log.info(" using user-provided libclang: '%s'", libclang_path)
+                return libclang_dir
+        # If the user hint did not work, we look for it normally
         if current_system == "Linux":
             version_str = settings_storage.SettingsStorage.CLANG_VERSION[:-2]
         for suffix in ClangUtils.suffixes[current_system]:

@@ -1,8 +1,9 @@
 """This module contains class for libclang based completions.
 
 Attributes:
-    cindex_dict (dict): dict of cindex entries for each version of clang
-    log (logging.Logger): logger for this module
+    cindex_dict (dict): dict of cindex entries for each version of clang.
+    clang_utils_module_name (str): Name of the module for clang tools.
+    log (logging.Logger): logger for this module.
 """
 import importlib
 import sublime
@@ -14,6 +15,7 @@ from .compiler_variant import LibClangCompilerVariant
 from ..tools import Tools
 from ..tools import SublBridge
 from ..tools import PKG_NAME
+from ..clang.utils import ClangUtils
 
 from threading import RLock
 from os import path
@@ -22,26 +24,31 @@ log = logging.getLogger(__name__)
 log.debug(" reloading module")
 
 cindex_dict = {
-    '3.2': PKG_NAME + ".clang.cindex32",
-    '3.3': PKG_NAME + ".clang.cindex33",
-    '3.4': PKG_NAME + ".clang.cindex34",
-    '3.5': PKG_NAME + ".clang.cindex35",
-    '3.6': PKG_NAME + ".clang.cindex36",
-    '3.7': PKG_NAME + ".clang.cindex37",
-    '3.8': PKG_NAME + ".clang.cindex38",
-    '3.9': PKG_NAME + ".clang.cindex39"
+    '3.2': PKG_NAME + ".plugin.clang.cindex32",
+    '3.3': PKG_NAME + ".plugin.clang.cindex33",
+    '3.4': PKG_NAME + ".plugin.clang.cindex34",
+    '3.5': PKG_NAME + ".plugin.clang.cindex35",
+    '3.6': PKG_NAME + ".plugin.clang.cindex36",
+    '3.7': PKG_NAME + ".plugin.clang.cindex37",
+    '3.8': PKG_NAME + ".plugin.clang.cindex38",
+    '3.9': PKG_NAME + ".plugin.clang.cindex39",
+    '4.0': PKG_NAME + ".plugin.clang.cindex40"
 }
-
-clang_utils_module_name = PKG_NAME + ".clang.utils"
 
 
 class Completer(BaseCompleter):
     """Encapsulates completions based on libclang.
 
     Attributes:
+        default_ignore_list (str[]): base list of cursor kinds to ignore
+        bigger_ignore_list (str[]): extended list of cursor kinds to ignore.
+            This list is used when completion is triggered with `::`.
+        compiler_variant: Compiler variant currently in use.
+        function_kinds_list (str[]): Defines what we think is a function.
         rlock (threading.Rlock): recursive mutex
-        tu_module (cindex.TranslationUnit): module for proper cindex
         tu (cindex.TranslationUnit): current translation unit
+        tu_module (cindex.TranslationUnit): module for proper cindex
+        valid (bool): Will be False if we fail to build proper clang index.
     """
     name = "lib"
     rlock = RLock()
@@ -88,9 +95,9 @@ class Completer(BaseCompleter):
                 [cindex.CursorKind.CLASS_DECL,
                  cindex.CursorKind.ENUM_CONSTANT_DECL]
 
-            # load clang helper class
-            clang_utils = importlib.import_module(clang_utils_module_name)
-            ClangUtils = clang_utils.ClangUtils
+            self.function_kinds_list = [cindex.CursorKind.FUNCTION_DECL,
+                                        cindex.CursorKind.CXX_METHOD]
+
             # If we haven't already initialized the clang Python bindings, try
             # to figure out the path libclang.
             if not cindex.Config.loaded:
@@ -114,6 +121,9 @@ class Completer(BaseCompleter):
 
         Args:
             view (sublime.View): current view
+
+        Raises:
+            ValueError: if file name does not exist - throw exception.
         """
         # Return early if this is an invalid view.
         if not Tools.is_valid_view(view):
@@ -143,7 +153,8 @@ class Completer(BaseCompleter):
                     args=self.clang_flags,
                     unsaved_files=files,
                     options=TU.PARSE_PRECOMPILED_PREAMBLE |
-                    TU.PARSE_CACHE_COMPLETION_RESULTS)
+                    TU.PARSE_CACHE_COMPLETION_RESULTS |
+                    TU.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION)
                 self.tu = trans_unit
             except Exception as e:
                 log.error(" error while compiling: %s", e)
@@ -155,6 +166,13 @@ class Completer(BaseCompleter):
 
         Using the current translation unit it queries libclang for the
         possible completions.
+
+        Args:
+            completion_request (tools.ActionRequest): completion request
+                holding information about the view and needed location.
+
+        Raises:
+            ValueError: if file name does not exist - throw exception.
 
         """
         view = completion_request.get_view()
@@ -198,6 +216,39 @@ class Completer(BaseCompleter):
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
 
+    def info(self, tooltip_request):
+        """Provide information about object in given location.
+
+        Using the current translation unit it queries libclang for available
+        information about cursor.
+
+        Args:
+            tooltip_request (tools.ActionRequest): A request for action
+                from the plugin.
+
+        Returns:
+            (tools.ActionRequest, str): completion request along with the
+                info details read from the translation unit.
+
+        """
+        empty_info = (tooltip_request, "")
+        with Completer.rlock:
+            if not self.tu:
+                return (tooltip_request, "")
+            view = tooltip_request.get_view()
+            (row, col) = SublBridge.cursor_pos(
+                view, tooltip_request.get_trigger_position())
+
+            cursor = self.tu.cursor.from_location(
+                self.tu, self.tu.get_location(view.file_name(), (row, col)))
+            if not cursor or cursor.kind.is_declaration():
+                return empty_info
+            if cursor.referenced and cursor.referenced.kind.is_declaration():
+                info_details = ClangUtils.build_info_details(
+                    cursor.referenced, self.function_kinds_list)
+                return (tooltip_request, info_details)
+            return empty_info
+
     def update(self, view, show_errors):
         """Reparse the translation unit.
 
@@ -215,9 +266,19 @@ class Completer(BaseCompleter):
         v_id = view.buffer_id()
         log.debug(" view is %s", v_id)
         with Completer.rlock:
-            # fix issue #191 - avoid crashing when renaming file
-            if not self.tu or not self.tu.cursor.location.file:
+            if not self.tu:
                 log.debug(" translation unit does not exist. Creating.")
+                self.parse_tu(view)
+            if self.tu.cursor.displayname != view.file_name():
+                # In case the file was renamed, the translation unit still has
+                # the old name in it and crashes the plugin host. We need to
+                # completely recreate a translation unit if the filename has
+                # changed. Addressed in issue #191.
+                log.debug(" translation unit file does not match view one")
+                log.debug(" names: '%s' vs '%s'",
+                          self.tu.cursor.displayname,
+                          view.file_name())
+                log.debug(" recreate translation unit completely")
                 self.parse_tu(view)
             log.debug(" reparsing translation_unit for view %s", v_id)
             if not self.tu:
@@ -255,7 +316,7 @@ class Completer(BaseCompleter):
            Remove excluded types and unaccessible members.
 
         Args:
-            completion_result (): completion result from libclang
+            completion_result: completion result from libclang
             excluded_kinds (list): list of CursorKind types that shouldn't be
                                    added to completion list
 
@@ -293,6 +354,7 @@ class Completer(BaseCompleter):
                 continue
             hint = ''
             contents = ''
+            trigger = ''
             place_holders = 1
             for chunk in c.string:
                 if not chunk:

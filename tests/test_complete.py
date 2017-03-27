@@ -4,7 +4,7 @@ import platform
 from os import path
 
 from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
-from EasyClangComplete.plugin.tools import CompletionRequest
+from EasyClangComplete.plugin.tools import ActionRequest
 from EasyClangComplete.plugin.view_config import ViewConfigManager
 
 
@@ -95,7 +95,7 @@ class BaseTestCompleter(object):
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        request = CompletionRequest(self.view, pos)
+        request = ActionRequest(self.view, pos)
         (_, completions) = completer.complete(request)
 
         # Verify that we got the expected completions back.
@@ -122,7 +122,7 @@ class BaseTestCompleter(object):
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        request = CompletionRequest(self.view, pos)
+        request = ActionRequest(self.view, pos)
         (_, completions) = completer.complete(request)
 
         # Verify that we got the expected completions back.
@@ -151,7 +151,7 @@ class BaseTestCompleter(object):
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        request = CompletionRequest(self.view, pos)
+        request = ActionRequest(self.view, pos)
         (_, completions) = completer.complete(request)
 
         # Verify that we got the expected completions back.
@@ -180,7 +180,7 @@ class BaseTestCompleter(object):
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        request = CompletionRequest(self.view, pos)
+        request = ActionRequest(self.view, pos)
         (_, completions) = completer.complete(request)
 
         # Verify that we got the expected completions back.

@@ -3,7 +3,7 @@
 Plugin for Sublime Text 3 for easy to use, out of the box autocompletions for C
 and C++.
 
-![Example](pics/autocomplete_show_off.gif)
+![Example](pics/autocomplete.gif)
 
 [![Release][img-release]][release]
 [![Downloads Month][img-downloads-month]][downloads]
@@ -132,11 +132,15 @@ this plugin more.
 The trick with multiple `clang.cindex` files is inspired by this repo:
 [clangHelper](https://github.com/griebd/clangHelper). Thanks for inspiration!
 
+The progress indicator idea is from
+[ColorSublime](https://github.com/Colorsublime/Colorsublime-Plugin) plugin.
+
 If you are an experienced python developer and find that something in my code
 sucks completely - **DO** tell me. Python is not my main language and I am
 always willing to learn.
 
-Some functionality is there only because of the help of the following users (in no particualr order):
+Some functionality is there only because of the help of the following users (in
+no particualr order):
 
 @Ventero, @riazanovskiy, @rchl, @Mischa-Alff, @jdumas, @simia, @tastytea,
 @brupelo, @randy3k, @david9991.
@@ -168,6 +172,7 @@ Please ensure, that your code conforms to this.
 [![Donate][img-paypal]][donate-paypal]
 [![Flattr this git repo][img-flattr]][donate-flattr]
 [![Bountysource][img-bountysource]][bountysource-link]
+[![Beerpay][img-beerpay]][beerpay]
 
 Current sponsor of this project is my sleep.
 Please buy me a cup of tea if you appreciate the effort.
@@ -187,7 +192,9 @@ plugin! The more people use it - the merrier.
 [libclang-issue]: https://github.com/niosus/EasyClangComplete/issues/88
 [cmake-issue]: https://github.com/niosus/EasyClangComplete/issues/19
 [bountysource-link]: https://www.bountysource.com/teams/easyclangcomplete
+[beerpay]: https://beerpay.io/niosus/EasyClangComplete
 
+[img-beerpay]: https://beerpay.io/niosus/EasyClangComplete/badge.svg?style=flat-square
 [img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg?style=flat-square
 [img-appveyor]: https://img.shields.io/appveyor/ci/niosus/easyclangcomplete/master.svg?style=flat-square&label=windows
 [img-travis]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?style=flat-square&label=linux%20|%20osx

@@ -51,7 +51,22 @@ class BaseCompleter:
         """Function to generate completions. See children for implementation.
 
         Args:
-            completion_request (CompletionRequest): request object
+            completion_request (ActionRequest): request object
+
+        Raises:
+            NotImplementedError: Guarantees we do not call this abstract method
+        """
+        raise NotImplementedError("calling abstract method")
+
+    def info(self, tooltip_request):
+        """Provide information about object in given location.
+
+        Using the current translation unit it queries libclang for available
+        information about cursor.
+
+        Args:
+            tooltip_request (tools.ActionRequest): A request for action
+                from the plugin.
 
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method

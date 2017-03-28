@@ -98,6 +98,6 @@
   "progress_style": "Moon",
 
   // Enable showing phantoms instead of popups for errors
-  "show_phantoms_for_errors": false
+  "show_phantoms_for_errors": true
 
 }

@@ -131,7 +131,7 @@ class Completer(BaseCompleter):
         """
         sublime.error_message(msg)
 
-    def update(self, view, show_errors):
+    def update(self, view, show_errors, show_phantoms):
         """Update build for current view.
 
         Args:

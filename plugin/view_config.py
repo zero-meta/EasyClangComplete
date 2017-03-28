@@ -63,7 +63,8 @@ class ViewConfig(object):
 
         self.completer = completer
         self.completer.clang_flags = flags
-        self.completer.update(view, settings.errors_on_save)
+        self.completer.update(view, settings.errors_on_save,
+                              settings.show_phantoms_for_errors)
 
     def update_if_needed(self, view, settings):
         """Check if the view config has changed.
@@ -88,7 +89,8 @@ class ViewConfig(object):
             return self
         if ViewConfig.needs_reparse(view):
             log.debug(" config updates existing completer.")
-            self.completer.update(view, settings.errors_on_save)
+            self.completer.update(view, settings.errors_on_save,
+                                  settings.show_phantoms_for_errors)
         return self
 
     def needs_update(self, completer, flags):

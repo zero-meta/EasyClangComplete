@@ -73,7 +73,7 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def update(self, view, show_errors):
+    def update(self, view, show_errors, show_phantoms):
         """Update the completer for this view.
 
         This can increase consequent completion speeds or is needed to just
@@ -88,7 +88,7 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def show_errors(self, view, output):
+    def show_errors(self, view, output, show_phantoms):
         """Show current complie errors.
 
         Args:
@@ -100,4 +100,4 @@ class BaseCompleter:
             log.error(" cannot show errors. View became invalid!")
             return
         self.error_vis.generate(view, errors)
-        self.error_vis.show_regions(view)
+        self.error_vis.show_regions(view, show_phantoms)

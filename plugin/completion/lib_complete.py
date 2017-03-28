@@ -252,7 +252,7 @@ class Completer(BaseCompleter):
                 return (tooltip_request, info_details)
             return empty_info
 
-    def update(self, view, show_errors):
+    def update(self, view, show_errors, show_phantoms):
         """Reparse the translation unit.
 
         This speeds up completions significantly, so we perform this upon file
@@ -292,7 +292,7 @@ class Completer(BaseCompleter):
             end = time.time()
             log.debug(" reparsed in %s seconds", end - start)
             if show_errors:
-                self.show_errors(view, self.tu.diagnostics)
+                self.show_errors(view, self.tu.diagnostics, show_phantoms)
             return True
         log.error(" no translation unit for view id %s", v_id)
         return False

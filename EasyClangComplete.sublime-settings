@@ -95,5 +95,9 @@
   // Pick the progress style. There are currently these styles available:
   // - "ColorSublime" : '⣾⣽⣻⢿⡿⣟⣯⣷'
   // - "Moon"         : '🌑🌒🌓🌔🌕🌖🌗🌘'
-  "progress_style": "Moon"
+  "progress_style": "Moon",
+
+  // Enable showing phantoms instead of popups for errors
+  "show_phantoms_for_errors": false
+
 }

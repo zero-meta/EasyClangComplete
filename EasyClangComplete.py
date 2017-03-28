@@ -167,20 +167,23 @@ class EasyClangComplete(sublime_plugin.EventListener):
                         args=[view, settings])
         EasyClangComplete.thread_pool.new_job(job)
 
-    # def on_selection_modified(self, view):
-    #     """Called when selection is modified. Executed in gui thread.
+    def on_selection_modified(self, view):
+        """Called when selection is modified. Executed in gui thread.
 
-    #     Args:
-    #         view (sublime.View): current view
-    #     """
-    #     if Tools.is_valid_view(view):
-    #         (row, _) = SublBridge.cursor_pos(view)
-    #         view_config = self.view_config_manager.get_from_cache(view)
-    #         if not view_config:
-    #             return
-    #         if not view_config.completer:
-    #             return
-    #         view_config.completer.error_vis.show_popup_if_needed(view, row)
+        Args:
+            view (sublime.View): current view
+        """
+        settings = self.settings_manager.settings_for_view(view)
+        if settings.show_phantoms_for_errors:
+            return
+        if Tools.is_valid_view(view):
+            (row, _) = SublBridge.cursor_pos(view)
+            view_config = self.view_config_manager.get_from_cache(view)
+            if not view_config:
+                return
+            if not view_config.completer:
+                return
+            view_config.completer.error_vis.show_popup_if_needed(view, row)
 
     def on_modified_async(self, view):
         """Called in a worker thread when view is modified.

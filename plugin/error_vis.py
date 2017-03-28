@@ -44,6 +44,7 @@ class CompileErrors:
             del self.err_regions[view_id]
         # create an empty region dict for view id
         self.err_regions[view_id] = {}
+
         # If the view is closed while this is running, there will be
         # errors. We want to handle them gracefully.
         try:
@@ -72,7 +73,30 @@ class CompileErrors:
             else:
                 self.err_regions[view.buffer_id()][row] = [error_dict]
 
-    def show_regions(self, view):
+    def show_phantoms(self, view):
+        view.erase_phantoms("compile_errors")
+        if view.buffer_id() not in self.phantom_sets:
+            phantom_set = sublime.PhantomSet(view, "compile_errors")
+            self.phantom_sets[view.buffer_id()] = phantom_set
+        else:
+            phantom_set = self.phantom_sets[view.buffer_id()]
+        phantoms = []
+        current_error_dict = self.err_regions[view.buffer_id()]
+        for err in current_error_dict:
+            errors_dict = current_error_dict[err]
+            errors_html = CompileErrors._as_phantom_html(errors_dict)
+            pt = view.text_point(err - 1, 1)
+            phantoms.append(sublime.Phantom(
+                sublime.Region(pt, view.line(pt).b),
+                errors_html,
+                sublime.LAYOUT_BELOW,
+                on_navigate=self.on_phantom_navigate))
+        phantom_set.update(phantoms)
+
+    def on_phantom_navigate(self, url):
+        sublime.active_window().active_view().erase_phantoms("compile_errors")
+
+    def show_regions(self, view, show_phantoms):
         """Show current error regions.
 
         Args:
@@ -85,24 +109,8 @@ class CompileErrors:
         regions = CompileErrors._as_region_list(current_error_dict)
         log.debug(" showing error regions: %s", regions)
         view.add_regions(CompileErrors._TAG, regions, "string")
-        if view.buffer_id() not in self.phantom_sets:
-            phantom_set = sublime.PhantomSet(view, "exec")
-            self.phantom_sets[view.buffer_id()] = phantom_set
-        else:
-            phantom_set = self.phantom_sets[view.buffer_id()]
-        phantoms = []
-        for err in current_error_dict:
-            errors_dict = current_error_dict[err]
-            for e in errors_dict:
-                print(e)
-            errors_html = CompileErrors._as_html(errors_dict)
-            pt = view.text_point(err -1, 1)
-            phantoms.append(sublime.Phantom(
-                        sublime.Region(pt, view.line(pt).b),
-                        errors_html,
-                        sublime.LAYOUT_BELOW))
-        phantom_set.update(phantoms)
-
+        if show_phantoms:
+            self.show_phantoms(view)
 
     def erase_regions(self, view):
         """Erase error regions for view.
@@ -176,6 +184,59 @@ class CompileErrors:
             processed_error = processed_error.replace('<', '&lt;')
             processed_error = processed_error.replace('>', '&gt;')
             errors_html += "<p><tt>" + processed_error + "</tt></p>"
+        # Add non-breaking space to prevent popup from getting a newline
+        # after every word
+        return errors_html
+
+    @staticmethod
+    def _as_phantom_html(errors_dict):
+        """Get error as html for phantom
+
+        Args:
+            errors_dict (dict): Current error
+        """
+        stylesheet = '''
+            <style>
+                div.error {
+                    padding: 0.4rem 0 0.4rem 0.7rem;
+                    margin: 0.2rem 0;
+                    border-radius: 2px;
+                }
+
+                div.error span.message {
+                    padding-right: 0.7rem;
+                }
+
+                div.error a {
+                    text-decoration: inherit;
+                    padding: 0.35rem 0.7rem 0.45rem 0.8rem;
+                    position: relative;
+                    bottom: 0.05rem;
+                    border-radius: 0 2px 2px 0;
+                    font-weight: bold;
+                }
+                html.dark div.error a {
+                    background-color: #00000018;
+                }
+                html.light div.error a {
+                    background-color: #ffffff18;
+                }
+            </style>
+        '''
+
+        errors_html = '<body id=inline-error>'
+        errors_html += stylesheet
+        errors_html += '<div class="error">'
+        errors_html += '<span class="message">'
+        for entry in errors_dict:
+            processed_error = entry['error']
+            processed_error = processed_error.replace(' ', '&nbsp;')
+            processed_error = processed_error.replace('<', '&lt;')
+            processed_error = processed_error.replace('>', '&gt;')
+            errors_html += processed_error
+        errors_html += '</span>'
+        errors_html += '<a href=hide>' + chr(0x00D7) + '</a></div>'
+        errors_html += '</body>'
         # Add non-breaking space to prevent popup from getting a newline
         # after every word
         return errors_html

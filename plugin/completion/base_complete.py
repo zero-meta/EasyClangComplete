@@ -88,7 +88,7 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def show_errors(self, view, output):
+    def show_errors(self, view, output, show_phantoms):
         """Show current complie errors.
 
         Args:
@@ -100,4 +100,4 @@ class BaseCompleter:
             log.error(" cannot show errors. View became invalid!")
             return
         self.error_vis.generate(view, errors)
-        self.error_vis.show_regions(view)
+        self.error_vis.show_regions(view, show_phantoms)

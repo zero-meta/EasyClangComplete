@@ -315,7 +315,8 @@ class Completer(BaseCompleter):
             end = time.time()
             log.debug(" reparsed in %s seconds", end - start)
             if settings.errors_on_save:
-                self.show_errors(view, self.tu.diagnostics)
+                self.show_errors(view, self.tu.diagnostics,
+                                 settings.show_phantoms_for_errors)
             return True
         log.error(" no translation unit for view id %s", v_id)
         return False

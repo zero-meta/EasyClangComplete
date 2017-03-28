@@ -66,6 +66,7 @@ class SettingsStorage:
         "use_libclang",
         "verbose",
         "show_type_info",
+        "show_phantoms_for_errors",
         "libclang_path",
         "progress_style",
     ]

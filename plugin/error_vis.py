@@ -74,6 +74,11 @@ class CompileErrors:
                 self.err_regions[view.buffer_id()][row] = [error_dict]
 
     def show_phantoms(self, view):
+        """Show phantoms for compilation errors.
+
+        Args:
+            view (sublime.View): current view
+        """
         view.erase_phantoms("compile_errors")
         if view.buffer_id() not in self.phantom_sets:
             phantom_set = sublime.PhantomSet(view, "compile_errors")
@@ -90,11 +95,8 @@ class CompileErrors:
                 sublime.Region(pt, view.line(pt).b),
                 errors_html,
                 sublime.LAYOUT_BELOW,
-                on_navigate=self.on_phantom_navigate))
+                on_navigate=self._on_phantom_navigate))
         phantom_set.update(phantoms)
-
-    def on_phantom_navigate(self, url):
-        sublime.active_window().active_view().erase_phantoms("compile_errors")
 
     def show_regions(self, view, show_phantoms):
         """Show current error regions.
@@ -171,6 +173,13 @@ class CompileErrors:
         del current_error_dict[row]
 
     @staticmethod
+    def _on_phantom_navigate(self, url):
+        """Close all phantoms in active view.
+
+        """
+        sublime.active_window().active_view().erase_phantoms("compile_errors")
+
+    @staticmethod
     def _as_html(errors_dict):
         """Show error as html.
 
@@ -228,11 +237,15 @@ class CompileErrors:
         errors_html += stylesheet
         errors_html += '<div class="error">'
         errors_html += '<span class="message">'
+        first = True
         for entry in errors_dict:
             processed_error = entry['error']
             processed_error = processed_error.replace(' ', '&nbsp;')
             processed_error = processed_error.replace('<', '&lt;')
             processed_error = processed_error.replace('>', '&gt;')
+            if not first:
+                processed_error = '<br>' + processed_error
+            first = False
             errors_html += processed_error
         errors_html += '</span>'
         errors_html += '<a href=hide>' + chr(0x00D7) + '</a></div>'

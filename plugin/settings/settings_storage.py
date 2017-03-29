@@ -55,7 +55,7 @@ class SettingsStorage:
         "clang_binary",
         "common_flags",
         "cpp_flags",
-        "disable_cache",
+        "use_libclang_caching",
         "errors_on_save",
         "flags_sources",
         "hide_default_completions",

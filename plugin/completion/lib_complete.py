@@ -152,9 +152,10 @@ class Completer(BaseCompleter):
                 if not file_name or not path.exists(file_name):
                     raise ValueError("file name does not exist anymore")
 
-                parse_options = (TU.PARSE_PRECOMPILED_PREAMBLE |
-                    TU.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION)
-                if not settings.disable_cache:
+                parse_options = \
+                    (TU.PARSE_PRECOMPILED_PREAMBLE |
+                     TU.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION)
+                if settings.use_libclang_caching:
                     parse_options |= TU.PARSE_CACHE_COMPLETION_RESULTS
 
                 trans_unit = TU.from_source(

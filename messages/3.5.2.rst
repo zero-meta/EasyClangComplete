@@ -5,7 +5,7 @@ New setting!
 ------------
 - ``use_libclang_caching`` - now you can decide if you want to use libclang
   caching. Using cache is a lot faster, but can produce wrong completions in
-  rare cases. See issue #238 on GitHub for discussions.
+  rare cases. See issue #228 on GitHub for discussions.
 - Thanks @simia for a pull request on this! 👍
 
 Restart

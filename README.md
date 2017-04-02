@@ -25,12 +25,13 @@ You are just three simple steps away!
     [here](https://github.com/niosus/EasyClangComplete/releases).
 
 ## 2. Install clang ##
-- **Ubuntu**: `sudo apt-get install clang`
-- **Windows**: install the latest release from `clang`
-  [website](http://llvm.org/releases/download.html) (v >= 3.9)
-- **OSX**: ships `clang` by default. You are all set!
-- on other systems refer to their package managers or install from `clang`
-  [website](http://llvm.org/releases/download.html)
+- **Ubuntu**        : `sudo apt-get install clang`
+- **OSX**           : ships `clang` by default. You are all set!
+- **Windows**       : install the latest release from clang website.
+  + **WARNING**: there seems to be a bug with `libclang` when using clang 4.0.
+    Please install 3.9 on Windows for now.
+- **Other Systems** : use your package manager or install from clang website.
+- clang website: http://llvm.org/releases/download.html
 
 ## 3. Configure your includes ##
 

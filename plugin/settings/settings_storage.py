@@ -41,8 +41,13 @@ class SettingsStorage:
                     "compile_commands.json",
                     ".clang_complete"]
     FLAG_SOURCES_ENTRIES_WITH_PATHS = ["search_in", "prefix_paths"]
+
     PREFIXES = ["ecc_", "easy_clang_complete_"]
 
+    COLOR_SUBLIME_STYLE_TAG = "ColorSublime"
+    MOON_STYLE_TAG = "Moon"
+
+    PROGRESS_STYLES = [COLOR_SUBLIME_STYLE_TAG, MOON_STYLE_TAG]
     # refer to Preferences.sublime-settings for usage explanation
     NAMES_ENUM = [
         "autocomplete_all",
@@ -50,6 +55,7 @@ class SettingsStorage:
         "clang_binary",
         "common_flags",
         "cpp_flags",
+        "use_libclang_caching",
         "errors_on_save",
         "flags_sources",
         "hide_default_completions",
@@ -62,6 +68,8 @@ class SettingsStorage:
         "use_libclang",
         "verbose",
         "show_type_info",
+        "libclang_path",
+        "progress_style",
     ]
 
     CLANG_VERSION = None
@@ -97,8 +105,12 @@ class SettingsStorage:
             # initialize wildcard values with view
             self.__update_widcard_values(view)
             # replace wildcards
-            self.__populate_common_flags(view)
-            self.__populate_flags_source_paths(view)
+            self.__populate_common_flags(view.file_name())
+            self.__populate_flags_source_paths()
+            self.libclang_path = self.__replace_wildcard_if_needed(
+                self.libclang_path)
+            self.clang_binary = self.__replace_wildcard_if_needed(
+                self.clang_binary)
         except AttributeError as e:
             log.error(" view became None. Do not continue.")
             log.error(" original error: %s", e)
@@ -117,6 +129,9 @@ class SettingsStorage:
             if value is None:
                 log.critical(" no setting '%s' found!", key)
                 return False
+        if self.progress_style not in SettingsStorage.PROGRESS_STYLES:
+            log.critical(" progress style %s is not one of '%s'",
+                         self.progress_style, SettingsStorage.PROGRESS_STYLES)
         for source_dict in self.flags_sources:
             if "file" not in source_dict:
                 log.critical(" no 'file' in a flags source: %s", source_dict)
@@ -163,12 +178,8 @@ class SettingsStorage:
         if isinstance(self.max_cache_age, str):
             self.max_cache_age = Tools.seconds_from_string(self.max_cache_age)
 
-    def __populate_flags_source_paths(self, view):
-        """Populate variables inside flags sources.
-
-        Args:
-            view (View): Current view.
-        """
+    def __populate_flags_source_paths(self):
+        """Populate variables inside flags sources."""
         if not self.flags_sources:
             log.critical(" Cannot update paths of flag sources.")
             return
@@ -186,18 +197,18 @@ class SettingsStorage:
                         self.flags_sources[idx][option][i] =\
                             self.__replace_wildcard_if_needed(entry)
 
-    def __populate_common_flags(self, view):
+    def __populate_common_flags(self, current_file_name):
         """Populate the variables inside common_flags with real values.
 
         Args:
-            view (sublime.View): current view
+            current_file_name (str): current view file name
         """
         # populate variables to real values
         log.debug(" populating common_flags with current variables.")
         for idx, flag in enumerate(self.common_flags):
             self.common_flags[idx] = self.__replace_wildcard_if_needed(flag)
 
-        file_current_folder = path.dirname(view.file_name())
+        file_current_folder = path.dirname(current_file_name)
         if self.include_file_folder:
             self.common_flags.append("-I" + file_current_folder)
         file_parent_folder = path.dirname(file_current_folder)
@@ -214,10 +225,11 @@ class SettingsStorage:
             str: line with replaced wildcards
         """
         res = str(line)
+        res = path.expanduser(path.expandvars(res))
+
         # replace all wildcards in the line
         for wildcard, value in self._wildcard_values.items():
             res = re.sub(re.escape(wildcard), value, res)
-            res = path.expandvars(res)
         if res != line:
             log.debug(" populated '%s' to '%s'", line, res)
         return res

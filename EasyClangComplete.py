@@ -19,7 +19,9 @@ from .plugin import error_vis
 from .plugin import view_config
 from .plugin import flags_sources
 from .plugin.utils import thread_pool
+from .plugin.utils import progress_status
 from .plugin.settings import settings_manager
+from .plugin.settings import settings_storage
 from .plugin.completion import lib_complete
 from .plugin.completion import bin_complete
 
@@ -32,12 +34,16 @@ imp.reload(bin_complete)
 imp.reload(view_config)
 imp.reload(thread_pool)
 imp.reload(flags_sources)
+imp.reload(progress_status)
 
 # some aliases
 SettingsManager = settings_manager.SettingsManager
+SettingsStorage = settings_storage.SettingsStorage
 ViewConfigManager = view_config.ViewConfigManager
 SublBridge = tools.SublBridge
 Tools = tools.Tools
+MoonProgressStatus = progress_status.MoonProgressStatus
+ColorSublimeProgressStatus = progress_status.ColorSublimeProgressStatus
 PosStatus = tools.PosStatus
 CMakeFile = flags_sources.cmake_file.CMakeFile
 CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
@@ -91,9 +97,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
     """
     thread_pool = ThreadPool(max_workers=4)
 
-    current_job_id = None
-    current_completions = []
-
     CLEAR_JOB_TAG = "clear"
     COMPLETE_JOB_TAG = "complete"
     UPDATE_JOB_TAG = "update"
@@ -107,6 +110,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # By default be verbose and limit on settings change if verbose flag is
         # not set.
         logging.basicConfig(level=logging.DEBUG)
+
+        # init instance variables to reasonable defaults
+        self.current_completions = None
+        self.current_job_id = None
 
     def on_plugin_loaded(self):
         """Called upon plugin load event."""
@@ -129,6 +136,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
         off_level = logging.NOTSET if user_settings.verbose else logging.DEBUG
         logging.disable(level=off_level)
 
+        # set progress status
+        progress_style_tag = user_settings.progress_style
+        if progress_style_tag == SettingsStorage.MOON_STYLE_TAG:
+            progress_style = MoonProgressStatus()
+        else:
+            progress_style = ColorSublimeProgressStatus()
+        EasyClangComplete.thread_pool.progress_status = progress_style
+
     def on_activated_async(self, view):
         """Called upon activating a view. Execution in a worker thread.
 
@@ -139,15 +154,18 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # disable on_activated_async when running tests
         if view.settings().get("disable_easy_clang_complete"):
             return
-        if Tools.is_valid_view(view):
-            log.debug(" on_activated_async view id %s", view.buffer_id())
-            settings = self.settings_manager.settings_for_view(view)
-            # All is taken care of. The view is built if needed.
-            job = ThreadJob(name=EasyClangComplete.UPDATE_JOB_TAG,
-                            callback=EasyClangComplete.config_updated,
-                            function=self.view_config_manager.load_for_view,
-                            args=[view, settings])
-            EasyClangComplete.thread_pool.new_job(job)
+        if not Tools.is_valid_view(view):
+            EasyClangComplete.thread_pool.progress_status.erase_status()
+            return
+        EasyClangComplete.thread_pool.progress_status.showing = True
+        log.debug(" on_activated_async view id %s", view.buffer_id())
+        settings = self.settings_manager.settings_for_view(view)
+        # All is taken care of. The view is built if needed.
+        job = ThreadJob(name=EasyClangComplete.UPDATE_JOB_TAG,
+                        callback=EasyClangComplete.config_updated,
+                        function=self.view_config_manager.load_for_view,
+                        args=[view, settings])
+        EasyClangComplete.thread_pool.new_job(job)
 
     def on_selection_modified(self, view):
         """Called when selection is modified. Executed in gui thread.
@@ -197,6 +215,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
                             function=self.view_config_manager.load_for_view,
                             args=[view, settings])
             EasyClangComplete.thread_pool.new_job(job)
+            # invalidate current completions
+            self.current_completions = None
 
     def on_close(self, view):
         """Called on closing the view.

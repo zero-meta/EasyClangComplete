@@ -94,5 +94,18 @@
 
   // Show additional information on hover over function call/variable etc.
   // This replaces default sublime on hover behaviour
-  "show_type_info": true
+  "show_type_info": true,
+
+  // On some esoteric systems we cannot find libclang properly.
+  // If you know where your libclang is - set the full path here.
+  "libclang_path": "<some_path_here>",
+
+  // Pick the progress style. There are currently these styles available:
+  // - "ColorSublime" : '⣾⣽⣻⢿⡿⣟⣯⣷'
+  // - "Moon"         : '🌑🌒🌓🌔🌕🌖🌗🌘'
+  "progress_style": "Moon",
+
+  // Controls if libclang will cache the results.
+  // This works faster, but in rare cases can generate wrong completions.
+  "use_libclang_caching": true
 }

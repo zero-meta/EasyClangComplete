@@ -57,7 +57,7 @@ class TestViewConfig(GuiTestWrapper):
 
         self.assertIsNotNone(view_config.completer)
         completer = view_config.completer
-        self.assertEqual(len(completer.clang_flags), 17)
+        self.assertEqual(len(completer.clang_flags), 14)
         # test from the start
         self.assertEqual(completer.clang_flags[0], '-c')
         self.assertEqual(completer.clang_flags[1], '-fsyntax-only')

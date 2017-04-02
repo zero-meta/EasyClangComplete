@@ -1,6 +1,7 @@
 # EasyClangComplete #
 
-Sublime Text 3 plugin that offers clang-based auto-completion for C++
+Sublime Text 3 plugin that offers clang-based auto-completion for C, C++,
+Objective-C, and Objective-C++.
 
 ![Example](../pics/autocomplete.gif)
 

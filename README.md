@@ -28,8 +28,6 @@ You are just three simple steps away!
 - **Ubuntu**        : `sudo apt-get install clang`
 - **OSX**           : ships `clang` by default. You are all set!
 - **Windows**       : install the latest release from clang website.
-  + **WARNING**: there seems to be a bug with `libclang` when using clang 4.0.
-    Please install 3.9 on Windows for now.
 - **Other Systems** : use your package manager or install from clang website.
 - clang website: http://llvm.org/releases/download.html
 

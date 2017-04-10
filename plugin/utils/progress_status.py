@@ -16,13 +16,13 @@ MSG_READY_COLOR_SUBLIME = '     READY      '
 
 
 class BaseProgressStatus(object):
-
-    """A base class for progress status"""
+    """A base class for progress status."""
 
     MSG_TAG = '000_ECC'
     MSG_MASK = 'ECC: [{}]'
 
     def __init__(self):
+        """Initialize progress status."""
         self.showing = False
         self.msg_chars = None
         self.msg_ready = None
@@ -52,10 +52,10 @@ class BaseProgressStatus(object):
 
 
 class MoonProgressStatus(BaseProgressStatus):
-
     """Progress status that shows phases of the moon."""
 
     def __init__(self):
+        """Init moon progress status."""
         super(MoonProgressStatus, self).__init__()
         self.idx = 0
         self.msg_chars = MSG_CHARS_MOON
@@ -73,10 +73,10 @@ class MoonProgressStatus(BaseProgressStatus):
 
 
 class ColorSublimeProgressStatus(BaseProgressStatus):
-
     """Progress status that shows phases of the moon."""
 
     def __init__(self):
+        """Init color sublime like progress status."""
         super(ColorSublimeProgressStatus, self).__init__()
         self.msg_chars = MSG_CHARS_COLOR_SUBLIME
         self.msg_ready = MSG_READY_COLOR_SUBLIME

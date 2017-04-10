@@ -8,6 +8,7 @@ env:
     global:
         # Your package name
         - PACKAGE="EasyClangComplete"
+        - SUBLIME_TEXT_VERSION="3"
 matrix:
     include:
     - os: linux

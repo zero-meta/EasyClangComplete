@@ -84,7 +84,6 @@ class Flag:
             flags.append(Flag(entry))
         return flags
 
-
     # generated from `clang -help` with regex: ([-/][\w-]+)\s\<\w+\>\s
     SEPARABLE_PREFIXES = ["-arcmt-migrate-report-output",
                           "-cxx-isystem",

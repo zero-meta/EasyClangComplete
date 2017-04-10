@@ -1,10 +1,8 @@
 """Test compilation database flags generation."""
-import sys
-from os import path
 from unittest import TestCase
 
-sys.path.append(path.dirname(path.dirname(__file__)))
-from plugin.utils.unique_list import UniqueList
+from EasyClangComplete.plugin.utils.unique_list import UniqueList
+
 
 class test_unique_list(TestCase):
     """Test unique list."""

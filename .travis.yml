@@ -31,8 +31,8 @@ before_install:
             sudo pip install --upgrade pep8 pep257;
             sudo pip install coverage codacy-coverage;
       fi
-    - ls /usr/bin | grep clang
-    - ls /usr/local/bin | grep clang
+    - dpkg -L clang-3.4
+    - dpkg -L clang-3.8
     - if [ "$DISTRO" == "Ubuntu 14.04" ]; then
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.4 100;
             sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.4 100;

@@ -10,19 +10,21 @@ language:
 matrix:
     include:
     - os: linux
+      env: DISTRO="Ubuntu 14.04"
       dist: trusty
       sudo: required
       addons:
           apt:
             packages:
-            - clang-3.4
+            - clang
     - os: linux
+      env: DISTRO="Ubuntu 16.04"
       dist: xenial
       sudo: required
       addons:
           apt:
             packages:
-            - clang-3.8
+            - clang
     - os: osx
 
 before_install:

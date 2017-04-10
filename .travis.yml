@@ -39,10 +39,12 @@ before_install:
       fi
     - if [ "$DISTRO" == "Ubuntu 14.04" ]; then
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.4 100;
-            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.4 100
+            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.4 100;
+      fi
     - if [ "$DISTRO" == "Ubuntu 16.04" ]; then
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.8 100;
-            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 100
+            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 100;
+      fi
 
 install:
     - sh travis.sh bootstrap

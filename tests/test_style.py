@@ -18,6 +18,9 @@ class TestStyle(TestCase):
         cmd = PEP8_CMD.format(PLUGIN_SOURCE_FOLDER)
         output = Tools.run_command(cmd)
         print(output)
+        if 'command not found' in output:
+            print('no pep8 found in path!')
+            return
         self.assertTrue(len(output) == 0)
 
     def test_pep257(self):
@@ -25,4 +28,7 @@ class TestStyle(TestCase):
         cmd = PEP257_CMD.format(PLUGIN_SOURCE_FOLDER)
         output = Tools.run_command(cmd)
         print(output)
+        if 'command not found' in output:
+            print('no pep257 found in path!')
+            return
         self.assertTrue(len(output) == 0)

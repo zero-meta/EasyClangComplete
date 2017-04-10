@@ -16,7 +16,7 @@ matrix:
       addons:
           apt:
             packages:
-            - clang
+            - clang-3.4
     - os: linux
       env: DISTRO="Ubuntu 16.04"
       dist: xenial
@@ -24,8 +24,9 @@ matrix:
       addons:
           apt:
             packages:
-            - clang
+            - clang-3.8
     - os: osx
+      env: DISTRO="OSX"
 
 before_install:
     - curl -OL https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/travis.sh
@@ -36,6 +37,12 @@ before_install:
             sudo pip install --upgrade pep8 pep257;
             sudo pip install coverage codacy-coverage;
       fi
+    - if [ "$DISTRO" == "Ubuntu 14.04" ]; then
+            sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.4 100;
+            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.4 100
+    - if [ "$DISTRO" == "Ubuntu 16.04" ]; then
+            sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.8 100;
+            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 100
 
 install:
     - sh travis.sh bootstrap

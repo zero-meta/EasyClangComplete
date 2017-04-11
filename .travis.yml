@@ -1,15 +1,24 @@
-os:
-    - linux
-    - osx
-
-sudo: required
-
 env:
     global:
         # Your package name
         - PACKAGE="EasyClangComplete"
-    matrix:
         - SUBLIME_TEXT_VERSION="3"
+
+language:
+    - python
+
+matrix:
+    include:
+    - os: linux
+      env: DISTRO="Ubuntu 14.04"
+      dist: trusty
+      sudo: required
+    - os: linux
+      env: DISTRO="Ubuntu 16.04"
+      dist: xenial
+      sudo: required
+    - os: osx
+      env: DISTRO="OSX"
 
 before_install:
     - curl -OL https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/travis.sh
@@ -17,8 +26,9 @@ before_install:
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
             export DISPLAY=:99.0;
             sh -e /etc/init.d/xvfb start;
-            sudo apt-get update -qq -y;
-            sudo apt-get install -yqq clang-3.4;
+            sudo apt-get update -yqq;
+            sudo apt-get install -y clang;
+            sudo pip install --upgrade pep8 pep257;
             sudo pip install coverage codacy-coverage;
             sudo apt-get install -yqq gnustep-devel;
       fi
@@ -32,8 +42,6 @@ script:
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
             coverage xml -o coverage.xml;
       fi
-    # testing syntax_test files
-    # - sh travis.sh run_syntax_tests
 
 after_success:
     - python-codacy-coverage -r coverage.xml

@@ -17,9 +17,6 @@ def has_libclang():
     Returns:
         str: row contents
     """
-    # HACK: Disable libclang for windows until #230 is fixed
-    if platform.system() == "Windows":
-        return False
     # Older version of Sublime Text x64 have ctypes crash bug.
     if platform.system() == "Windows" and sublime.arch() == "x64" and \
             int(sublime.version()) < 3123:
@@ -188,10 +185,6 @@ class BaseTestCompleter(object):
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
-        if platform.system() == "Windows":
-            # disable the windows tests for now until AppVeyor fixes things
-            self.tear_down()
-            return
         expected = ['begin\titerator begin()', 'begin()']
         self.assertIn(expected, completions)
         self.tear_down_completer()

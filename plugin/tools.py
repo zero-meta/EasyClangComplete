@@ -1,4 +1,4 @@
-"""This module contains various tools
+"""This module contains various tools.
 
 Attributes:
     log (logging): logger for this module

@@ -28,8 +28,6 @@ You are just three simple steps away!
 - **Ubuntu**        : `sudo apt-get install clang`
 - **OSX**           : ships `clang` by default. You are all set!
 - **Windows**       : install the latest release from clang website.
-  + **WARNING**: there seems to be a bug with `libclang` when using clang 4.0.
-    Please install 3.9 on Windows for now.
 - **Other Systems** : use your package manager or install from clang website.
 - clang website: http://llvm.org/releases/download.html
 
@@ -174,12 +172,17 @@ Please ensure, that your code conforms to this.
 [![Flattr this git repo][img-flattr]][donate-flattr]
 [![Bountysource][img-bountysource]][bountysource-link]
 [![Beerpay][img-beerpay]][beerpay]
+[![Gratipay][img-gratipay]][gratipay]
 
 Current sponsor of this project is my sleep.
 Please buy me a cup of tea if you appreciate the effort.
 
 Also, pull requests are welcome! And don't forget to tell people about this
 plugin! The more people use it - the merrier.
+
+                      ╔═╗┌─┐┌─┐┬ ┬  ╔═╗┬  ┌─┐┌┐┌┌─┐  ╔═╗┌─┐┌┬┐┌─┐┬  ┌─┐┌┬┐┌─┐
+                      ║╣ ├─┤└─┐└┬┘  ║  │  ├─┤││││ ┬  ║  │ ││││├─┘│  ├┤  │ ├┤
+                      ╚═╝┴ ┴└─┘ ┴   ╚═╝┴─┘┴ ┴┘└┘└─┘  ╚═╝└─┘┴ ┴┴  ┴─┘└─┘ ┴ └─┘
 
 [release]: https://github.com/niosus/EasyClangComplete/releases
 [downloads]: https://packagecontrol.io/packages/EasyClangComplete
@@ -194,7 +197,9 @@ plugin! The more people use it - the merrier.
 [cmake-issue]: https://github.com/niosus/EasyClangComplete/issues/19
 [bountysource-link]: https://www.bountysource.com/teams/easyclangcomplete
 [beerpay]: https://beerpay.io/niosus/EasyClangComplete
+[gratipay]: https://gratipay.com/EasyClangComplete/
 
+[img-gratipay]: https://img.shields.io/gratipay/user/niosus.svg?style=flat-square
 [img-beerpay]: https://beerpay.io/niosus/EasyClangComplete/badge.svg?style=flat-square
 [img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg?style=flat-square
 [img-appveyor]: https://img.shields.io/appveyor/ci/niosus/easyclangcomplete/master.svg?style=flat-square&label=windows

@@ -205,17 +205,28 @@ class Completer(BaseCompleter):
             try:
                 if not file_name or not path.exists(file_name):
                     raise ValueError("file name does not exist anymore")
-                # It is important to set this option for clang 4.0 as there is
-                # an assert in ASTUnit.cpp that checks if this flag
-                # corresponds to the one that was used for building the
-                # translation unit. As we use it to create the unit, we need
-                # it here too. See issue #230.
+                if self.version_str.startswith('4'):
+                    log.debug(" using newer version of clang: %s",
+                              self.version_str)
+                    # It is important to set this option for clang 4.0 as
+                    # there is an assert in ASTUnit.cpp that checks if this
+                    # flag corresponds to the one that was used for building
+                    # the translation unit. As we use it to create the unit,
+                    # we need it here too. See issue #230.
+                    include_brief_comments = True
+                else:
+                    log.debug(" using older version of clang: %s",
+                              self.version_str)
+                    # To avoid breaking compatibility with old versions of
+                    # clang, where the assert is different, we make sure to
+                    # pass False if the version is older. See issue #245.
+                    include_brief_comments = False
                 complete_obj = self.tu.codeComplete(
                     file_name,
                     row, col,
                     unsaved_files=files,
                     include_macros=True,
-                    include_brief_comments=True)
+                    include_brief_comments=include_brief_comments)
             except Exception as e:
                 log.error(" error while completing view %s: %s", file_name, e)
                 complete_obj = None

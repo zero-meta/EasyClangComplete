@@ -26,15 +26,7 @@ from .plugin.completion import lib_complete
 from .plugin.completion import bin_complete
 
 # reload the modules
-imp.reload(tools)
-imp.reload(settings_manager)
-imp.reload(error_vis)
-imp.reload(lib_complete)
-imp.reload(bin_complete)
-imp.reload(view_config)
-imp.reload(thread_pool)
-imp.reload(flags_sources)
-imp.reload(progress_status)
+tools.Reloader.reload_all()
 
 # some aliases
 SettingsManager = settings_manager.SettingsManager

@@ -21,13 +21,10 @@ import platform
 import subprocess
 
 import re
+import sys
+import imp
 
 PKG_NAME = path.basename(path.dirname(path.dirname(__file__)))
-
-READY_MSG = 'ECC: [     READY      ]'
-PROGRESS_MSG = 'ECC: [{}]'
-PROGRESS_CHARS = u'⣾⣽⣻⢿⡿⣟⣯⣷'
-
 
 OSX_CLANG_VERSION_DICT = {
     '4.2': '3.2',
@@ -64,12 +61,33 @@ def singleton(class_):
     return getinstance
 
 
+class Reloader:
+    """Reloader for all dependencies."""
+
+    @staticmethod
+    def reload_all():
+        """Reload all loaded modules."""
+        prefix = PKG_NAME + '.plugin.'
+        # reload all twice to make sure all dependencies are satisfied
+        Reloader.reload_once(prefix)
+        Reloader.reload_once(prefix)
+
+    @staticmethod
+    def reload_once(prefix):
+        """Reload all modules once."""
+        for name, module in sys.modules.items():
+            if name.startswith(prefix):
+                log.debug("reloading module: '%s'", name)
+                imp.reload(module)
+
+
 class SublBridge:
     """A small help class that bridges with sublime (maybe will grow).
 
     Attributes:
         NO_DEFAULT_COMPLETIONS (TYPE): Description
     """
+
     NO_DEFAULT_COMPLETIONS = sublime.INHIBIT_WORD_COMPLETIONS \
         | sublime.INHIBIT_EXPLICIT_COMPLETIONS
 

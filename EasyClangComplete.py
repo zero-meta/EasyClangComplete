@@ -10,20 +10,16 @@ import sublime
 import sublime_plugin
 import logging
 import shutil
-import imp
 
 from os import path
 
 from .plugin import tools
-from .plugin import error_vis
 from .plugin import view_config
 from .plugin import flags_sources
 from .plugin.utils import thread_pool
 from .plugin.utils import progress_status
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
-from .plugin.completion import lib_complete
-from .plugin.completion import bin_complete
 
 # reload the modules
 tools.Reloader.reload_all()

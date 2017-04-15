@@ -8,9 +8,6 @@ environment:
 install:
     - ps: appveyor DownloadFile "https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/appveyor.ps1"
     - ps: .\appveyor.ps1 "bootstrap" -verbose
-    # Download and run GNUstep installer for Clang/Objective C
-    - ps: appveyor DownloadFile "http://ftpmain.gnustep.org/pub/gnustep/binaries/windows/gnustep-core-0.35.0-setup.exe"
-    - ps: .\gnustep-core-0.35.0-setup.exe /S
     # install Package Control
     # - ps: .\appveyor.ps1 "install_package_control" -verbose
 

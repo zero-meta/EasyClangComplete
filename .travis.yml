@@ -31,7 +31,6 @@ before_install:
             sudo apt-get install -y clang;
             sudo pip install --upgrade pep8 pep257;
             sudo pip install coverage codacy-coverage;
-            sudo apt-get install -yqq gnustep-devel;
       fi
 
 install:

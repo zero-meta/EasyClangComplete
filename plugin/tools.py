@@ -433,13 +433,15 @@ class Tools:
 
     syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
-    valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx", ".m", ".mm"]
+    valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx",
+                        ".m", ".mm"]
 
     C_SYNTAX = ["C", "C Improved", "C99"]
     CPP_SYNTAX = ["C++", "C++11"]
     OBJECTIVE_C_SYNTAX = ["Objective-C"]
     OBJECTIVE_CPP_SYNTAX = ["Objective-C++"]
-    valid_syntax = C_SYNTAX + CPP_SYNTAX + OBJECTIVE_C_SYNTAX + OBJECTIVE_CPP_SYNTAX
+    valid_syntax = C_SYNTAX + CPP_SYNTAX \
+        + OBJECTIVE_C_SYNTAX + OBJECTIVE_CPP_SYNTAX
 
     SHOW_DEFAULT_COMPLETIONS = None
     HIDE_DEFAULT_COMPLETIONS = ([], sublime.INHIBIT_WORD_COMPLETIONS |

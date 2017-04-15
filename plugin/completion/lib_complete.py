@@ -271,7 +271,7 @@ class Completer(BaseCompleter):
 
             cursor = self.tu.cursor.from_location(
                 self.tu, self.tu.get_location(view.file_name(), (row, col)))
-            if not cursor or cursor.kind.is_declaration():
+            if not cursor:
                 return empty_info
             if cursor.kind in self.objc_message_kinds_list:
                 info_details = ClangUtils.build_objc_message_info_details(

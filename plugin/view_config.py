@@ -88,12 +88,7 @@ class ViewConfig(object):
             return self
         if ViewConfig.needs_reparse(view):
             log.debug(" config updates existing completer.")
-<<<<<<< fd4868e96c0538f7bbb6daf1b58bfa85d8de647c
             self.completer.update(view, settings)
-=======
-            self.completer.update(view, settings.errors_on_save,
-                                  settings.show_phantoms_for_errors)
->>>>>>> Make phanoms more beautifull.
         return self
 
     def needs_update(self, completer, flags):

@@ -161,7 +161,7 @@ class CompileErrors:
             processed_error = processed_error.replace('>', '&gt;')
             if LibClangCompilerVariant.SEVERITY_TAG in entry:
                 severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
-                if severity == 3:
+                if severity > 2:
                     errors_html += "<b>Error:</b><br>"
                 elif severity == 2:
                     errors_html += "<b>Warning:</b><br>"

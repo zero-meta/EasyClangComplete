@@ -135,8 +135,7 @@ class Completer(BaseCompleter):
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
 
-        # initialize unsaved files
-        files = [(file_name, file_body)]
+        unsaved_files = [(file_name, file_body)]
 
         # flags are loaded by base completer already
         log.debug(" clang flags are: %s", self.clang_flags)
@@ -161,7 +160,7 @@ class Completer(BaseCompleter):
                 trans_unit = TU.from_source(
                     filename=file_name,
                     args=self.clang_flags,
-                    unsaved_files=files,
+                    unsaved_files=unsaved_files,
                     options=parse_options)
                 self.tu = trans_unit
             except Exception as e:
@@ -190,7 +189,7 @@ class Completer(BaseCompleter):
             view, completion_request.get_trigger_position())
 
         # unsaved files
-        files = [(file_name, file_body)]
+        unsaved_files = [(file_name, file_body)]
 
         v_id = view.buffer_id()
 
@@ -220,7 +219,7 @@ class Completer(BaseCompleter):
                 complete_obj = self.tu.codeComplete(
                     file_name,
                     row, col,
-                    unsaved_files=files,
+                    unsaved_files=unsaved_files,
                     include_macros=True,
                     include_brief_comments=include_brief_comments)
             except Exception as e:

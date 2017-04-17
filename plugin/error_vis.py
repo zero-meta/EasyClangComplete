@@ -173,7 +173,7 @@ class CompileErrors:
         del current_error_dict[row]
 
     @staticmethod
-    def _on_phantom_navigate(self, url):
+    def _on_phantom_navigate(self):
         """Close all phantoms in active view.
 
         """

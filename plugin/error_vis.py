@@ -23,6 +23,15 @@ class CompileErrors:
 
     err_regions = {}
 
+    HTML_STYLE_MASK = """
+<style>
+html {{
+  background-color: {background_color};
+  color: {text_color};
+}}
+</style>
+"""
+
     def generate(self, view, errors):
         """Generate a dictionary that stores all errors.
 
@@ -162,8 +171,12 @@ class CompileErrors:
             if LibClangCompilerVariant.SEVERITY_TAG in entry:
                 severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
                 if severity > 2:
+                    errors_html = CompileErrors.HTML_STYLE_MASK.format(
+                        background_color="#BB2222", text_color="#EEEEEE")
                     errors_html += "<b>Error:</b><br>"
                 elif severity == 2:
+                    errors_html = CompileErrors.HTML_STYLE_MASK.format(
+                        background_color="#CC5500", text_color="#EEEEEE")
                     errors_html += "<b>Warning:</b><br>"
             errors_html += "<div>" + processed_error + "</div>"
         # Add non-breaking space to prevent popup from getting a newline

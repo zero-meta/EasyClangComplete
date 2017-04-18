@@ -86,6 +86,7 @@ class LibClangCompilerVariant(ClangCompilerVariant):
                            "line\s(?P<row>\d+), " +  # row
                            "column\s(?P<col>\d+)")  # col
     msg_regex = re.compile('[b\"|\"]*(?P<error>[^"]+)\"*')
+    SEVERITY_TAG = 'severity'
 
     def errors_from_output(self, output):
         """Parse errors received from diagnostics of a translation unit.
@@ -102,6 +103,7 @@ class LibClangCompilerVariant(ClangCompilerVariant):
         for diag in output:
             location = str(diag.location)
             spelling = str(diag.spelling)
+            severity = diag.severity
             # [HACK]: have found no other way as there seems to be no option to
             # pass to libclang to avoid producing this error
             if "#pragma once" in spelling:
@@ -121,5 +123,6 @@ class LibClangCompilerVariant(ClangCompilerVariant):
                 continue
             error_dict = pos_search.groupdict()
             error_dict.update(msg_search.groupdict())
+            error_dict[LibClangCompilerVariant.SEVERITY_TAG] = severity
             errors.append(error_dict)
         return errors

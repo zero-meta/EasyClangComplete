@@ -186,9 +186,7 @@ html {{
 
     @staticmethod
     def _on_phantom_navigate(self):
-        """Close all phantoms in active view.
-
-        """
+        """Close all phantoms in active view."""
         sublime.active_window().active_view().erase_phantoms("compile_errors")
 
     @staticmethod
@@ -221,7 +219,7 @@ html {{
 
     @staticmethod
     def _as_phantom_html(errors_dict):
-        """Get error as html for phantom
+        """Get error as html for phantom.
 
         Args:
             errors_dict (dict): Current error

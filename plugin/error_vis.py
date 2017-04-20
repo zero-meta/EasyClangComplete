@@ -17,8 +17,9 @@ class CompileErrors:
 
     Attributes:
         err_regions (dict): dictionary of error regions for view ids
+        phantom_sets (dict): dictionary of pahtom sets for view ids
     """
-
+    _PHATOM_SET_ID = "ECC_compile_errors"
     _TAG = "easy_clang_complete_errors"
     _MAX_POPUP_WIDTH = 1800
 
@@ -91,9 +92,10 @@ html {{
         Args:
             view (sublime.View): current view
         """
-        view.erase_phantoms("compile_errors")
+        view.erase_phantoms(CompileErrors._PHATOM_SET_ID)
         if view.buffer_id() not in self.phantom_sets:
-            phantom_set = sublime.PhantomSet(view, "compile_errors")
+            phantom_set = sublime.PhantomSet(view,
+                                             CompileErrors._PHATOM_SET_ID)
             self.phantom_sets[view.buffer_id()] = phantom_set
         else:
             phantom_set = self.phantom_sets[view.buffer_id()]

@@ -97,7 +97,8 @@ class ClangUtils:
         current_system = platform.system()
         log.debug(" we are on '%s'", platform.system())
         log.debug(" user provided libclang_path: %s", libclang_path)
-        # Get version string for help finding the proper libclang library on Linux
+        # Get version string for help finding the proper libclang library on
+        # Linux
         if libclang_path:
             # User thinks he knows better. Let him try his luck.
             libclang_dir = ClangUtils.try_load_from_user_hint(libclang_path)
@@ -213,16 +214,18 @@ class ClangUtils:
         else:
             log.warning("No spelling for type provided in info.")
             return ""
-
-        result += ClangUtils.link_from_location(
-            ClangUtils.location_from_type(cursor_type),
-            html.escape(cursor_type.spelling))
-
-        result += ' '
+        result += '<b>Definition:</b><br>'
+        if cursor.spelling != cursor.type.spelling:
+            # Don't show duplicates if the user focuses type, not variable
+            result += ClangUtils.link_from_location(
+                ClangUtils.location_from_type(cursor_type),
+                html.escape(cursor_type.spelling))
+            result += ' '
 
         if cursor.location:
-            result += ClangUtils.link_from_location(cursor.location,
-                                               html.escape(cursor.spelling))
+            result += ClangUtils.link_from_location(
+                cursor.location,
+                html.escape(cursor.spelling))
         else:
             result += html.escape(cursor.spelling)
 
@@ -245,8 +248,14 @@ class ClangUtils:
             result += " const"
 
         if cursor.brief_comment:
-            result += "<br><br><b>"
-            result += cursor.brief_comment + "</b>"
+            result += "<br><br><b>Brief documentation:</b><br>"
+            result += "<div>" + cursor.brief_comment + "</div>"
+
+        if cursor.raw_comment:
+            html_raw_comment = ClangUtils.cleanup_comment(cursor.raw_comment)
+            if len(html_raw_comment) > 0:
+                result += "<br><b>Full Doxygen comment:</b>"
+                result += "<br><div>" + html_raw_comment + "</div>"
 
         return result
 
@@ -317,3 +326,31 @@ class ClangUtils:
             result += method_cursor.brief_comment + "</b>"
 
         return result
+    
+    @staticmethod
+    def cleanup_comment(raw_comment):
+        """Cleanup raw doxygen comment."""
+        lines = raw_comment.split('\n')
+        clean_lines = []
+        prev_line = ''
+        is_brief_comment = False
+        for line in lines:
+            clean = line.strip()
+            if clean.startswith('/'):
+                clean = clean[3:]
+            elif clean.startswith('*'):
+                clean = clean[2:]
+            clean = line[3:].strip()
+            prev_line = clean
+            if clean.startswith('@brief') or clean.startswith('/brief'):
+                is_brief_comment = True
+                continue
+            if clean == '':
+                is_brief_comment = False
+            if clean == '' and prev_line == '':
+                # We want to ignore trailing empty lines.
+                continue
+            if is_brief_comment:
+                continue
+            clean_lines.append(clean)
+        return '<br>'.join(clean_lines)

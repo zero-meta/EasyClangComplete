@@ -6,6 +6,8 @@ Attributes:
 import logging
 from os import path
 
+from .completion.compiler_variant import LibClangCompilerVariant
+
 log = logging.getLogger(__name__)
 
 
@@ -20,6 +22,15 @@ class CompileErrors:
     _MAX_POPUP_WIDTH = 1800
 
     err_regions = {}
+
+    HTML_STYLE_MASK = """
+<style>
+html {{
+  background-color: {background_color};
+  color: {text_color};
+}}
+</style>
+"""
 
     def generate(self, view, errors):
         """Generate a dictionary that stores all errors.
@@ -61,7 +72,8 @@ class CompileErrors:
             error_dict (dict): current error dict {row, col, file, region}
         """
         logging.debug(" adding error %s", error_dict)
-        if path.basename(error_dict['file']) == path.basename(view.file_name()):
+        error_source_file = path.basename(error_dict['file'])
+        if error_source_file == path.basename(view.file_name()):
             row = int(error_dict['row'])
             col = int(error_dict['col'])
             point = view.text_point(row - 1, col - 1)
@@ -83,7 +95,7 @@ class CompileErrors:
         current_error_dict = self.err_regions[view.buffer_id()]
         regions = CompileErrors._as_region_list(current_error_dict)
         log.debug(" showing error regions: %s", regions)
-        view.add_regions(CompileErrors._TAG, regions, "string")
+        view.add_regions(CompileErrors._TAG, regions, "code")
 
     def erase_regions(self, view):
         """Erase error regions for view.
@@ -156,7 +168,17 @@ class CompileErrors:
             processed_error = processed_error.replace(' ', '&nbsp;')
             processed_error = processed_error.replace('<', '&lt;')
             processed_error = processed_error.replace('>', '&gt;')
-            errors_html += "<p><tt>" + processed_error + "</tt></p>"
+            if LibClangCompilerVariant.SEVERITY_TAG in entry:
+                severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
+                if severity > 2:
+                    errors_html = CompileErrors.HTML_STYLE_MASK.format(
+                        background_color="#BB2222", text_color="#EEEEEE")
+                    errors_html += "<b>Error:</b><br>"
+                elif severity == 2:
+                    errors_html = CompileErrors.HTML_STYLE_MASK.format(
+                        background_color="#CC5500", text_color="#EEEEEE")
+                    errors_html += "<b>Warning:</b><br>"
+            errors_html += "<div>" + processed_error + "</div>"
         # Add non-breaking space to prevent popup from getting a newline
         # after every word
         return errors_html

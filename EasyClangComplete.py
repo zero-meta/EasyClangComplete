@@ -161,6 +161,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
+        settings = self.settings_manager.settings_for_view(view)
+        if settings.show_phantoms_for_errors:
+            return
         if Tools.is_valid_view(view):
             (row, _) = SublBridge.cursor_pos(view)
             view_config = self.view_config_manager.get_from_cache(view)

@@ -5,32 +5,36 @@ Attributes:
 """
 import logging
 from os import path
+from string import Template
 
-from .completion.compiler_variant import LibClangCompilerVariant
+from ..completion.compiler_variant import LibClangCompilerVariant
 
 log = logging.getLogger(__name__)
 
+PATH_TO_HTML_FOLDER = path.join(
+    path.dirname(path.dirname(__file__)), 'html')
 
-class CompileErrors:
-    """Comple errors is a class that encapsulates compile error visualization.
+POPUP_ERROR_HTML_FILE = path.join(PATH_TO_HTML_FOLDER, "error_popup.html")
+POPUP_WARNING_HTML_FILE = path.join(PATH_TO_HTML_FOLDER, "warning_popup.html")
+
+
+class PopupErrorVis:
+    """A class for compile error visualization with popups.
 
     Attributes:
         err_regions (dict): dictionary of error regions for view ids
     """
-
     _TAG = "easy_clang_complete_errors"
     _MAX_POPUP_WIDTH = 1800
 
-    err_regions = {}
+    ERROR_HTML_TEMPLATE = Template(
+        open(POPUP_ERROR_HTML_FILE, encoding='utf8').read())
+    WARNING_HTML_TEMPLATE = Template(
+        open(POPUP_WARNING_HTML_FILE, encoding='utf8').read())
 
-    HTML_STYLE_MASK = """
-<style>
-html {{
-  background-color: {background_color};
-  color: {text_color};
-}}
-</style>
-"""
+    def __init__(self):
+        """Initialize error visualization."""
+        self.err_regions = {}
 
     def generate(self, view, errors):
         """Generate a dictionary that stores all errors.
@@ -83,7 +87,7 @@ html {{
             else:
                 self.err_regions[view.buffer_id()][row] = [error_dict]
 
-    def show_regions(self, view):
+    def show_errors(self, view):
         """Show current error regions.
 
         Args:
@@ -93,9 +97,9 @@ html {{
             # view has no errors for it
             return
         current_error_dict = self.err_regions[view.buffer_id()]
-        regions = CompileErrors._as_region_list(current_error_dict)
+        regions = PopupErrorVis._as_region_list(current_error_dict)
         log.debug(" showing error regions: %s", regions)
-        view.add_regions(CompileErrors._TAG, regions, "code")
+        view.add_regions(PopupErrorVis._TAG, regions, "code")
 
     def erase_regions(self, view):
         """Erase error regions for view.
@@ -107,7 +111,7 @@ html {{
             # view has no errors for it
             return
         log.debug(" erasing error regions for view %s", view.buffer_id())
-        view.erase_regions(CompileErrors._TAG)
+        view.erase_regions(PopupErrorVis._TAG)
 
     def show_popup_if_needed(self, view, row):
         """Show a popup if it is needed in this row.
@@ -121,7 +125,7 @@ html {{
         current_err_region_dict = self.err_regions[view.buffer_id()]
         if row in current_err_region_dict:
             errors_dict = current_err_region_dict[row]
-            errors_html = CompileErrors._as_html(errors_dict)
+            errors_html = PopupErrorVis._as_html(errors_dict)
             view.show_popup(errors_html, max_width=self._MAX_POPUP_WIDTH)
         else:
             log.debug(" no error regions for row: %s", row)
@@ -139,22 +143,6 @@ html {{
         self.erase_regions(view)
         self.err_regions[view.buffer_id()].clear()
 
-    def remove_region(self, view_id, row):
-        """Remove a region for view_id in row.
-
-        Args:
-            view_id (int): view id
-            row (int): row number
-        """
-        if view_id not in self.err_regions:
-            # no errors for this view
-            return
-        current_error_dict = self.err_regions[view_id]
-        if row not in current_error_dict:
-            # no errors for this row
-            return
-        del current_error_dict[row]
-
     @staticmethod
     def _as_html(errors_dict):
         """Show error as html.
@@ -162,26 +150,21 @@ html {{
         Args:
             errors_dict (dict): Current error
         """
+        import cgi
+        errors_html_mask = PopupErrorVis.WARNING_HTML_TEMPLATE
         errors_html = ""
         for entry in errors_dict:
-            processed_error = entry['error']
+            processed_error = cgi.escape(entry['error'])
+            # Add non-breaking space to prevent popup from getting a newline
+            # after every word
             processed_error = processed_error.replace(' ', '&nbsp;')
-            processed_error = processed_error.replace('<', '&lt;')
-            processed_error = processed_error.replace('>', '&gt;')
             if LibClangCompilerVariant.SEVERITY_TAG in entry:
                 severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
                 if severity > 2:
-                    errors_html = CompileErrors.HTML_STYLE_MASK.format(
-                        background_color="#BB2222", text_color="#EEEEEE")
-                    errors_html += "<b>Error:</b><br>"
-                elif severity == 2:
-                    errors_html = CompileErrors.HTML_STYLE_MASK.format(
-                        background_color="#CC5500", text_color="#EEEEEE")
-                    errors_html += "<b>Warning:</b><br>"
+                    errors_html_mask = PopupErrorVis.ERROR_HTML_TEMPLATE
             errors_html += "<div>" + processed_error + "</div>"
-        # Add non-breaking space to prevent popup from getting a newline
-        # after every word
-        return errors_html
+        # add error to html template
+        return errors_html_mask.substitute(content=errors_html)
 
     @staticmethod
     def _as_region_list(err_regions_dict):

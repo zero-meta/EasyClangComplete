@@ -152,7 +152,8 @@ class Completer(BaseCompleter):
         log.debug(" rebuilding done in %s seconds", end - start)
 
         if show_errors:
-            self.show_errors(view, output_text)
+            self.show_errors(view, output_text,
+                             settings.show_phantoms_for_errors)
 
     def run_clang_command(self, view, task_type, cursor_pos=0):
         """Construct and run clang command based on task.

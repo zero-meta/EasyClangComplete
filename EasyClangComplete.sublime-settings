@@ -99,5 +99,8 @@
 
   // Controls if libclang will cache the results.
   // This works faster, but in rare cases can generate wrong completions.
-  "use_libclang_caching": true
+  "use_libclang_caching": true,
+
+  // Enable showing phantoms instead of popups for errors
+  "show_phantoms_for_errors": false
 }

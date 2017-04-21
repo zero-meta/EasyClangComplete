@@ -135,8 +135,7 @@ class Completer(BaseCompleter):
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
 
-        # initialize unsaved files
-        files = [(file_name, file_body)]
+        unsaved_files = [(file_name, file_body)]
 
         # flags are loaded by base completer already
         log.debug(" clang flags are: %s", self.clang_flags)
@@ -161,7 +160,7 @@ class Completer(BaseCompleter):
                 trans_unit = TU.from_source(
                     filename=file_name,
                     args=self.clang_flags,
-                    unsaved_files=files,
+                    unsaved_files=unsaved_files,
                     options=parse_options)
                 self.tu = trans_unit
             except Exception as e:
@@ -190,7 +189,7 @@ class Completer(BaseCompleter):
             view, completion_request.get_trigger_position())
 
         # unsaved files
-        files = [(file_name, file_body)]
+        unsaved_files = [(file_name, file_body)]
 
         v_id = view.buffer_id()
 
@@ -220,7 +219,7 @@ class Completer(BaseCompleter):
                 complete_obj = self.tu.codeComplete(
                     file_name,
                     row, col,
-                    unsaved_files=files,
+                    unsaved_files=unsaved_files,
                     include_macros=True,
                     include_brief_comments=include_brief_comments)
             except Exception as e:
@@ -267,7 +266,7 @@ class Completer(BaseCompleter):
 
             cursor = self.tu.cursor.from_location(
                 self.tu, self.tu.get_location(view.file_name(), (row, col)))
-            if not cursor or cursor.kind.is_declaration():
+            if not cursor:
                 return empty_info
             if cursor.referenced and cursor.referenced.kind.is_declaration():
                 info_details = ClangUtils.build_info_details(
@@ -315,7 +314,8 @@ class Completer(BaseCompleter):
             end = time.time()
             log.debug(" reparsed in %s seconds", end - start)
             if settings.errors_on_save:
-                self.show_errors(view, self.tu.diagnostics)
+                self.show_errors(view, self.tu.diagnostics,
+                                 settings.show_phantoms_for_errors)
             return True
         log.error(" no translation unit for view id %s", v_id)
         return False

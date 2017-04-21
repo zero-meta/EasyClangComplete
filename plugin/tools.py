@@ -664,7 +664,9 @@ class Tools:
         match = version_regex.search(output_text)
         if match:
             version_str = match.group()
-            if version_str > "3.8" and platform.system() == "Darwin":
+            # TODO: we may need to revisit this and detect, say, word apple in
+            # the output of clang --version
+            if version_str >= "4.2" and platform.system() == "Darwin":
                 # info from this table: https://gist.github.com/yamaya/2924292
                 osx_version = version_str[:3]
                 try:

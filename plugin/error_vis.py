@@ -8,6 +8,7 @@ import sublime
 from os import path
 
 from .completion.compiler_variant import LibClangCompilerVariant
+from .tools import SublBridge
 
 log = logging.getLogger(__name__)
 
@@ -19,7 +20,6 @@ class CompileErrors:
         err_regions (dict): dictionary of error regions for view ids
         phantom_sets (dict): dictionary of pahtom sets for view ids
     """
-    _PHATOM_SET_ID = "ECC_compile_errors"
     _TAG = "easy_clang_complete_errors"
     _MAX_POPUP_WIDTH = 1800
 
@@ -92,10 +92,9 @@ html {{
         Args:
             view (sublime.View): current view
         """
-        view.erase_phantoms(CompileErrors._PHATOM_SET_ID)
+        view.erase_phantoms(CompileErrors._TAG)
         if view.buffer_id() not in self.phantom_sets:
-            phantom_set = sublime.PhantomSet(view,
-                                             CompileErrors._PHATOM_SET_ID)
+            phantom_set = sublime.PhantomSet(view, CompileErrors._TAG)
             self.phantom_sets[view.buffer_id()] = phantom_set
         else:
             phantom_set = self.phantom_sets[view.buffer_id()]
@@ -189,7 +188,7 @@ html {{
     @staticmethod
     def _on_phantom_navigate(self):
         """Close all phantoms in active view."""
-        sublime.active_window().active_view().erase_phantoms("compile_errors")
+        SublBridge.erase_phantoms(CompileErrors._TAG)
 
     @staticmethod
     def _as_html(errors_dict):

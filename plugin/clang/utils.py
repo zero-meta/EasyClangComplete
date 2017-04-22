@@ -326,7 +326,7 @@ class ClangUtils:
             result += method_cursor.brief_comment + "</b>"
 
         return result
-    
+
     @staticmethod
     def cleanup_comment(raw_comment):
         """Cleanup raw doxygen comment."""

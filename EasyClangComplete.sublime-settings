@@ -49,13 +49,15 @@
     {"file": ".clang_complete"},
   ],
 
-  // show compile errors on save
-  "errors_on_save": true,
+  // Show compile errors in this style on file save.
+  // Possible styles: "popups", "phantoms", "none"
+  "errors_style": "popups",
 
-  // triggers for auto-completion
+  // Triggers for auto-completion.
   "triggers" : [ ".", "->", "::"],
 
-  // use libclang. If set to false will use clang_binary and parse the output of
+  // Use libclang.
+  // If set to false will use clang_binary and parse the output of
   // `clang_binary -Xclang -code-complete-at...` instead.
   "use_libclang" : true,
 
@@ -100,7 +102,4 @@
   // Controls if libclang will cache the results.
   // This works faster, but in rare cases can generate wrong completions.
   "use_libclang_caching": true,
-
-  // Enable showing phantoms instead of popups for errors
-  "show_phantoms_for_errors": false
 }

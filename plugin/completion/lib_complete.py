@@ -16,6 +16,7 @@ from ..tools import Tools
 from ..tools import SublBridge
 from ..tools import PKG_NAME
 from ..clang.utils import ClangUtils
+from ..settings.settings_storage import SettingsStorage
 
 from threading import RLock
 from os import path
@@ -314,7 +315,7 @@ class Completer(BaseCompleter):
             self.tu.reparse()
             end = time.time()
             log.debug(" reparsed in %s seconds", end - start)
-            if settings.errors_on_save:
+            if settings.errors_style != SettingsStorage.NONE_STYLE:
                 self.show_errors(view, self.tu.diagnostics)
             return True
         log.error(" no translation unit for view id %s", v_id)

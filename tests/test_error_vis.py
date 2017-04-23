@@ -5,6 +5,7 @@ from os import path
 from EasyClangComplete.plugin.error_vis import popup_error_vis
 from EasyClangComplete.plugin.error_vis import phantom_error_vis
 from EasyClangComplete.plugin.settings import settings_manager
+from EasyClangComplete.plugin.settings import settings_storage
 from EasyClangComplete.plugin import view_config
 
 from EasyClangComplete.tests import gui_test_wrapper
@@ -13,16 +14,18 @@ imp.reload(gui_test_wrapper)
 imp.reload(popup_error_vis)
 imp.reload(phantom_error_vis)
 imp.reload(settings_manager)
+imp.reload(settings_storage)
 imp.reload(view_config)
 
 PopupErrorVis = popup_error_vis.PopupErrorVis
 PhantomErrorVis = phantom_error_vis.PhantomErrorVis
 GuiTestWrapper = gui_test_wrapper.GuiTestWrapper
 SettingsManager = settings_manager.SettingsManager
+SettingsStorage = settings_storage.SettingsStorage
 ViewConfigManager = view_config.ViewConfigManager
 
-PHANTOMS = "phantoms"
-POPUPS = "popups"
+PHANTOMS = SettingsStorage.PHANTOMS_STYLE
+POPUPS = SettingsStorage.POPUPS_STYLE
 
 
 class TestErrorVis:
@@ -38,7 +41,7 @@ class TestErrorVis:
         settings = manager.settings_for_view(self.view)
         settings.use_libclang = self.use_libclang
 
-        settings.show_phantoms_for_errors = bool(error_style == PHANTOMS)
+        settings.errors_style = error_style
 
         view_config_manager = ViewConfigManager()
         view_config = view_config_manager.load_for_view(self.view, settings)

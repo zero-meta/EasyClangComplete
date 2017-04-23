@@ -15,6 +15,7 @@ from ..tools import SublBridge
 from .base_complete import BaseCompleter
 from .compiler_variant import ClangCompilerVariant
 from .compiler_variant import ClangClCompilerVariant
+from ..settings.settings_storage import SettingsStorage
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -67,16 +68,17 @@ class Completer(BaseCompleter):
 
     opts_regex = re.compile("{#|#}")
 
-    def __init__(self, clang_binary, version_str):
+    def __init__(self, clang_binary, version_str, error_vis):
         """Initialize the Completer.
 
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.8++'
             version_str (str): string for clang version e.g. '3.8.0'
+            error_vis (obj): an object of error visualizer
 
         """
         # init common completer interface
-        super().__init__(clang_binary, version_str)
+        super().__init__(clang_binary, version_str, error_vis)
         self.clang_binary = clang_binary
 
         # Create compiler options of specific variant of the compiler.
@@ -140,8 +142,7 @@ class Completer(BaseCompleter):
                 dummy function as we gain nothing from building it with binary.
 
         """
-        show_errors = settings.errors_on_save
-        if not show_errors:
+        if settings.errors_style == SettingsStorage.NONE_STYLE:
             # in this class there is no need to rebuild the file. It brings no
             # benefits. We only want to do it if we need to show errors.
             return False
@@ -151,8 +152,7 @@ class Completer(BaseCompleter):
         end = time.time()
         log.debug(" rebuilding done in %s seconds", end - start)
 
-        if show_errors:
-            self.show_errors(view, output_text)
+        self.show_errors(view, output_text)
 
     def run_clang_command(self, view, task_type, cursor_pos=0):
         """Construct and run clang command based on task.

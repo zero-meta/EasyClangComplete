@@ -104,6 +104,12 @@ class SublBridge:
         view.erase_status("000_ECC")
 
     @staticmethod
+    def erase_phantoms(tag):
+        """Erase phantoms for the current view."""
+        view = sublime.active_window().active_view()
+        view.erase_phantoms(tag)
+
+    @staticmethod
     def active_view_id():
         """Get the id of the active view.
 

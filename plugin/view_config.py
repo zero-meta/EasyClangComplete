@@ -20,10 +20,15 @@ from .utils.unique_list import UniqueList
 from .completion import lib_complete
 from .completion import bin_complete
 
+from .error_vis.phantom_error_vis import PhantomErrorVis
+from .error_vis.popup_error_vis import PopupErrorVis
+
 from .flags_sources.flags_file import FlagsFile
 from .flags_sources.cmake_file import CMakeFile
 from .flags_sources.flags_source import FlagsSource
 from .flags_sources.compilation_db import CompilationDb
+
+from .settings.settings_storage import SettingsStorage
 
 log = logging.getLogger(__name__)
 
@@ -251,11 +256,15 @@ class ViewConfig(object):
         Returns:
             Completer: A completer. Can be lib completer or bin completer.
         """
+        error_vis = PopupErrorVis()
+        if settings.errors_style == SettingsStorage.PHANTOMS_STYLE:
+            error_vis = PhantomErrorVis()
         completer = None
         if settings.use_libclang:
             log.info(" init completer based on libclang")
             completer = lib_complete.Completer(settings.clang_binary,
                                                settings.clang_version,
+                                               error_vis,
                                                settings.libclang_path)
             if not completer.valid:
                 log.error(" cannot initialize completer with libclang.")
@@ -264,7 +273,8 @@ class ViewConfig(object):
         if not completer:
             log.info(" init completer based on clang from cmd")
             completer = bin_complete.Completer(settings.clang_binary,
-                                               settings.clang_version)
+                                               settings.clang_version,
+                                               error_vis)
         return completer
 
     @staticmethod

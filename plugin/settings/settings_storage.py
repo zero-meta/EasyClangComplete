@@ -48,6 +48,12 @@ class SettingsStorage:
     MOON_STYLE_TAG = "Moon"
 
     PROGRESS_STYLES = [COLOR_SUBLIME_STYLE_TAG, MOON_STYLE_TAG]
+
+    POPUPS_STYLE = "popups"
+    PHANTOMS_STYLE = "phantoms"
+    NONE_STYLE = "none"
+    ERROR_STYLES = [POPUPS_STYLE, PHANTOMS_STYLE, NONE_STYLE]
+
     # refer to Preferences.sublime-settings for usage explanation
     NAMES_ENUM = [
         "autocomplete_all",
@@ -56,7 +62,6 @@ class SettingsStorage:
         "common_flags",
         "cpp_flags",
         "use_libclang_caching",
-        "errors_on_save",
         "flags_sources",
         "hide_default_completions",
         "include_file_folder",
@@ -69,6 +74,7 @@ class SettingsStorage:
         "verbose",
         "show_type_info",
         "libclang_path",
+        "errors_style",
         "progress_style",
     ]
 
@@ -121,26 +127,33 @@ class SettingsStorage:
         If any of the settings is None the settings are not valid.
 
         Returns:
-            bool: validity of settings
+            (bool, str): validity of settings + error message.
         """
+        error_msg = ""
         for key, value in self.__dict__.items():
             if key.startswith('__') or callable(key):
                 continue
             if value is None:
-                log.critical(" no setting '%s' found!", key)
-                return False
+                error_msg = "No value for setting '{}' found!".format(key)
+                return False, error_msg
         if self.progress_style not in SettingsStorage.PROGRESS_STYLES:
-            log.critical(" progress style %s is not one of '%s'",
-                         self.progress_style, SettingsStorage.PROGRESS_STYLES)
+            error_msg = "Progress style '{}' is not one of {}".format(
+                self.progress_style, SettingsStorage.PROGRESS_STYLES)
+            return False, error_msg
+        if self.errors_style not in SettingsStorage.ERROR_STYLES:
+            error_msg = "Error style '{}' is not one of {}".format(
+                self.errors_style, SettingsStorage.ERROR_STYLES)
+            return False, error_msg
         for source_dict in self.flags_sources:
             if "file" not in source_dict:
-                log.critical(" no 'file' in a flags source: %s", source_dict)
-                return False
+                error_msg = "No 'file' setting in a flags source '{}'".format(
+                    source_dict)
+                return False, error_msg
             if source_dict["file"] not in SettingsStorage.FLAG_SOURCES:
-                log.critical(" flag source: '%s' is not one of '%s'!",
-                             source_dict["file"], SettingsStorage.FLAG_SOURCES)
-                return False
-        return True
+                error_msg = "flag source '{}' is not one of {}".format(
+                    source_dict["file"], SettingsStorage.FLAG_SOURCES)
+                return False, error_msg
+        return True, ""
 
     def __load_vars_from_settings(self, settings, project_specific=False):
         """Load all settings and add them as attributes of self.

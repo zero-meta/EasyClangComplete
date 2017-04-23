@@ -143,7 +143,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if view.settings().get("disable_easy_clang_complete"):
             return
         if not Tools.is_valid_view(view):
-            EasyClangComplete.thread_pool.progress_status.erase_status()
+            try:
+                EasyClangComplete.thread_pool.progress_status.erase_status()
+            except AttributeError as e:
+                log.debug(" cannot clear status, %s", e)
             return
         EasyClangComplete.thread_pool.progress_status.showing = True
         log.debug(" on_activated_async view id %s", view.buffer_id())
@@ -161,6 +164,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
+        settings = self.settings_manager.settings_for_view(view)
+        if settings.errors_style == SettingsStorage.PHANTOMS_STYLE:
+            return
         if Tools.is_valid_view(view):
             (row, _) = SublBridge.cursor_pos(view)
             view_config = self.view_config_manager.get_from_cache(view)

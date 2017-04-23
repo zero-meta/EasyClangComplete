@@ -308,8 +308,9 @@ class ClangUtils:
         method_and_params = method_cursor.spelling.split(':')
         method_name = method_and_params[0]
         if method_cursor.location:
-            result += ClangUtils.link_from_location(method_cursor.location,
-                                               html.escape(method_name))
+            result += ClangUtils.link_from_location(
+                method_cursor.location,
+                html.escape(method_name))
         else:
             result += html.escape(method_cursor.spelling)
 
@@ -342,7 +343,7 @@ class ClangUtils:
                 clean = clean[2:]
             clean = line[3:].strip()
             prev_line = clean
-            if clean.startswith('@brief') or clean.startswith('/brief'):
+            if clean[1:].startswith('brief'):
                 is_brief_comment = True
                 continue
             if clean == '':

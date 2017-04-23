@@ -137,10 +137,10 @@ class test_tools_command(TestCase):
         # Verify that we got the expected completions back.
         self.assertEqual(status, PosStatus.WRONG_TRIGGER)
 
-        # check that ' >' does not trigger completions
-        pos = self.view.text_point(2, 4)
+        # check that 'a' does not trigger completions
+        pos = self.view.text_point(2, 3)
         current_word = self.view.substr(self.view.word(pos))
-        self.assertEqual(current_word, " >")
+        self.assertEqual(current_word, "a")
 
         status = Tools.get_pos_status(pos, self.view, settings)
 

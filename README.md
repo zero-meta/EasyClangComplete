@@ -1,7 +1,7 @@
 # EasyClangComplete #
 
-Plugin for Sublime Text 3 for easy to use, out of the box autocompletions for C
-and C++.
+Plugin for Sublime Text 3 for easy to use, out of the box autocompletions for C,
+C++, Objective-C, and Objective-C++.
 
 ![Example](pics/autocomplete.gif)
 

@@ -18,7 +18,7 @@
     "-I/usr/include",
     "-I$project_base_path/src",
     // this is needed to include the correct headers for clang
-    "-I/usr/lib/clang/$clang_version/include"
+    "-I/usr/lib/clang/$clang_version/include",
   ],
   // C specific flags. Prepend common_flags for C files.
   "c_flags" : [
@@ -26,6 +26,14 @@
   ],
   // C++ specific flags. Prepend common_flags for C++ files.
   "cpp_flags" : [
+    "-std=c++11"
+  ],
+  // Objective-C specific flags. Prepend common_flags for Objective-C files.
+  "objective_c_flags" : [
+    "-std=c11"
+  ],
+  // Objective-C++ specific flags. Prepend common_flags for Objective-C++ files.
+  "objective_cpp_flags" : [
     "-std=c++11"
   ],
 
@@ -53,8 +61,8 @@
   // Possible styles: "popups", "phantoms", "none"
   "errors_style": "popups",
 
-  // Triggers for auto-completion.
-  "triggers" : [ ".", "->", "::"],
+  // triggers for auto-completion
+  "triggers" : [ ".", "->", "::", " "],
 
   // Use libclang.
   // If set to false will use clang_binary and parse the output of

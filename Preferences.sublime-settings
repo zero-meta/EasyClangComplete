@@ -11,6 +11,14 @@
     {
       "selector": "source.c - string - comment - constant.numeric",
       "characters": ".>:",
+    },
+    {
+      "selector": "source.objc++ - string - comment - constant.numeric",
+      "characters": ".>: ",
+    },
+    {
+      "selector": "source.objc - string - comment - constant.numeric",
+      "characters": ".>: ",
     }
   ],
 }

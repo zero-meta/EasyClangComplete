@@ -41,7 +41,9 @@ class TestFlagsFile(TestCase):
 
         flags_file = FlagsFile(['-I', '-isystem'])
         flags = flags_file.get_flags(test_file_path)
-        self.assertIn(Flag('-std=c++11'), flags)
+        # This flag only exists in .clang_complete to help us test that
+        # we can read the flag.
+        self.assertIn(Flag('-Wabi'), flags)
 
     def test_fail_to_find(self):
         """Test failing to find a .clang_complete file."""

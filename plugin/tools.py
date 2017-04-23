@@ -457,11 +457,15 @@ class Tools:
 
     syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
-    valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
+    valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx",
+                        ".m", ".mm"]
 
     C_SYNTAX = ["C", "C Improved", "C99"]
     CPP_SYNTAX = ["C++", "C++11"]
-    valid_syntax = C_SYNTAX + CPP_SYNTAX
+    OBJECTIVE_C_SYNTAX = ["Objective-C"]
+    OBJECTIVE_CPP_SYNTAX = ["Objective-C++"]
+    valid_syntax = C_SYNTAX + CPP_SYNTAX \
+        + OBJECTIVE_C_SYNTAX + OBJECTIVE_CPP_SYNTAX
 
     SHOW_DEFAULT_COMPLETIONS = None
     HIDE_DEFAULT_COMPLETIONS = ([], sublime.INHIBIT_WORD_COMPLETIONS |
@@ -483,13 +487,17 @@ class Tools:
             view (sublime.View): Current view
 
         Returns:
-            str: language, "C" or "C++"
+            str: language, "C", "C++", "Objective-C", or "Objective-C++""
         """
         syntax = Tools.get_view_syntax(view)
         if syntax in Tools.C_SYNTAX:
             return "C"
         if syntax in Tools.CPP_SYNTAX:
             return "C++"
+        if syntax in Tools.OBJECTIVE_C_SYNTAX:
+            return "Objective-C"
+        if syntax in Tools.OBJECTIVE_CPP_SYNTAX:
+            return "Objective-C++"
         return None
 
     @staticmethod

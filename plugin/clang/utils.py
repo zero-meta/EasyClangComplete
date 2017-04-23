@@ -214,7 +214,10 @@ class ClangUtils:
         else:
             log.warning("No spelling for type provided in info.")
             return ""
-        result += '<b>Definition:</b><br>'
+        result += '<b>Declaration:</b><br>'
+        if cursor.is_static_method():
+            result += "static "
+
         if cursor.spelling != cursor.type.spelling:
             # Don't show duplicates if the user focuses type, not variable
             result += ClangUtils.link_from_location(
@@ -242,8 +245,6 @@ class ClangUtils:
                 result += html.escape(', '.join(args))
             result += ')'
 
-        if cursor.is_static_method():
-            result = "static " + result
         if cursor.is_const_method():
             result += " const"
 

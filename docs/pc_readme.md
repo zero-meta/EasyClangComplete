@@ -31,7 +31,9 @@ set!
 Plugin will search for a compilation database `compile_commands.json` in the
 project folder and will load it to complete your code.
 
-If you want to specify a custom path to a comilation database you can do it in settings:
+If you want to specify a custom path to a compilation database you can do it in
+settings:
+
 ```json
 "flags_sources": [
     {"file": "compile_commands.json", "search_in": "<YOUR_PATH>"},

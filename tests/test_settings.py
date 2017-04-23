@@ -27,13 +27,14 @@ class test_settings(GuiTestWrapper):
         self.assertIsNotNone(settings.common_flags)
         self.assertIsNotNone(settings.clang_binary)
         self.assertIsNotNone(settings.flags_sources)
-        self.assertIsNotNone(settings.errors_on_save)
+        self.assertIsNotNone(settings.errors_style)
 
     def test_valid(self):
         """Test validity."""
         manager = SettingsManager()
         settings = manager.user_settings()
-        self.assertTrue(settings.is_valid())
+        valid, _ = settings.is_valid()
+        self.assertTrue(valid)
 
     def test_populate_flags(self):
         """Testing include population."""
@@ -45,7 +46,8 @@ class test_settings(GuiTestWrapper):
         # now test the things
         manager = SettingsManager()
         settings = manager.user_settings()
-        self.assertTrue(settings.is_valid())
+        valid, _ = settings.is_valid()
+        self.assertTrue(valid)
 
         initial_common_flags = list(settings.common_flags)
         settings = manager.settings_for_view(self.view)

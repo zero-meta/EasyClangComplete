@@ -141,7 +141,7 @@ class PopupErrorVis:
             return
         view.hide_popup()
         self.erase_regions(view)
-        self.err_regions[view.buffer_id()].clear()
+        del self.err_regions[view.buffer_id()]
 
     @staticmethod
     def _as_html(errors_dict):

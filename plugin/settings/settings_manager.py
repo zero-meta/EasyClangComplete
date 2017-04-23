@@ -125,7 +125,13 @@ class SettingsManager:
         self.__default_settings = SettingsStorage(self.__subl_settings)
 
         # check validity
-        if not self.__default_settings.is_valid():
-            log.critical(" Could not load settings!")
-            log.critical(" NO AUTOCOMPLETE WILL BE AVAILABLE")
+        valid, error_msg = self.__default_settings.is_valid()
+        if not valid:
+            error_dialog_msg = """
+EasyClangComplete:
+
+An error has occurred while parsing settings:
+{}
+""".format(error_msg)
+            sublime.error_message(error_dialog_msg)
             raise RuntimeError("Settings could not be loaded.")

@@ -44,7 +44,7 @@ class PhantomErrorVis(PopupErrorVis):
         current_error_dict = self.err_regions[view.buffer_id()]
         for err in current_error_dict:
             errors_dict = current_error_dict[err]
-            errors_html = PhantomErrorVis._as_phantom_html(errors_dict)
+            errors_html = PhantomErrorVis._as_html(errors_dict)
             pt = view.text_point(err - 1, 1)
             phantoms.append(sublime.Phantom(
                 sublime.Region(pt, view.line(pt).b),
@@ -89,7 +89,7 @@ class PhantomErrorVis(PopupErrorVis):
         SublBridge.erase_phantoms(PopupErrorVis._TAG)
 
     @staticmethod
-    def _as_phantom_html(errors_dict):
+    def _as_html(errors_dict):
         """Get error as html for phantom.
 
         Args:

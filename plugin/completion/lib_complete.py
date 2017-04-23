@@ -16,6 +16,7 @@ from ..tools import Tools
 from ..tools import SublBridge
 from ..tools import PKG_NAME
 from ..clang.utils import ClangUtils
+from ..settings.settings_storage import SettingsStorage
 
 from threading import RLock
 from os import path
@@ -100,6 +101,10 @@ class Completer(BaseCompleter):
 
             self.function_kinds_list = [cindex.CursorKind.FUNCTION_DECL,
                                         cindex.CursorKind.CXX_METHOD]
+
+            self.objc_message_kinds_list = [
+                cindex.CursorKind.OBJC_MESSAGE_EXPR,
+            ]
 
             # If we haven't already initialized the clang Python bindings, try
             # to figure out the path libclang.
@@ -269,6 +274,10 @@ class Completer(BaseCompleter):
                 self.tu, self.tu.get_location(view.file_name(), (row, col)))
             if not cursor:
                 return empty_info
+            if cursor.kind in self.objc_message_kinds_list:
+                info_details = ClangUtils.build_objc_message_info_details(
+                    cursor)
+                return (tooltip_request, info_details)
             if cursor.referenced and cursor.referenced.kind.is_declaration():
                 info_details = ClangUtils.build_info_details(
                     cursor.referenced, self.function_kinds_list)
@@ -314,7 +323,7 @@ class Completer(BaseCompleter):
             self.tu.reparse()
             end = time.time()
             log.debug(" reparsed in %s seconds", end - start)
-            if settings.errors_on_save:
+            if settings.errors_style != SettingsStorage.NONE_STYLE:
                 self.show_errors(view, self.tu.diagnostics)
             return True
         log.error(" no translation unit for view id %s", v_id)
@@ -389,7 +398,7 @@ class Completer(BaseCompleter):
                     continue
                 hint += chunk.spelling
                 if chunk.isKindTypedText():
-                    trigger = chunk.spelling
+                    trigger += chunk.spelling
                 if chunk.isKindResultType():
                     hint += ' '
                     continue

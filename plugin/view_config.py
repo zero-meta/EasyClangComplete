@@ -28,6 +28,8 @@ from .flags_sources.cmake_file import CMakeFile
 from .flags_sources.flags_source import FlagsSource
 from .flags_sources.compilation_db import CompilationDb
 
+from .settings.settings_storage import SettingsStorage
+
 log = logging.getLogger(__name__)
 
 
@@ -255,7 +257,7 @@ class ViewConfig(object):
             Completer: A completer. Can be lib completer or bin completer.
         """
         error_vis = PopupErrorVis()
-        if settings.show_phantoms_for_errors:
+        if settings.errors_style == SettingsStorage.PHANTOMS_STYLE:
             error_vis = PhantomErrorVis()
         completer = None
         if settings.use_libclang:
@@ -288,7 +290,15 @@ class ViewConfig(object):
         """
         current_lang = Tools.get_view_lang(view)
         lang_flags = []
-        if current_lang == 'C':
+        if current_lang == "Objective-C":
+            if need_lang_flags:
+                lang_flags += ["-x"] + ["objective-c"]
+            lang_flags += settings.objective_c_flags
+        elif current_lang == "Objective-C++":
+            if need_lang_flags:
+                lang_flags += ["-x"] + ["objective-c++"]
+            lang_flags += settings.objective_cpp_flags
+        elif current_lang == 'C':
             if need_lang_flags:
                 lang_flags += ["-x"] + ["c"]
             lang_flags += settings.c_flags

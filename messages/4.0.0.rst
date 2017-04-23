@@ -1,0 +1,24 @@
+Version 4.0.0
+=============
+
+New features:
+-------------
+- **BREAKING CHANGE**:
+  - New setting        : "errors_style".
+  - Deprecated setting : "errors_on_save"
+- The new setting "error_style" allows for a choice between popups and
+  phantoms to show the compilation errors. See settings for more info.
+- Support for Objective C and Objective C++ (only tested on OSX)
+- Seems that the plugin is fast enough, so we have added " " (space) as a
+  trigger for completion.
+- Doxygen comment parsing has gotten slightly better.
+
+Thanks!
+-------
+- @simia who has implemented the phantoms for showing errors.
+- @kjteske who has implemented the Objective C/C++ support.
+
+Support it
+----------
+💜 this plugin? Consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

@@ -79,6 +79,9 @@ Pick *ANY* of the following:
   }
   ```
 
+These settings are prioritized in a configurable way. Check out the settings to
+learn more about it.
+
 ## That's it! You're ready to use the plugin! ##
 
 # More on the plugin #
@@ -86,15 +89,13 @@ All the essential information to make the plugin run is written above. If you
 are still interested in more details - please read on.
 
 ## General info ##
-The plugin has two modes:
+The plugin uses `libclang` with its python bindings. This method fully utilizes
+caching from `libclang` that makes your completions blazingly fast. It is unit
+tested to complete STL functions on Linux, OSX and Windows platforms.
 
-- [DEFAULT]: uses `libclang` with its python bindings. This is the better
-  method as it fully utilizes saving compilation database which makes your
-  completions blazingly fast. It is a default method. It is also unit tested to
-  complete STL functions on Linux and OSX platforms. It will also fully work
-  for Windows as soon as clang 4.0 is released. See [issue][libclang-issue]
-- [FALLBACK]: one that parses the output from
-  `clang -Xclang -code-completion-at` run from the command line. This is a fallback method if something is wrong with the first one.
+There is also a fallback mode if something is wrong with the `libclang` one
+that parses the output from `clang -Xclang -code-completion-at` which is called
+from the command line.
 
 This plugin is intended to be easy to use. It should autocomplete STL out of
 the box and is capable of working with multiple flag storages, such as a
@@ -111,22 +112,19 @@ pallet. Open it by pressing:
 All the commands of this plugin start with `EasyClangComplete:` and should be
 self explanatory. Open an issue if they are not.
 
-
 ## Settings ##
 
 Please see the default settings [file](EasyClangComplete.sublime-settings)
 shipped with the plugin for explanations and sane default values.
-
-**PLEASE RESTART SUBLIME TEXT AFTER EACH SETTINGS CHANGE**
 
 ## Credits ##
 The whole work seen here was originally a fork of another repository:
 [ClangAutoComplete](https://github.com/pl-ca/ClangAutoComplete)
 
 However, with time this plugin has grown quite different from its origin and
-this is why you see it as a separate package now. Anyway, I encourage you to
-check out what `ClangAutoComplete` has to offer and come back if you still like
-this plugin more.
+this is why you see it as a separate package now. Anyway, feel free to check
+out what `ClangAutoComplete` has to offer and come back if you still like this
+plugin more.
 
 The trick with multiple `clang.cindex` files is inspired by this repo:
 [clangHelper](https://github.com/griebd/clangHelper). Thanks for inspiration!
@@ -152,9 +150,13 @@ Most crucial functionality is covered with unit tests using
 Contributions are welcome! Look at the issue list. If there is something you
 think you can tackle, write about it in that issue and submit a Pull Request.
 
+Please don't jump into creating a Pull Request straight away and open an issue
+first. This way, we can synchronize our views on the problem, so that everyone
+avoids losing time.
+
 There are two branches:
 - `master`: should be stable and generally following the last release. Used for
-  bug fixing.
+  urgent bug fixing.
 - `dev`: used to develop new features. Merges with master right before a new
   release.
 

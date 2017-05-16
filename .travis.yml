@@ -10,12 +10,8 @@ language:
 matrix:
     include:
     - os: linux
-      env: DISTRO="Ubuntu 14.04"
+      env: DISTRO="Ubuntu"
       dist: trusty
-      sudo: required
-    - os: linux
-      env: DISTRO="Ubuntu 16.04"
-      dist: xenial
       sudo: required
     - os: osx
       env: DISTRO="OSX"

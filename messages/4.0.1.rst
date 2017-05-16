@@ -1,0 +1,17 @@
+Version 4.0.1
+=============
+
+Fixes and improvements:
+-------------
+- fixed an issue when completions were not shown in if statements by adding
+  '[' and '(' to valid completion triggers.
+- @darwinyip has added tab as a trigger for those who indent with tabs
+
+Thanks!
+-------
+- @darwinyip for reminding me that people do indent with tabs :)
+
+Support it
+----------
+💜 this plugin? Consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

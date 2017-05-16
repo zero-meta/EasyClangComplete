@@ -111,7 +111,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         self.settings_manager.add_change_listener(self.on_settings_changed)
         # init view config manager
         self.view_config_manager = ViewConfigManager()
-        # As the plugin have just loaded, we might have missed an activation
+        # As the plugin has just loaded, we might have missed an activation
         # event for the active view so completion will not work for it until
         # re-activated. Force active view initialization in that case.
         self.on_activated_async(sublime.active_window().active_view())

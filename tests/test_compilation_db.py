@@ -29,7 +29,34 @@ class TestCompilationDb(TestCase):
                     Flag('-fPIC')]
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
-                               'linux')
+                               'command')
+        scope = SearchScope(from_folder=path_to_db)
+        self.assertEqual(expected, db.get_flags(search_scope=scope))
+
+    def test_get_all_flags_arguments(self):
+        """Test argument filtering."""
+        arguments = [
+            "/usr/bin/c++",
+            "-I/lib_include_dir",
+            "-o",
+            "CMakeFiles/main_obj.o",
+            "-c",
+            "/home/user/dummy_main.cpp"]
+        expected = ["-I/lib_include_dir"]
+        result = CompilationDb.filter_bad_arguments(arguments)
+        self.assertEqual(result, expected)
+
+    def test_strip_wrong_arguments(self):
+        """Test if compilation db is found and flags loaded from arguments."""
+        include_prefixes = ['-I']
+        db = CompilationDb(include_prefixes)
+
+        expected = [Flag('-I' + path.normpath('/lib_include_dir')),
+                    Flag('-Dlib_EXPORTS'),
+                    Flag('-fPIC')]
+        path_to_db = path.join(path.dirname(__file__),
+                               'compilation_db_files',
+                               'arguments')
         scope = SearchScope(from_folder=path_to_db)
         self.assertEqual(expected, db.get_flags(search_scope=scope))
 
@@ -46,7 +73,7 @@ class TestCompilationDb(TestCase):
         lib_file_path_h = path.normpath('/home/user/dummy_lib.h')
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
-                               'linux')
+                               'command')
         scope = SearchScope(from_folder=path_to_db)
         self.assertEqual(expected_lib, db.get_flags(lib_file_path, scope))
         self.assertEqual(expected_lib, db.get_flags(lib_file_path_h, scope))
@@ -57,7 +84,7 @@ class TestCompilationDb(TestCase):
         self.assertIn(main_file_path, db._cache)
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
-                               'linux', 'compile_commands.json')
+                               'command', 'compile_commands.json')
         self.assertEqual(path_to_db,
                          db._cache[lib_file_path])
         self.assertEqual(path_to_db,
@@ -87,7 +114,7 @@ class TestCompilationDb(TestCase):
         main_file_path = path.normpath('/home/user/dummy_main.cpp')
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
-                               'linux')
+                               'command')
         scope = SearchScope(from_folder=path_to_db)
         self.assertEqual(expected_lib, db.get_flags(lib_file_path, scope))
         self.assertEqual(expected_main, db.get_flags(main_file_path, scope))

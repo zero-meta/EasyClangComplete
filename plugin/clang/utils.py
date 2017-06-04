@@ -426,13 +426,13 @@ class ClangUtils:
         clean_lines = []
         prev_line = ''
         is_brief_comment = False
-        for line in lines:
+        non_brief_found = False
+        for idx, line in enumerate(lines):
             clean = line.strip()
             if clean.startswith('/'):
                 clean = clean[3:]
             elif clean.startswith('*'):
                 clean = clean[2:]
-            clean = line[3:].strip()
             prev_line = clean
             if clean[1:].startswith('brief'):
                 is_brief_comment = True
@@ -444,5 +444,10 @@ class ClangUtils:
                 continue
             if is_brief_comment:
                 continue
+            if not non_brief_found:
+                non_brief_found = True
+                is_brief_comment = True
+                continue
+            non_brief_found = True
             clean_lines.append(clean)
         return '<br>'.join(clean_lines)

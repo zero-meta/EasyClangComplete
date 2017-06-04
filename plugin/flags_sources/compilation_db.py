@@ -122,9 +122,19 @@ class CompilationDb(FlagsSource):
             file_path = File.canonical_path(entry['file'],
                                             database_file.folder())
             file_path = path.splitext(file_path)[0]
-            command_as_list = CompilationDb.line_as_list(entry['command'])
+            argument_list = []
+            if 'command' in entry:
+                import shlex
+                argument_list = shlex.split(entry['command'])
+            elif 'arguments' in entry:
+                argument_list = entry['arguments']
+            else:
+                # TODO(igor): maybe show message to the user instead here
+                log.critical(" compilation database has unsupported format")
+                return None
+            argument_list = CompilationDb.filter_bad_arguments(argument_list)
             flags = FlagsSource.parse_flags(database_file.folder(),
-                                            command_as_list,
+                                            argument_list,
                                             self._include_prefixes)
             # set these flags for current file
             parsed_db[file_path] = flags
@@ -136,17 +146,33 @@ class CompilationDb(FlagsSource):
         return parsed_db
 
     @staticmethod
-    def line_as_list(line):
-        """Represent line as a list of flags.
+    def filter_bad_arguments(argument_list):
+        """Filter out the arguments that we don't care about.
 
         Args:
-            line (str): a line from database file.
+            argument_list (str[]): a list of flags.
 
         Returns:
-            str[]: A line parsed with shlex.
+            str[]: Flags without the unneeded ones.
         """
-        import shlex
-        # first argument is always a command, like c++
-        # last 4 entries are always object and filename
-        # between them there are valuable flags
-        return shlex.split(line)[1:-4]
+        new_args = []
+        skip_next = False
+        for i, argument in enumerate(argument_list):
+            if skip_next:
+                # somebody told us to skip this
+                skip_next = False
+                continue
+            if i == 0:
+                # ignore first element as it is always the program to run,
+                # something like 'c++'
+                continue
+            if i == len(argument_list) - 1:
+                # ignore the last element as it is a file to compile, something
+                # like 'test.cpp'
+                continue
+            if argument == '-o':
+                # ignore the -o flag and whatever comes after it
+                skip_next = True
+                continue
+            new_args.append(argument)
+        return new_args

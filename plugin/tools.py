@@ -101,6 +101,9 @@ class SublBridge:
     def erase_status():
         """Erase status message for the current view."""
         view = sublime.active_window().active_view()
+        if not view:
+            # do nothing if there is no view
+            return
         view.erase_status("000_ECC")
 
     @staticmethod

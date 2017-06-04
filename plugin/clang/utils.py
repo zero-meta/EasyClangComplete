@@ -427,7 +427,7 @@ class ClangUtils:
         prev_line = ''
         is_brief_comment = False
         non_brief_found = False
-        for idx, line in enumerate(lines):
+        for line in lines:
             clean = line.strip()
             if clean.startswith('/'):
                 clean = clean[3:]

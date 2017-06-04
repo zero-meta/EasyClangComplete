@@ -170,6 +170,9 @@ class CompilationDb(FlagsSource):
                 # ignore the last element as it is a file to compile, something
                 # like 'test.cpp'
                 continue
+            if argument == '-c':
+                # ignore -c too
+                continue
             if argument == '-o':
                 # ignore the -o flag and whatever comes after it
                 skip_next = True

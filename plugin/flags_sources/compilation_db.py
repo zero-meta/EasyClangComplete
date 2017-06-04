@@ -112,6 +112,7 @@ class CompilationDb(FlagsSource):
         data = None
 
         with open(database_file.full_path()) as data_file:
+            log.debug("!!!!!! %s", database_file.full_path())
             data = json.load(data_file)
         if not data:
             return None

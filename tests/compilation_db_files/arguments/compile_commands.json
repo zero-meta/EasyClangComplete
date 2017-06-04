@@ -6,7 +6,7 @@
     "-o",
     "CMakeFiles/main_obj.o",
     "-c",
-    "/home/user/dummy_main.cpp",
+    "/home/user/dummy_main.cpp"
     ],
   "directory": "/main_dir",
   "file": "/home/user/dummy_main.cpp"
@@ -19,7 +19,7 @@
     "-o",
     "CMakeFiles/lib_obj.o",
     "-c",
-    "/home/user/dummy_lib.cpp",
+    "/home/user/dummy_lib.cpp"
   ],
   "directory": "/lib_dir",
   "file": "/home/user/dummy_lib.cpp"

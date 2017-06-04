@@ -34,6 +34,19 @@ class TestCompilationDb(TestCase):
         self.assertEqual(expected, db.get_flags(search_scope=scope))
 
     def test_get_all_flags_arguments(self):
+        """Test argument filtering."""
+        arguments = [
+            "/usr/bin/c++",
+            "-I/lib_include_dir",
+            "-o",
+            "CMakeFiles/main_obj.o",
+            "-c",
+            "/home/user/dummy_main.cpp"]
+        expected = ["-I/lib_include_dir"]
+        result = CompilationDb.filter_bad_arguments(arguments)
+        self.assertEqual(result, expected)
+
+    def test_strip_wrong_arguments(self):
         """Test if compilation db is found and flags loaded from arguments."""
         include_prefixes = ['-I']
         db = CompilationDb(include_prefixes)

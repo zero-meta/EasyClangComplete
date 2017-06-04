@@ -101,6 +101,9 @@ class SublBridge:
     def erase_status():
         """Erase status message for the current view."""
         view = sublime.active_window().active_view()
+        if not view:
+            # do nothing if there is no view
+            return
         view.erase_status("000_ECC")
 
     @staticmethod
@@ -549,16 +552,23 @@ class Tools:
             bool: True if we want to handle this view, False otherwise
         """
         if not view:
+            log.error(" view is None")
             return False
         if not view.file_name():
+            log.error(" view file_name is None")
             return False
         if not Tools.has_valid_syntax(view):
+            log.error(" view has wrong syntax: %s",
+                      Tools.get_view_syntax(view))
             return False
         if view.is_scratch():
+            log.error(" view is scratch view")
             return False
         if view.buffer_id() == 0:
+            log.error(" view buffer id is 0")
             return False
         if not path.exists(view.file_name()):
+            log.error(" view file_name does not exist in system")
             return False
         return True
 

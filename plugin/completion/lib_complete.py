@@ -295,6 +295,9 @@ class Completer(BaseCompleter):
             if not self.tu:
                 log.debug(" translation unit does not exist. Creating.")
                 self.parse_tu(view, settings)
+            if not self.tu:
+                log.critical(" cannot create translation unit. Abort.")
+                return False
             if self.tu.cursor.displayname != view.file_name():
                 # In case the file was renamed, the translation unit still has
                 # the old name in it and crashes the plugin host. We need to

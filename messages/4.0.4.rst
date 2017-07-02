@@ -1,0 +1,15 @@
+Version 4.0.4
+=============
+
+Fixes and improvements:
+-------------
+- allow disabling status animation
+- remove annoying error for invalid views from the console output
+- allow people to use new clang 5.0 if they really feel they want to.
+  (*WARNING*: please use clang 4.0 until clang 5.0 is officially out)
+
+Support it
+----------
+Main sponsor of this project is currently my sleep.
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

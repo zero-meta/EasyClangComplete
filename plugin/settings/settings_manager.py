@@ -29,6 +29,7 @@ class SettingsManager:
 
     def __init__(self):
         """Initialize the class by loading the default user settings."""
+        log.debug(" create new setting manager object")
         self.__default_settings = None
         self.__settings_dict = {}
         self.__change_listeners = []
@@ -98,7 +99,7 @@ class SettingsManager:
         self.__settings_dict[view_id].update_from_view(view)
         log.debug(" settings initialized for view: %s", view_id)
 
-    def __on_settings_changed(self):
+    def on_settings_changed(self):
         """When user changes settings, trigger this."""
         self.__init_default_settings()
 
@@ -122,7 +123,7 @@ class SettingsManager:
             PKG_NAME + ".sublime-settings")
         self.__subl_settings.clear_on_change(PKG_NAME)
         self.__subl_settings.add_on_change(PKG_NAME,
-                                           self.__on_settings_changed)
+                                           self.on_settings_changed)
 
         # initialize default settings
         self.__default_settings = SettingsStorage(self.__subl_settings)

@@ -396,7 +396,6 @@ class Completer(BaseCompleter):
                     continue
                 if not chunk.spelling:
                     continue
-                print(chunk.spelling)
                 hint += chunk.spelling
                 if chunk.isKindTypedText():
                     trigger += chunk.spelling

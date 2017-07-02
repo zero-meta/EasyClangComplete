@@ -1,0 +1,20 @@
+Version 4.0.2
+=============
+
+Fixes and improvements:
+-------------
+- better parsing of ``compilation_database.json``
+- now also databases generated with Bear are supported.
+- tooltips now also show information about macro declaration.
+- better parsing of Doxygen comments for tooltips. Now also works without an
+  explicit brief tag.
+
+Thanks!
+-------
+- @kjteske for implementing macro declaration tooltips
+- @turndn for fixing a bug in compilation flag parsing
+
+Support it
+----------
+💜 this plugin? Consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

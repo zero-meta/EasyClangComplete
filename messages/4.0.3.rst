@@ -1,0 +1,20 @@
+Version 4.0.3
+=============
+
+Fixes and improvements:
+-------------
+- the settings are loaded lazily now, which guarantees that they always will
+  be valid in case they get invalidated or not fully loaded (e.g. while the
+  plugin is loading for the first time).
+- clean install of the plugin and updates should work properly without
+  restarting sublime text now.
+- disabling/enabling the plugin should not crash it anymore.
+- on some systems, libclang reported the file name as encoded string which
+  resulted in unnecessary re-parsing of the translation unit. This is fixed
+  now.
+
+Support it
+----------
+Main sponsor of this project is currently my sleep.
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

@@ -9,19 +9,18 @@ import subprocess
 import html
 
 from os import path
-from ..settings import settings_storage
 
 log = logging.getLogger(__name__)
 
 
 class MacroParser(object):
-    """ Parses info from macros
+    """Parse info from macros.
 
     Clang doesn't provide much information for MACRO_DEFINITION cursors,
     so we have to parse this info ourselves.
     """
     def __init__(self, name, location):
-        """Parses the macro with the given name from its location
+        """Parse the macro with the given name from its location.
 
         Args:
             name (str): Macro's name.
@@ -41,7 +40,7 @@ class MacroParser(object):
                 self._parse_macro_file_lines(macro_file_lines, location.line)
 
     def _parse_macro_file_lines(self, macro_file_lines, macro_line_number):
-        """ Parse a macro from lines of text containing the macro
+        """Parse a macro from lines of text containing the macro.
 
         Args:
             macro_file_lines (list[str]): lines of text containing the macro
@@ -69,7 +68,7 @@ class MacroParser(object):
 
     @property
     def args_string(self):
-        """ Get arguments string
+        """Get arguments string.
 
         Examples:
             '#define MACRO()' would return '()'
@@ -144,14 +143,14 @@ class ClangUtils:
             return path.dirname(libclang_path)
 
     @staticmethod
-    def find_libclang_dir(clang_binary, libclang_path):
+    def find_libclang_dir(clang_binary, libclang_path, version_str):
         """Find directory with libclang.
 
         Args:
             clang_binary (str): clang binary to call
             libclang_path (str): libclang path provided by user.
                 Does not have to be valid.
-
+            version_str(str): version of libclang to be used in format 3.8.0
         Returns:
             str: folder with libclang
         """
@@ -174,7 +173,8 @@ class ClangUtils:
                 return libclang_dir
         # If the user hint did not work, we look for it normally
         if current_system == "Linux":
-            version_str = settings_storage.SettingsStorage.CLANG_VERSION[:-2]
+            # we only care about first two digits
+            version_str = version_str[0:3]
         for suffix in ClangUtils.suffixes[current_system]:
             # pick a name for a file
             for name in ClangUtils.possible_filenames[current_system]:
@@ -426,13 +426,13 @@ class ClangUtils:
         clean_lines = []
         prev_line = ''
         is_brief_comment = False
+        non_brief_found = False
         for line in lines:
             clean = line.strip()
             if clean.startswith('/'):
                 clean = clean[3:]
             elif clean.startswith('*'):
                 clean = clean[2:]
-            clean = line[3:].strip()
             prev_line = clean
             if clean[1:].startswith('brief'):
                 is_brief_comment = True
@@ -444,5 +444,10 @@ class ClangUtils:
                 continue
             if is_brief_comment:
                 continue
+            if not non_brief_found:
+                non_brief_found = True
+                is_brief_comment = True
+                continue
+            non_brief_found = True
             clean_lines.append(clean)
         return '<br>'.join(clean_lines)

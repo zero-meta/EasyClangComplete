@@ -378,7 +378,10 @@ class ViewConfigManager(object):
             # now return the needed config
             return res
         except AttributeError as e:
+            import traceback
+            tb = traceback.format_exc()
             log.error(" view became invalid while loading config: %s", e)
+            log.error(" traceback: %s", tb)
             return None
 
     def clear_for_view(self, v_id):

@@ -233,8 +233,7 @@ class Completer(BaseCompleter):
                 excluded = self.bigger_ignore_list
             else:
                 excluded = self.default_ignore_list
-            completions = Completer._parse_completions(
-                complete_obj, excluded, self.show_optional_params)
+            completions = Completer._parse_completions(complete_obj, excluded)
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
 

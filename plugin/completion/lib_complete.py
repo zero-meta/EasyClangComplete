@@ -53,20 +53,17 @@ class Completer(BaseCompleter):
     name = "lib"
     rlock = RLock()
 
-    def __init__(self, clang_binary, version_str, error_vis, libclang_path):
+    def __init__(self, settings, error_vis):
         """Initialize the Completer from clang binary, reading its version.
 
         Picks an according cindex for the found version.
 
         Args:
-            clang_binary (str): string for clang binary e.g. 'clang++-3.8'
-            version_str (str): string for clang version e.g. '3.8.0'
-            error_vis (obj): an object of error visualizer
-            libclang_path (str): in case a user knows the path to libclang
-                he can provide it here. Does not have to be valid.
+            settings (SettingStorage): object that stores current settings
+            error_vis (ErrorVis): an object of error visualizer
 
         """
-        super().__init__(clang_binary, version_str, error_vis)
+        super().__init__(settings, error_vis)
 
         # Create compiler options of specific variant of the compiler.
         self.compiler_variant = LibClangCompilerVariant()
@@ -103,7 +100,9 @@ class Completer(BaseCompleter):
             if not self.cindex.Config.loaded:
                 # This will return something like /.../lib/clang/3.x.0
                 libclang_dir = ClangUtils.find_libclang_dir(
-                    clang_binary, libclang_path, version_str)
+                    settings.clang_binary,
+                    settings.libclang_path,
+                    settings.clang_version)
                 if libclang_dir:
                     self.cindex.Config.set_library_path(libclang_dir)
 
@@ -234,7 +233,8 @@ class Completer(BaseCompleter):
                 excluded = self.bigger_ignore_list
             else:
                 excluded = self.default_ignore_list
-            completions = Completer._parse_completions(complete_obj, excluded)
+            completions = Completer._parse_completions(
+                complete_obj, excluded, self.show_optional_params)
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
 
@@ -397,6 +397,7 @@ class Completer(BaseCompleter):
                     continue
                 if not chunk.spelling:
                     continue
+                print(chunk.spelling)
                 hint += chunk.spelling
                 if chunk.isKindTypedText():
                     trigger += chunk.spelling

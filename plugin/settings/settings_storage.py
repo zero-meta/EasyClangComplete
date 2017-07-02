@@ -76,6 +76,7 @@ class SettingsStorage:
         "libclang_path",
         "errors_style",
         "progress_style",
+        "show_optional_arguments"
     ]
 
     def __init__(self, settings_handle):

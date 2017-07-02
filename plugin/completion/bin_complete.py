@@ -67,21 +67,19 @@ class Completer(BaseCompleter):
 
     opts_regex = re.compile("{#|#}")
 
-    def __init__(self, clang_binary, version_str, error_vis):
+    def __init__(self, settings, error_vis):
         """Initialize the Completer.
 
         Args:
-            clang_binary (str): string for clang binary e.g. 'clang-3.8++'
-            version_str (str): string for clang version e.g. '3.8.0'
-            error_vis (obj): an object of error visualizer
+            settings (SettingsStorage): object that stores all settings
+            error_vis (ErrorVis): an object of error visualizer
 
         """
         # init common completer interface
-        super().__init__(clang_binary, version_str, error_vis)
-        self.clang_binary = clang_binary
+        super().__init__(settings, error_vis)
 
         # Create compiler options of specific variant of the compiler.
-        filename = path.splitext(path.basename(clang_binary))[0]
+        filename = path.splitext(path.basename(self.clang_binary))[0]
         if filename.startswith('clang-cl'):
             self.compiler_variant = ClangClCompilerVariant()
         else:

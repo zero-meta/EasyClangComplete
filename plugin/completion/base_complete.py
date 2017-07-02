@@ -24,24 +24,24 @@ class BaseCompleter:
 
     valid = False
 
-    def __init__(self, clang_binary, version_str, error_vis):
+    def __init__(self, settings, error_vis):
         """Initialize the BaseCompleter.
 
         Args:
-            clang_binary (str): string for clang binary e.g. 'clang-3.8++'
-            version_str (str): string for clang version e.g. '3.8.0'
-            error_vis (obj): an object of error visualizer
+            settings (SettingsStorage): an object that stores current settings
+            error_vis (ErrorVis): an object of error visualizer
 
         Raises:
             RuntimeError: if clang not defined we throw an error
 
         """
         # check if clang binary is defined
-        if not clang_binary:
+        if not settings.clang_binary:
             raise RuntimeError("clang binary not defined")
 
         self.compiler_variant = None
-        self.version_str = version_str
+        self.version_str = settings.clang_version
+        self.clang_binary = settings.clang_binary
         # initialize error visualization
         self.error_vis = error_vis
 

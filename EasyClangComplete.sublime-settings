@@ -105,6 +105,7 @@
   // Pick the progress style. There are currently these styles available:
   // - "ColorSublime" : '⣾⣽⣻⢿⡿⣟⣯⣷'
   // - "Moon"         : '🌑🌒🌓🌔🌕🌖🌗🌘'
+  // - "None"
   "progress_style": "Moon",
 
   // Controls if libclang will cache the results.

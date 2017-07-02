@@ -31,6 +31,7 @@ SublBridge = tools.SublBridge
 Tools = tools.Tools
 MoonProgressStatus = progress_status.MoonProgressStatus
 ColorSublimeProgressStatus = progress_status.ColorSublimeProgressStatus
+NoneSublimeProgressStatus = progress_status.NoneSublimeProgressStatus
 PosStatus = tools.PosStatus
 CMakeFile = flags_sources.cmake_file.CMakeFile
 CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
@@ -158,8 +159,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
         progress_style_tag = user_settings.progress_style
         if progress_style_tag == SettingsStorage.MOON_STYLE_TAG:
             progress_style = MoonProgressStatus()
-        else:
+        elif progress_style_tag == SettingsStorage.COLOR_SUBLIME_STYLE_TAG:
             progress_style = ColorSublimeProgressStatus()
+        else:
+            progress_style = NoneSublimeProgressStatus()
         EasyClangComplete.thread_pool.progress_status = progress_style
 
     def on_activated_async(self, view):

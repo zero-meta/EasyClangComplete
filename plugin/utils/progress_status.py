@@ -1,8 +1,8 @@
 """Module for progress status indicator.
 
 Attributes:
-    MSG_CHARS_COLOR_SUBLIME (str): chars for using in colorsublime-like progress
-    MSG_READY_COLOR_SUBLIME (str): ready message in colorsublime-like progress
+    MSG_CHARS_COLOR_SUBLIME: chars for using in colorsublime-like progress
+    MSG_READY_COLOR_SUBLIME: ready message in colorsublime-like progress
     MSG_CHARS_MOON (str): chars for using in moon-like progress
     MSG_READY_MOON (str): ready message in moon-like progress
 """
@@ -90,3 +90,20 @@ class ColorSublimeProgressStatus(BaseProgressStatus):
         rands = [self.msg_chars[x % mod] for x in sample(range(100), 10)]
         BaseProgressStatus.set_status(
             BaseProgressStatus.MSG_MASK.format(''.join(rands)))
+
+
+class NoneSublimeProgressStatus(BaseProgressStatus):
+    """Progress status that does nothing."""
+
+    def __init__(self):
+        """Init color sublime like progress status."""
+        super().__init__()
+        self.showing = False
+
+    def show_ready_message(self):
+        """Empty implementation."""
+        pass
+
+    def show_next_message(self):
+        """Empty implementation."""
+        pass

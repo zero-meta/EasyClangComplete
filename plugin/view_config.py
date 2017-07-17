@@ -38,10 +38,6 @@ class ViewConfig(object):
 
     Stores everything needed to perform completion tasks on a given view with
     given settings.
-
-    Attributes:
-        completer (Completer): A completer for each view configuration.
-        flag_source (FlagsSource): FlagsSource that was used to generate flags.
     """
 
     def __init__(self, view, settings):
@@ -52,7 +48,7 @@ class ViewConfig(object):
             settings (SettingsStorage): Current settings.
         """
         # initialize with nothing
-        self.completer = None
+        self.__completer = None
         if not Tools.is_valid_view(view):
             return
 
@@ -66,9 +62,14 @@ class ViewConfig(object):
                         view.buffer_id())
             return
 
-        self.completer = completer
-        self.completer.clang_flags = flags
-        self.completer.update(view, settings)
+        self.__completer = completer
+        self.__completer.clang_flags = flags
+        self.__completer.update(view, settings)
+
+    def completer(self):
+        """Return only a weak reference to a completer. We own it."""
+        import weakref
+        return weakref.proxy(self.__completer)
 
     def update_if_needed(self, view, settings):
         """Check if the view config has changed.
@@ -86,14 +87,14 @@ class ViewConfig(object):
         completer, flags = ViewConfig.__generate_essentials(view, settings)
         if self.needs_update(completer, flags):
             log.debug("config needs new completer.")
-            self.completer = completer
-            self.completer.clang_flags = flags
-            self.completer.update(view, settings)
+            self.__completer = completer
+            self.__completer.clang_flags = flags
+            self.__completer.update(view, settings)
             File.update_mod_time(view.file_name())
             return self
         if ViewConfig.needs_reparse(view):
             log.debug("config updates existing completer.")
-            self.completer.update(view, settings)
+            self.__completer.update(view, settings)
         return self
 
     def needs_update(self, completer, flags):
@@ -106,13 +107,13 @@ class ViewConfig(object):
         Returns:
             bool: True if update is needed, False otherwise.
         """
-        if not self.completer:
+        if not self.__completer:
             log.debug("no completer. Need to update.")
             return True
-        if completer.name != self.completer.name:
+        if completer.name != self.__completer.name:
             log.debug("different completer class. Need to update.")
             return True
-        if flags != self.completer.clang_flags:
+        if flags != self.__completer.clang_flags:
             log.debug("different completer flags. Need to update.")
             return True
         log.debug("view config needs no update.")
@@ -279,6 +280,7 @@ class ViewConfig(object):
         Args:
             view (View): Current view.
             settings (SettingsStorage): Current settings.
+            need_lang_flags (bool): Decides if we add language flags
 
         Returns:
             Flag[]: A list of language-specific flags.
@@ -351,6 +353,7 @@ class ViewConfigManager(object):
         try:
             v_id = view.buffer_id()
             res = None
+            import weakref
             # we need to protect this with mutex to avoid race condition
             # between creating and removing a config.
             with ViewConfigManager.__rlock:
@@ -371,7 +374,7 @@ class ViewConfigManager(object):
                 ViewConfigManager.__start_timer(
                     self.__remove_old_config, v_id, settings.max_cache_age)
             # now return the needed config
-            return res
+            return weakref.proxy(res)
         except AttributeError as e:
             import traceback
             tb = traceback.format_exc()
@@ -380,13 +383,36 @@ class ViewConfigManager(object):
             return None
 
     def clear_for_view(self, v_id):
-        """Clear config for path."""
+        """Clear config for a view id."""
+        import gc
         log.debug("trying to clear config for view: %s", v_id)
         with ViewConfigManager.__rlock:
             if v_id in self._cache:
                 del self._cache[v_id]
+                # explicitly collect garbage
+                gc.collect()
             ViewConfigManager.__cancel_timer(v_id)
         return v_id
+
+    def trigger_info(self, view, tooltip_request):
+        """A proxy function to handle getting info from completer.
+
+        The main purpose of this function is to ensure that python correctly
+        collects garbage. Before, a direct call to info of the completer was
+        made as part of async job, which prevented garbage collection.
+        """
+        config = self.get_from_cache(view)
+        return config.completer().info(tooltip_request)
+
+    def trigger_completion(self, view, completion_request):
+        """A proxy function to get completions.
+
+        This function is needed to ensure that python can get everything
+        properly garbage collected. Before we passed a function of a completer
+        to an async task. This left a reference to a completer forever active.
+        """
+        view_config = self.get_from_cache(view)
+        return view_config.completer().complete(completion_request)
 
     @staticmethod
     def __start_timer(callback, v_id, max_age):
@@ -417,11 +443,14 @@ class ViewConfigManager(object):
             v_id (str): Path to a file
             max_config_age (int): Max config age in seconds.
         """
+        import gc
         with ViewConfigManager.__rlock:
             ViewConfigManager.__cancel_timer(v_id)
             if self._cache[v_id].is_older_than(max_config_age):
                 log.debug("[delete] old config: %s", v_id)
                 del self._cache[v_id]
+                # explicitly collect garbage
+                gc.collect()
             else:
                 log.debug("[skip] young config: Age %s < %s. View: %s.",
                           self._cache[v_id].get_age(),

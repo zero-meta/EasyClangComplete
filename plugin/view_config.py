@@ -49,7 +49,7 @@ class ViewConfig(object):
             settings (SettingsStorage): Current settings.
         """
         # initialize with nothing
-        self.__completer = None
+        self.completer = None
         if not Tools.is_valid_view(view):
             return
 
@@ -63,14 +63,9 @@ class ViewConfig(object):
                         view.buffer_id())
             return
 
-        self.__completer = completer
-        self.__completer.clang_flags = flags
-        self.__completer.update(view, settings)
-
-    def completer(self):
-        """Return only a weak reference to a completer. We own it."""
-        import weakref
-        return weakref.proxy(self.__completer)
+        self.completer = completer
+        self.completer.clang_flags = flags
+        self.completer.update(view, settings)
 
     def update_if_needed(self, view, settings):
         """Check if the view config has changed.
@@ -88,14 +83,14 @@ class ViewConfig(object):
         completer, flags = ViewConfig.__generate_essentials(view, settings)
         if self.needs_update(completer, flags):
             log.debug("config needs new completer.")
-            self.__completer = completer
-            self.__completer.clang_flags = flags
-            self.__completer.update(view, settings)
+            self.completer = completer
+            self.completer.clang_flags = flags
+            self.completer.update(view, settings)
             File.update_mod_time(view.file_name())
             return self
         if ViewConfig.needs_reparse(view):
             log.debug("config updates existing completer.")
-            self.__completer.update(view, settings)
+            self.completer.update(view, settings)
         return self
 
     def needs_update(self, completer, flags):
@@ -108,13 +103,13 @@ class ViewConfig(object):
         Returns:
             bool: True if update is needed, False otherwise.
         """
-        if not self.__completer:
+        if not self.completer:
             log.debug("no completer. Need to update.")
             return True
-        if completer.name != self.__completer.name:
+        if completer.name != self.completer.name:
             log.debug("different completer class. Need to update.")
             return True
-        if flags != self.__completer.clang_flags:
+        if flags != self.completer.clang_flags:
             log.debug("different completer flags. Need to update.")
             return True
         log.debug("view config needs no update.")
@@ -403,7 +398,7 @@ class ViewConfigManager(object):
         made as part of async job, which prevented garbage collection.
         """
         config = self.get_from_cache(view)
-        return config.completer().info(tooltip_request)
+        return config.completer.info(tooltip_request)
 
     def trigger_completion(self, view, completion_request):
         """A proxy function to get completions.
@@ -413,7 +408,7 @@ class ViewConfigManager(object):
         to an async task. This left a reference to a completer forever active.
         """
         view_config = self.get_from_cache(view)
-        return view_config.completer().complete(completion_request)
+        return view_config.completer.complete(completion_request)
 
     @staticmethod
     def __start_timer(callback, v_id, max_age):

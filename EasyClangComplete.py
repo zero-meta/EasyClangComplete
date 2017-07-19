@@ -44,7 +44,7 @@ log.propagate = False
 formatter_default = logging.Formatter(
     '[%(name)s:%(levelname)-7s]: %(message)s')
 formatter_verbose = logging.Formatter(
-    '[%(name)s:%(levelname)-7s]:[%(filename)s]:[%(funcName)s]:'
+    '[%(name)s:%(levelname)s]:[%(filename)s]:[%(funcName)s]:'
     '[%(threadName)s]: %(message)s')
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
@@ -220,9 +220,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view_config = self.view_config_manager.get_from_cache(view)
             if not view_config:
                 return
-            if not view_config.completer():
+            if not view_config.completer:
                 return
-            view_config.completer().error_vis.show_popup_if_needed(view, row)
+            view_config.completer.error_vis.show_popup_if_needed(view, row)
 
     def on_modified_async(self, view):
         """Called in a worker thread when view is modified.
@@ -235,9 +235,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view_config = self.view_config_manager.get_from_cache(view)
             if not view_config:
                 return
-            if not view_config.completer():
+            if not view_config.completer:
                 return
-            view_config.completer().error_vis.clear(view)
+            view_config.completer.error_vis.clear(view)
 
     def on_post_save_async(self, view):
         """Executed in a worker thread on save.

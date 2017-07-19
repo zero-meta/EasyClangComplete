@@ -349,7 +349,6 @@ class ViewConfigManager(object):
         try:
             v_id = view.buffer_id()
             res = None
-            import weakref
             # we need to protect this with mutex to avoid race condition
             # between creating and removing a config.
             with ViewConfigManager.__rlock:

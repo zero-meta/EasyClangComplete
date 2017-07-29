@@ -4,6 +4,7 @@ Attributes:
     log (logging.Logger): Logger for this module.
 """
 import logging
+import weakref
 from os import path
 from time import time
 from threading import RLock
@@ -38,10 +39,6 @@ class ViewConfig(object):
 
     Stores everything needed to perform completion tasks on a given view with
     given settings.
-
-    Attributes:
-        completer (Completer): A completer for each view configuration.
-        flag_source (FlagsSource): FlagsSource that was used to generate flags.
     """
 
     def __init__(self, view, settings):
@@ -279,6 +276,7 @@ class ViewConfig(object):
         Args:
             view (View): Current view.
             settings (SettingsStorage): Current settings.
+            need_lang_flags (bool): Decides if we add language flags
 
         Returns:
             Flag[]: A list of language-specific flags.
@@ -371,7 +369,7 @@ class ViewConfigManager(object):
                 ViewConfigManager.__start_timer(
                     self.__remove_old_config, v_id, settings.max_cache_age)
             # now return the needed config
-            return res
+            return weakref.proxy(res)
         except AttributeError as e:
             import traceback
             tb = traceback.format_exc()
@@ -380,13 +378,39 @@ class ViewConfigManager(object):
             return None
 
     def clear_for_view(self, v_id):
-        """Clear config for path."""
+        """Clear config for a view id."""
+        import gc
         log.debug("trying to clear config for view: %s", v_id)
         with ViewConfigManager.__rlock:
             if v_id in self._cache:
                 del self._cache[v_id]
+                # explicitly collect garbage
+                gc.collect()
             ViewConfigManager.__cancel_timer(v_id)
         return v_id
+
+    def trigger_info(self, view, tooltip_request):
+        """A proxy function to handle getting info from completer.
+
+        The main purpose of this function is to ensure that python correctly
+        collects garbage. Before, a direct call to info of the completer was
+        made as part of async job, which prevented garbage collection.
+        """
+        config = self.get_from_cache(view)
+        if not config:
+            log.debug("Config is not ready yet. No info tooltip shown.")
+            return tooltip_request, ""
+        return config.completer.info(tooltip_request)
+
+    def trigger_completion(self, view, completion_request):
+        """A proxy function to get completions.
+
+        This function is needed to ensure that python can get everything
+        properly garbage collected. Before we passed a function of a completer
+        to an async task. This left a reference to a completer forever active.
+        """
+        view_config = self.get_from_cache(view)
+        return view_config.completer.complete(completion_request)
 
     @staticmethod
     def __start_timer(callback, v_id, max_age):
@@ -417,11 +441,14 @@ class ViewConfigManager(object):
             v_id (str): Path to a file
             max_config_age (int): Max config age in seconds.
         """
+        import gc
         with ViewConfigManager.__rlock:
             ViewConfigManager.__cancel_timer(v_id)
             if self._cache[v_id].is_older_than(max_config_age):
                 log.debug("[delete] old config: %s", v_id)
                 del self._cache[v_id]
+                # explicitly collect garbage
+                gc.collect()
             else:
                 log.debug("[skip] young config: Age %s < %s. View: %s.",
                           self._cache[v_id].get_age(),

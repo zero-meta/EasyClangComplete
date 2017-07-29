@@ -2404,6 +2404,7 @@ class TranslationUnit(ClangObject):
         ClangObject.__init__(self, ptr)
 
     def __del__(self):
+        print(">>>>>>>>>>>>>>> Clear TU")
         conf.lib.clang_disposeTranslationUnit(self)
 
     @property

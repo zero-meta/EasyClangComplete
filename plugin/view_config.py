@@ -33,6 +33,10 @@ from .settings.settings_storage import SettingsStorage
 
 log = logging.getLogger("ECC")
 
+import sys
+sys.path.append(path.dirname(__file__) + "/objgraph")
+import objgraph
+
 
 class ViewConfig(object):
     """A bundle representing a view configuration.
@@ -383,9 +387,19 @@ class ViewConfigManager(object):
         log.debug("trying to clear config for view: %s", v_id)
         with ViewConfigManager.__rlock:
             if v_id in self._cache:
+                objgraph.show_refs(
+                    [self._cache],
+                    filename='/home/igor/refs_{}_before.png'.format(v_id),
+                    refcounts=True,
+                    max_depth=5)
                 del self._cache[v_id]
                 # explicitly collect garbage
                 gc.collect()
+                objgraph.show_refs(
+                    [self._cache],
+                    filename='/home/igor/refs_{}_after.png'.format(v_id),
+                    refcounts=True,
+                    max_depth=5)
             ViewConfigManager.__cancel_timer(v_id)
         return v_id
 

@@ -21,6 +21,11 @@ from .plugin.utils import progress_status
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 
+import sys
+sys.path.append(path.dirname(__file__) + "/plugin/objgraph")
+import objgraph
+
+
 # reload the modules
 
 # some aliases

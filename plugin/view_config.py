@@ -397,6 +397,9 @@ class ViewConfigManager(object):
         made as part of async job, which prevented garbage collection.
         """
         config = self.get_from_cache(view)
+        if not config:
+            log.debug("Config is not ready yet. No info tooltip shown.")
+            return tooltip_request, ""
         return config.completer.info(tooltip_request)
 
     def trigger_completion(self, view, completion_request):

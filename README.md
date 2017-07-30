@@ -12,6 +12,7 @@ C, C++, Objective-C, and Objective-C++.
 [![Codacy Badge][img-codacy]][codacy]
 [![Coverage Badge][img-coverage]][coverage]
 [![Donate][img-paypal]][donate-paypal]
+[![Gratipay][img-gratipay]][gratipay]
 
 # Jump right in! #
 You are just three simple steps away!

@@ -6,7 +6,7 @@ C, C++, Objective-C, and Objective-C++.
 ![Example](pics/autocomplete.gif)
 
 [![Release][img-release]][release]
-[![Downloads Month][img-downloads-month]][downloads]
+[![Downloads Month][img-downloads]][downloads]
 [![Travis Build][img-travis]][travis]
 [![Windows Build][img-appveyor]][appveyor]
 [![Codacy Badge][img-codacy]][codacy]

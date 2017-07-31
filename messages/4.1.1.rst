@@ -1,0 +1,7 @@
+Version 4.1.1
+=============
+
+Urgent bug fix:
+---------------
+- allowing all sublime variables in plugin settings broke proper variable
+  expansion. Revert this commit.

@@ -10,7 +10,7 @@ import html
 
 from os import path
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 class MacroParser(object):
@@ -19,6 +19,7 @@ class MacroParser(object):
     Clang doesn't provide much information for MACRO_DEFINITION cursors,
     so we have to parse this info ourselves.
     """
+
     def __init__(self, name, location):
         """Parse the macro with the given name from its location.
 
@@ -116,14 +117,14 @@ class ClangUtils:
         Returns:
             str: path to folder with libclang
         """
-        log.debug(" real output: %s", output)
+        log.debug("real output: %s", output)
         if platform.system() == "Darwin":
             # [HACK] uh... I'm not sure why it happens like this...
             folder_to_search = path.join(output, '..', '..')
-            log.debug(" folder to search: %s", folder_to_search)
+            log.debug("folder to search: %s", folder_to_search)
             return folder_to_search
         elif platform.system() == "Windows":
-            log.debug(" architecture: %s", platform.architecture())
+            log.debug("architecture: %s", platform.architecture())
             return path.normpath(output)
         elif platform.system() == "Linux":
             return path.normpath(path.dirname(output))
@@ -156,11 +157,11 @@ class ClangUtils:
         """
         stdin = None
         stderr = None
-        log.debug(" platform: %s", platform.architecture())
-        log.debug(" python version: %s", platform.python_version())
+        log.debug("platform: %s", platform.architecture())
+        log.debug("python version: %s", platform.python_version())
         current_system = platform.system()
-        log.debug(" we are on '%s'", platform.system())
-        log.debug(" user provided libclang_path: %s", libclang_path)
+        log.debug("we are on '%s'", platform.system())
+        log.debug("user provided libclang_path: %s", libclang_path)
         # Get version string for help finding the proper libclang library on
         # Linux
         if libclang_path:
@@ -169,7 +170,7 @@ class ClangUtils:
             if libclang_dir:
                 # It was found! No need to search any further!
                 ClangUtils.libclang_name = path.basename(libclang_path)
-                log.info(" using user-provided libclang: '%s'", libclang_path)
+                log.info("using user-provided libclang: '%s'", libclang_path)
                 return libclang_dir
         # If the user hint did not work, we look for it normally
         if current_system == "Linux":
@@ -179,7 +180,7 @@ class ClangUtils:
             # pick a name for a file
             for name in ClangUtils.possible_filenames[current_system]:
                 file = "{name}{suffix}".format(name=name, suffix=suffix)
-                log.debug(" searching for: '%s'", file)
+                log.debug("searching for: '%s'", file)
                 startupinfo = None
                 # let's find the library
                 if platform.system() == "Darwin":
@@ -202,19 +203,19 @@ class ClangUtils:
                     stdin=stdin,
                     stderr=stderr,
                     startupinfo=startupinfo).decode('utf8').strip()
-                log.debug(" libclang search output = '%s'", output)
+                log.debug("libclang search output = '%s'", output)
                 if output:
                     libclang_dir = ClangUtils.dir_from_output(output)
                     if path.isdir(libclang_dir):
                         full_libclang_path = path.join(libclang_dir, file)
                         if path.exists(full_libclang_path):
-                            log.info(" found libclang library file: '%s'",
+                            log.info("found libclang library file: '%s'",
                                      full_libclang_path)
                             ClangUtils.libclang_name = file
                             return libclang_dir
                 log.warning(" clang could not find '%s'", file)
         # if we haven't found anything there is nothing to return
-        log.error(" no libclang found at all")
+        log.error("no libclang found at all")
         return None
 
     @staticmethod
@@ -422,32 +423,28 @@ class ClangUtils:
     @staticmethod
     def cleanup_comment(raw_comment):
         """Cleanup raw doxygen comment."""
+        def pop_prepending_empty_lines(lines):
+            first_non_empty_line_idx = 0
+            for line in lines:
+                if line == '':
+                    first_non_empty_line_idx += 1
+                else:
+                    break
+            return lines[first_non_empty_line_idx:]
+
+        import string
         lines = raw_comment.split('\n')
+        chars_to_strip = '/' + '*' + string.whitespace
+        lines = [line.lstrip(chars_to_strip) for line in lines]
+        lines = pop_prepending_empty_lines(lines)
         clean_lines = []
-        prev_line = ''
-        is_brief_comment = False
-        non_brief_found = False
+        is_brief_comment = True
         for line in lines:
-            clean = line.strip()
-            if clean.startswith('/'):
-                clean = clean[3:]
-            elif clean.startswith('*'):
-                clean = clean[2:]
-            prev_line = clean
-            if clean[1:].startswith('brief'):
-                is_brief_comment = True
-                continue
-            if clean == '':
+            if line == '' and is_brief_comment:
+                # Skip lines that belong to brief comment.
                 is_brief_comment = False
-            if clean == '' and prev_line == '':
-                # We want to ignore trailing empty lines.
                 continue
             if is_brief_comment:
                 continue
-            if not non_brief_found:
-                non_brief_found = True
-                is_brief_comment = True
-                continue
-            non_brief_found = True
-            clean_lines.append(clean)
+            clean_lines.append(line)
         return '<br>'.join(clean_lines)

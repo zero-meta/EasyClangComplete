@@ -5,12 +5,13 @@ Attributes:
 """
 import logging
 import re
+import sublime
 
 from os import path
 
 from ..tools import Tools
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 class Wildcards:
@@ -21,10 +22,9 @@ class Wildcards:
         PROJECT_NAME (str): a wildcard to be replaced by the project name
         PROJECT_PATH (str): a wildcard to be replaced by the project path
     """
-    PROJECT_PATH = "$project_base_path"
-    PROJECT_NAME = "$project_name"
-    CLANG_VERSION = "$clang_version"
-    HOME = "~"
+    PROJECT_PATH = "project_base_path"
+    PROJECT_NAME = "project_name"
+    CLANG_VERSION = "clang_version"
 
 
 class SettingsStorage:
@@ -85,18 +85,13 @@ class SettingsStorage:
         Args:
             settings_handle (sublime.Settings): handle to sublime settings
         """
-        log.debug(" creating new settings storage object")
+        log.debug("creating new settings storage object")
         self.clang_version = ''
         self.libclang_path = ''
         self.clang_binary = ''
         self.project_folder = ''
         self.project_name = ''
-        self._wildcard_values = {
-            Wildcards.PROJECT_PATH: "",
-            Wildcards.PROJECT_NAME: "",
-            Wildcards.CLANG_VERSION: "",
-            Wildcards.HOME: ""
-        }
+        self._wildcard_values = {}
         self.__load_vars_from_settings(settings_handle,
                                        project_specific=False)
 
@@ -109,7 +104,7 @@ class SettingsStorage:
         try:
             # init current and parrent folders:
             if not Tools.is_valid_view(view):
-                log.error(" no view to populate common flags from")
+                log.error("no view to populate common flags from")
                 return
             self.__load_vars_from_settings(view.settings(),
                                            project_specific=True)
@@ -123,8 +118,8 @@ class SettingsStorage:
             self.clang_binary = self.__replace_wildcard_if_needed(
                 self.clang_binary)
         except AttributeError as e:
-            log.error(" view became None. Do not continue.")
-            log.error(" original error: %s", e)
+            log.error("view became None. Do not continue.")
+            log.error("original error: %s", e)
 
     def need_reparse(self):
         """A very hacky check that there was an incomplete load.
@@ -140,9 +135,9 @@ class SettingsStorage:
 
         """
         if 'progress_style' in self.__dict__:
-            log.debug(' settings complete')
+            log.debug('settings complete')
             return False
-        log.debug(' settings incomplete and will be reloaded a bit later')
+        log.debug('settings incomplete and will be reloaded a bit later')
         return True
 
     def is_valid(self):
@@ -189,9 +184,9 @@ class SettingsStorage:
                 project-specific and should be read with appropriate prefixes
         """
         if project_specific:
-            log.debug(" Overriding settings by project ones if needed:")
-            log.debug(" Valid prefixes: %s", SettingsStorage.PREFIXES)
-        log.debug(" Reading settings...")
+            log.debug("Overriding settings by project ones if needed:")
+            log.debug("Valid prefixes: %s", SettingsStorage.PREFIXES)
+        log.debug("Reading settings...")
         # project settings are all prefixed to disambiguate them from others
         if project_specific:
             prefixes = SettingsStorage.PREFIXES
@@ -207,8 +202,8 @@ class SettingsStorage:
                 # set this value to this object too
                 setattr(self, setting_name, val)
                 # tell the user what we have done
-                log.debug("  %-26s <-- '%s'", setting_name, val)
-        log.debug(" Settings sucessfully read...")
+                log.debug("%-26s <-- '%s'", setting_name, val)
+        log.debug("Settings sucessfully read...")
 
         # initialize max_cache_age if is it not yet, default to 30 minutes
         self.max_cache_age = getattr(self, "max_cache_age", "00:30:00")
@@ -242,7 +237,7 @@ class SettingsStorage:
             current_file_name (str): current view file name
         """
         # populate variables to real values
-        log.debug(" populating common_flags with current variables.")
+        log.debug("populating common_flags with current variables.")
         for idx, flag in enumerate(self.common_flags):
             self.common_flags[idx] = self.__replace_wildcard_if_needed(flag)
 
@@ -262,33 +257,32 @@ class SettingsStorage:
         Returns:
             str: line with replaced wildcards
         """
-        res = str(line)
-        res = path.expanduser(path.expandvars(res))
+        res = sublime.expand_variables(line, self._wildcard_values)
+        res = path.expanduser(res)
 
         # replace all wildcards in the line
         for wildcard, value in self._wildcard_values.items():
             res = re.sub(re.escape(wildcard), value, res)
         if res != line:
-            log.debug(" populated '%s' to '%s'", line, res)
+            log.debug("populated '%s' to '%s'", line, res)
         return res
 
     def __update_widcard_values(self, view):
         """Update values for wildcard variables."""
-        from os.path import expanduser
-        self._wildcard_values[Wildcards.HOME] = expanduser("~")
         variables = view.window().extract_variables()
-        if 'folder' in variables:
-            project_folder = variables['folder'].replace('\\', '\\\\')
-            self._wildcard_values[Wildcards.PROJECT_PATH] = project_folder
-        if 'project_name' in variables:
-            project_name = path.splitext(variables['project_name'])[0]
-            self._wildcard_values[Wildcards.PROJECT_NAME] = project_name
+        self._wildcard_values.update(variables)
 
-        # duplicate as fields
-        self.project_folder = self._wildcard_values[Wildcards.PROJECT_PATH]
-        self.project_name = self._wildcard_values[Wildcards.PROJECT_NAME]
+        self._wildcard_values[Wildcards.PROJECT_PATH] = \
+            variables.get("folder", "").replace("\\", "\\\\")
+
+        self._wildcard_values[Wildcards.PROJECT_NAME] = \
+            variables.get("project_base_name", "")
 
         # get clang version string
         version_str = Tools.get_clang_version_str(self.clang_binary)
         self._wildcard_values[Wildcards.CLANG_VERSION] = version_str
+
+        # duplicate as fields
+        self.project_folder = self._wildcard_values[Wildcards.PROJECT_PATH]
+        self.project_name = self._wildcard_values[Wildcards.PROJECT_NAME]
         self.clang_version = self._wildcard_values[Wildcards.CLANG_VERSION]

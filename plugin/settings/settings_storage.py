@@ -5,7 +5,6 @@ Attributes:
 """
 import logging
 import re
-import sublime
 
 from os import path
 
@@ -22,10 +21,10 @@ class Wildcards:
         PROJECT_NAME (str): a wildcard to be replaced by the project name
         PROJECT_PATH (str): a wildcard to be replaced by the project path
     """
-    PROJECT_PATH = "project_base_path"
-    PROJECT_NAME = "project_name"
-    CLANG_VERSION = "clang_version"
-    HOME_PATH = "~"
+    PROJECT_PATH = "$project_base_path"
+    PROJECT_NAME = "$project_name"
+    CLANG_VERSION = "$clang_version"
+    HOME = "~"
 
 
 class SettingsStorage:
@@ -92,7 +91,12 @@ class SettingsStorage:
         self.clang_binary = ''
         self.project_folder = ''
         self.project_name = ''
-        self._wildcard_values = {}
+        self._wildcard_values = {
+            Wildcards.PROJECT_PATH: "",
+            Wildcards.PROJECT_NAME: "",
+            Wildcards.CLANG_VERSION: "",
+            Wildcards.HOME: ""
+        }
         self.__load_vars_from_settings(settings_handle,
                                        project_specific=False)
 

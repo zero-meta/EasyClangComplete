@@ -18,3 +18,5 @@
 
 *__pycache__/
 EasyClangComplete.sublime-workspace
+
+*.pyc

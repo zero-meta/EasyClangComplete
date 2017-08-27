@@ -25,6 +25,7 @@ class Wildcards:
     PROJECT_PATH = "project_base_path"
     PROJECT_NAME = "project_name"
     CLANG_VERSION = "clang_version"
+    HOME_PATH = "~"
 
 
 class SettingsStorage:
@@ -109,7 +110,7 @@ class SettingsStorage:
             self.__load_vars_from_settings(view.settings(),
                                            project_specific=True)
             # initialize wildcard values with view
-            self.__update_widcard_values(view)
+            self.__update_wildcard_values(view)
             # replace wildcards
             self.__populate_common_flags(view.file_name())
             self.__populate_flags_source_paths()
@@ -258,7 +259,12 @@ class SettingsStorage:
             str: line with replaced wildcards
         """
         res = sublime.expand_variables(line, self._wildcard_values)
-        res = path.expanduser(res)
+        if Wildcards.HOME_PATH in res:
+            # replace '~' by full home path. Leave everything else intact.
+            prefix_idx = res.index(Wildcards.HOME_PATH)
+            prefix = res[:prefix_idx]
+            home_path = path.expanduser(res[prefix_idx:prefix_idx + 1])
+            res = prefix + home_path + res[prefix_idx + 1:]
 
         # replace all wildcards in the line
         for wildcard, value in self._wildcard_values.items():
@@ -267,7 +273,7 @@ class SettingsStorage:
             log.debug("populated '%s' to '%s'", line, res)
         return res
 
-    def __update_widcard_values(self, view):
+    def __update_wildcard_values(self, view):
         """Update values for wildcard variables."""
         variables = view.window().extract_variables()
         self._wildcard_values.update(variables)

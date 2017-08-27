@@ -5,6 +5,7 @@ Attributes:
 """
 import logging
 import re
+import sublime
 
 from os import path
 

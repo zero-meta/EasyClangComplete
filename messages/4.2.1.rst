@@ -1,0 +1,14 @@
+Version 4.2.0
+=============
+
+Bug fixes and improvements:
+---------------------------
+- Fix accidentally broken variable expansion in settings.
+- Allow using all variables defined in sublime text.
+
+For example, now `-I${project_path}/blah` is valid in settings.
+
+Show your support!
+------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

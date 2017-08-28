@@ -266,9 +266,6 @@ class SettingsStorage:
             home_path = path.expanduser(res[prefix_idx:prefix_idx + 1])
             res = prefix + home_path + res[prefix_idx + 1:]
 
-        # replace all wildcards in the line
-        for wildcard, value in self._wildcard_values.items():
-            res = re.sub(re.escape(wildcard), value, res)
         if res != line:
             log.debug("populated '%s' to '%s'", line, res)
         return res

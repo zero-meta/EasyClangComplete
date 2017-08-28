@@ -22,10 +22,10 @@ class Wildcards:
         PROJECT_NAME (str): a wildcard to be replaced by the project name
         PROJECT_PATH (str): a wildcard to be replaced by the project path
     """
-    PROJECT_PATH = "$project_base_path"
-    PROJECT_NAME = "$project_name"
-    CLANG_VERSION = "$clang_version"
-    HOME = "~"
+    PROJECT_PATH = "project_base_path"
+    PROJECT_NAME = "project_name"
+    CLANG_VERSION = "clang_version"
+    HOME_PATH = "~"
 
 
 class SettingsStorage:
@@ -92,12 +92,7 @@ class SettingsStorage:
         self.clang_binary = ''
         self.project_folder = ''
         self.project_name = ''
-        self._wildcard_values = {
-            Wildcards.PROJECT_PATH: "",
-            Wildcards.PROJECT_NAME: "",
-            Wildcards.CLANG_VERSION: "",
-            Wildcards.HOME: ""
-        }
+        self._wildcard_values = {}
         self.__load_vars_from_settings(settings_handle,
                                        project_specific=False)
 

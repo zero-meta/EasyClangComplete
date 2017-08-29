@@ -1,0 +1,25 @@
+Version 4.2.0
+=============
+
+New features and fixes:
+-----------------------
+- Add ``*`` symbol that can be put at the end of each path.
+  - It expands the path to all its children:
+
+      <path>/* --> [<path>/folder_1, <path>/folder_2, ...]
+
+- Allow using this plugin with Apple Clang 9.0
+- Minor bug fixes and stability improvements
+
+
+Show your support!
+------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it
+
+It takes a lot of time to create and support such a plugin as a hobby.
+Every donation that I receive makes me more passionate about developing
+this plugin further. It shows me that it is being used by real people.
+And makes it a bit easier to sit and code it after a full day of work.
+
+Thanks a lot!

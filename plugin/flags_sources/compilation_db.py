@@ -123,6 +123,11 @@ class CompilationDb(FlagsSource):
                                             database_file.folder())
             file_path = path.splitext(file_path)[0]
             argument_list = []
+
+            base_path = database_file.folder()
+            if 'directory' in entry:
+                base_path = entry['directory']
+
             if 'command' in entry:
                 import shlex
                 argument_list = shlex.split(entry['command'])
@@ -132,8 +137,9 @@ class CompilationDb(FlagsSource):
                 # TODO(igor): maybe show message to the user instead here
                 log.critical(" compilation database has unsupported format")
                 return None
+
             argument_list = CompilationDb.filter_bad_arguments(argument_list)
-            flags = FlagsSource.parse_flags(database_file.folder(),
+            flags = FlagsSource.parse_flags(base_path,
                                             argument_list,
                                             self._include_prefixes)
             # set these flags for current file

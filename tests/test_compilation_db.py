@@ -126,3 +126,19 @@ class TestCompilationDb(TestCase):
                          db._cache[main_file_path])
         self.assertEqual(path.join(path_to_db, "compile_commands.json"),
                          db._cache[lib_file_path])
+
+    def test_relative_directory(self):
+        """Test if compilation db 'directory' records are applied."""
+        include_prefixes = ['-I', '-isystem']
+        db = CompilationDb(include_prefixes)
+
+        expected = [Flag('-I' + path.normpath('/usr/local/foo')),
+                    Flag('-I' + path.normpath('/foo/bar/test/include')),
+                    Flag('-I' + path.normpath('/foo/include')),
+                    Flag('-isystem', path.normpath('/foo/bar/matilda'))]
+
+        path_to_db = path.join(path.dirname(__file__),
+                               'compilation_db_files',
+                               'directory')
+        scope = SearchScope(from_folder=path_to_db)
+        self.assertEqual(expected, db.get_flags(search_scope=scope))

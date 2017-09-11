@@ -1,0 +1,13 @@
+Version 4.2.2
+=============
+
+Bug fixes and improvements:
+---------------------------
+- Allow using with recently released clang 5.0.
+- Add fallback option to use clang 6.0 for those on the bleeding edge.
+- Fix not reading ``directory`` in the compilation database. Thanks @tillt.
+
+Show your support!
+------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

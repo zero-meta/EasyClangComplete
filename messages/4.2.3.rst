@@ -1,0 +1,11 @@
+Version 4.2.3
+=============
+
+Bug fixes and improvements:
+---------------------------
+- Minor fixes to the new clang 5.0 bindings.
+
+Show your support!
+------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

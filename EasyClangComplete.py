@@ -206,7 +206,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                         args=[view, settings])
         EasyClangComplete.thread_pool.new_job(job)
 
-    def on_selection_modified(self, view):
+    def on_selection_modified_async(self, view):
         """Called when selection is modified. Executed in gui thread.
 
         Args:

@@ -11,6 +11,7 @@ Attributes:
     PROGRESS_MSG (str): unicode string of chars to show progress with
 """
 from os import path
+from os import environ
 from os import makedirs
 from os import listdir
 
@@ -668,7 +669,7 @@ class Tools:
         return PosStatus.COMPLETION_NOT_NEEDED
 
     @staticmethod
-    def run_command(command, shell=True):
+    def run_command(command, shell=True, cwd=path.curdir, env=environ):
         """Run a generic command in a subprocess.
 
         Args:
@@ -682,7 +683,7 @@ class Tools:
             startupinfo = None
             if isinstance(command, list):
                 command = subprocess.list2cmdline(command)
-                log.debug("command: \n%s", command)
+                log.debug("running command: \n%s", command)
             if sublime.platform() == "windows":
                 # Don't let console window pop-up briefly.
                 startupinfo = subprocess.STARTUPINFO()
@@ -693,12 +694,14 @@ class Tools:
                                              stdin=stdin,
                                              stderr=subprocess.STDOUT,
                                              shell=shell,
+                                             cwd=cwd,
+                                             env=env,
                                              startupinfo=startupinfo)
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")
-            log.debug("clang process finished with code: %s", e.returncode)
-            log.debug("clang process output: \n%s", output_text)
+            log.debug("command finished with code: %s", e.returncode)
+            log.debug("command output: \n%s", output_text)
         return output_text
 
     @classmethod

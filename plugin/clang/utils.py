@@ -333,6 +333,7 @@ class ClangUtils:
             args_string = macro_parser.args_string
         else:
             args = []
+            log.debug("!!!!!!!!! %s", cursor.kind)
             for arg in cursor.get_arguments():
                 if arg.spelling:
                     args.append(arg.type.spelling + ' ' + arg.spelling)
@@ -367,6 +368,23 @@ class ClangUtils:
             body = body.replace("&quot;", "&nbsp;")
 
             result += " " + body
+
+        if cursor.semantic_parent:
+            parent = cursor.semantic_parent
+            log.debug("PARENT: %s, %s", parent.spelling,
+                      cursor.is_definition())
+            for child in parent.get_children():
+                if not child.canonical == cursor.canonical:
+                    continue
+                if child.is_definition():
+                    continue
+                log.debug("CHILD: %s, %s", child.displayname,
+                          child.is_definition())
+                result += '<br><b>Definition:</b><br>'
+                result += ClangUtils.link_from_location(
+                    child.location,
+                    html.escape(child.displayname))
+                result += ' '
 
         # Doxygen comments
         if cursor.brief_comment:

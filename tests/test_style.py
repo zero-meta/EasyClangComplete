@@ -5,7 +5,7 @@ from os import path
 from EasyClangComplete.plugin.tools import Tools
 
 PEP257_CMD = "pep257 '{}' --match-dir='^(?!clang$).*' --ignore=D204,D203,D209"
-PEP8_CMD = "pep8 '{}' --exclude=clang --count --max-line-length=80"
+PEP8_CMD = "pycodestyle '{}' --exclude=clang --count --max-line-length=80"
 
 PLUGIN_SOURCE_FOLDER = path.dirname(path.dirname(__file__))
 

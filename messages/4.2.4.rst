@@ -1,0 +1,12 @@
+Version 4.2.4
+=============
+
+Improvements and bug fixes:
+---------------------------
+- Allow peeking full macro definition, thanks @dibalavs.
+- Remove lag when selecting text.
+
+Show your support!
+------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

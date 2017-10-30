@@ -1,0 +1,14 @@
+Version 4.2.5
+=============
+
+Improvements and bug fixes:
+---------------------------
+- Goto declaration with Shift + F12, thanks @dibalavs
+- Allow using read-only CMakeLists.txt files, thanks @mrockey28
+- Allow non-unicode symbols in info msg, thanks @kjteske
+- Allow using cusom cmake binary
+
+Show your support!
+------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

@@ -1,0 +1,11 @@
+Version 4.2.6
+=============
+
+Improvements and bug fixes:
+---------------------------
+- Fix a bug in settings introduced in last release.
+
+Show your support!
+------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

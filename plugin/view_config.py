@@ -13,6 +13,7 @@ from threading import Timer
 from .tools import File
 from .tools import Tools
 from .tools import singleton
+from .tools import SublBridge
 from .tools import SearchScope
 
 from .utils.flag import Flag
@@ -388,6 +389,15 @@ class ViewConfigManager(object):
                 gc.collect()
             ViewConfigManager.__cancel_timer(v_id)
         return v_id
+
+    def trigger_get_declaration_location(self, view):
+        """Return location to object declaration."""
+        config = self.get_from_cache(view)
+        if not config:
+            log.debug("Config is not ready yet. No reference is available.")
+            return None
+        (row, col) = SublBridge.cursor_pos(view)
+        return config.completer.get_declaration_location(view, row, col)
 
     def trigger_info(self, view, tooltip_request):
         """A proxy function to handle getting info from completer.

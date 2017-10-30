@@ -330,6 +330,31 @@ class Completer(BaseCompleter):
         log.error("no translation unit for view id %s", v_id)
         return False
 
+    def get_declaration_location(self, view, row, col):
+        """Get location of declaration from given location in file.
+
+        Args:
+            view (sublime.View): current view
+            row (int): cursor row
+            col (int): cursor col
+
+        Returns:
+            Location: location of declaration
+
+        """
+        with Completer.rlock:
+            if not self.tu:
+                return None
+            cursor = self.tu.cursor.from_location(
+                self.tu, self.tu.get_location(view.file_name(), (row, col)))
+            ref_new = None
+            if cursor and cursor.referenced:
+                ref = cursor.referenced
+                if cursor.kind.is_declaration():
+                    ref_new = ref.get_definition()
+                return (ref_new or ref).location
+            return None
+
     @staticmethod
     def _cindex_for_version(version):
         """Get cindex module name from version string.

@@ -23,7 +23,7 @@ You are just three simple steps away!
     `EasyClangComplete`
 - If you don't have Package Control (you should)
   + download one of the releases from
-    [here](https://github.com/niosus/EasyClangComplete/releases).
+    [here](https://github.com/niosus/EasyClangComplete/releases) and restart Sublime Text after unpacking.
 
 ## 2. Install clang ##
 - **Ubuntu**        : `sudo apt-get install clang`

@@ -92,7 +92,7 @@
   "hide_default_completions": false,
 
   // Plugin uses smart caching to not load the data more times than needed.
-  // Remove cache data older than specified time.
+  // Remove cache data older than specified time. Minimum value is 30 seconds.
   // Format: <hours>:<minutes>:<seconds>: "HH:MM:SS".
   "max_cache_age": "00:30:00",
 
@@ -122,7 +122,7 @@
   // compile flags for header files. In order to find a best matching
   // source file instead, you can use templates. Such templates describe how
   // to find (relative to the header file) a source file which we can
-  // use to get compile flags for. 
+  // use to get compile flags for.
   // In the simplest case, one can just use the (relative) path to where
   // the source files are relative to your header file. For example, if
   // your headers are in a subdirectory "inc" and your sources in a
@@ -150,6 +150,6 @@
 
     // Example: Use flags from a file with an
     // "exotic" file name suffix:
-    // "{stamp}.mycustomext 
+    // "{stamp}.mycustomext
   ],
 }

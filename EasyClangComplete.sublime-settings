@@ -92,7 +92,7 @@
   "hide_default_completions": false,
 
   // Plugin uses smart caching to not load the data more times than needed.
-  // Remove cache data older than specified time.
+  // Remove cache data older than specified time. Minimum value is 30 seconds.
   // Format: <hours>:<minutes>:<seconds>: "HH:MM:SS".
   "max_cache_age": "00:30:00",
 
@@ -116,4 +116,40 @@
   // Controls if libclang will cache the results.
   // This works faster, but in rare cases can generate wrong completions.
   "use_libclang_caching": true,
+
+  // Templates to find source files for headers in case we use a
+  // compilation database: Such a DB does not contain the required
+  // compile flags for header files. In order to find a best matching
+  // source file instead, you can use templates. Such templates describe how
+  // to find (relative to the header file) a source file which we can
+  // use to get compile flags for.
+  // In the simplest case, one can just use the (relative) path to where
+  // the source files are relative to your header file. For example, if
+  // your headers are in a subdirectory "inc" and your sources in a
+  // subdirectory "src" next to the first one, then you can use
+  // "../src/" as lookup.
+  // If needed, you can also use finer granular lookup templates by using
+  // UNIX style globbing patterns and placeholders. Placeholders are of the
+  // form '{placeholdername}'. The following placeholders can be used:
+  // - basename:  The base file name without the directory part.
+  // - stamp:     Like "basename", but with the file name extension removed.
+  // - ext:       The file name extension of the header file.
+  "header_to_source_mapping": [
+    // Look for related files in the header's directory:
+    "./",
+
+    // And in the "src" directory:
+    "../src/",
+
+    // And in the "source" directory:
+    "../source/",
+
+    // Example: Use flags but only from the source file
+    // belonging to the header in question:
+    // "{stamp}.cpp",
+
+    // Example: Use flags from a file with an
+    // "exotic" file name suffix:
+    // "{stamp}.mycustomext
+  ],
 }

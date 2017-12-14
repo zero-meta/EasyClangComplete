@@ -19,10 +19,12 @@ from .plugin import view_config
 from .plugin import flags_sources
 from .plugin.utils import thread_pool
 from .plugin.utils import progress_status
+from .plugin.utils import quick_panel_handler
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 
 # reload the modules
+tools.Reloader.reload_all()
 
 # some aliases
 SettingsManager = settings_manager.SettingsManager
@@ -38,6 +40,7 @@ CMakeFile = flags_sources.cmake_file.CMakeFile
 CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
 ThreadPool = thread_pool.ThreadPool
 ThreadJob = thread_pool.ThreadJob
+QuickPanelHandler = quick_panel_handler.QuickPanelHandler
 
 log = logging.getLogger("ECC")
 log.setLevel(logging.DEBUG)
@@ -71,6 +74,39 @@ def plugin_loaded():
 def plugin_unloaded():
     """Call right before the package was unloaded."""
     handle_plugin_unloaded_function()
+
+
+class EccShowAllErrorsCommand(sublime_plugin.TextCommand):
+    """Handle easy_clang_goto_declaration command."""
+
+    def run(self, edit):
+        """Show all errors available in this view.
+
+        This function shows all errors that are available from within a view.
+        Note that the errors can be from different files.
+        """
+        if not Tools.is_valid_view(self.view):
+            return
+        config_manager = EasyClangComplete.view_config_manager
+        if not config_manager:
+            log.error("No ViewConfigManager available.")
+            return
+        config = config_manager.get_from_cache(self.view)
+        log.debug("config: %s", config)
+        if not config:
+            log.error("No ViewConfig for view: %s.", self.view.buffer_id())
+            return
+        if not config.completer:
+            log.error("No Completer for view: %s.", self.view.buffer_id())
+        handler = QuickPanelHandler(self.view, config.completer.latest_errors)
+        start_idx = 0
+        self.view.window().show_quick_panel(
+            handler.items_to_show(),
+            handler.on_done,
+            sublime.MONOSPACE_FONT,
+            start_idx,
+            handler.on_highlighted)
+        print(config.completer.latest_errors)
 
 
 class EccGotoDeclarationCommand(sublime_plugin.TextCommand):
@@ -130,12 +166,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     Most of the functionality is delegated.
     """
-    thread_pool = ThreadPool(max_workers=4)
-
-    CLEAR_JOB_TAG = "clear"
-    COMPLETE_JOB_TAG = "complete"
-    UPDATE_JOB_TAG = "update"
-    INFO_JOB_TAG = "info"
+    thread_pool = ThreadPool()
 
     view_config_manager = None
     settings_manager = None
@@ -228,7 +259,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
         # All is taken care of. The view is built if needed.
         job = ThreadJob(
-            name=EasyClangComplete.UPDATE_JOB_TAG,
+            name=ThreadJob.UPDATE_TAG,
             callback=EasyClangComplete.config_updated,
             function=EasyClangComplete.view_config_manager.load_for_view,
             args=[view, settings])
@@ -279,6 +310,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # disable on_activated_async when running tests
         if view.settings().get("disable_easy_clang_complete"):
             return
+        if not view.file_name():
+            return
         if view.file_name().endswith('.sublime-project'):
             if not EasyClangComplete.settings_manager:
                 log.error("no settings manager, no cannot reload settings")
@@ -290,7 +323,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             settings = EasyClangComplete.settings_manager.settings_for_view(
                 view)
             job = ThreadJob(
-                name=EasyClangComplete.UPDATE_JOB_TAG,
+                name=ThreadJob.UPDATE_TAG,
                 callback=EasyClangComplete.config_updated,
                 function=EasyClangComplete.view_config_manager.load_for_view,
                 args=[view, settings])
@@ -305,16 +338,24 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
-        if Tools.is_valid_view(view):
-            log.debug("closing view %s", view.buffer_id())
-            EasyClangComplete.settings_manager.clear_for_view(view)
-            file_id = view.buffer_id()
-            job = ThreadJob(
-                name=EasyClangComplete.CLEAR_JOB_TAG,
-                callback=EasyClangComplete.config_removed,
-                function=EasyClangComplete.view_config_manager.clear_for_view,
-                args=[file_id])
-            EasyClangComplete.thread_pool.new_job(job)
+        if not Tools.is_valid_view(view):
+            # View is invalid, so just ignore it.
+            return
+        if not EasyClangComplete.settings_manager.has_settings_for_view(view):
+            # View is valid, but is temporary and was never actually opened.
+            # This mostly happens when previewing views while in Ctrl + P
+            # environment. Do nothing for such a view.
+            return
+        # Now we know that the view is valid and we need to clear it.
+        log.debug("closing view %s", view.buffer_id())
+        EasyClangComplete.settings_manager.clear_for_view(view)
+        file_id = view.buffer_id()
+        job = ThreadJob(
+            name=ThreadJob.CLEAR_TAG,
+            callback=EasyClangComplete.config_removed,
+            function=EasyClangComplete.view_config_manager.clear_for_view,
+            args=[file_id])
+        EasyClangComplete.thread_pool.new_job(job)
 
     @staticmethod
     def config_removed(future):
@@ -325,9 +366,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             future (concurrent.Future): future holding id of removed view
         """
-        if future.done():
+        if future.done() and not future.cancelled():
             log.debug("removed config for id: %s", future.result())
-        elif future.cancelled():
+        else:
             log.debug("could not remove config -> cancelled")
 
     @staticmethod
@@ -337,9 +378,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             future (concurrent.Future): future holding config of updated view
         """
-        if future.done():
+        if future.done() and not future.cancelled():
             log.debug("updated config: %s", future.result())
-        elif future.cancelled():
+        else:
             log.debug("could not update config -> cancelled")
 
     @staticmethod
@@ -358,6 +399,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         """
         if not future.done():
+            return
+        if future.cancelled():
             return
         (tooltip_request, result) = future.result()
         if result == "":
@@ -383,6 +426,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
             future (concurrent.Future): future holding completion result
         """
         if not future.done():
+            return
+        if future.cancelled():
             return
         (completion_request, completions) = future.result()
         if not completion_request:
@@ -419,7 +464,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         self.current_job_id = tooltip_request.get_identifier()
 
         job = ThreadJob(
-            name=EasyClangComplete.INFO_JOB_TAG,
+            name=ThreadJob.INFO_TAG,
             callback=self.info_finished,
             function=EasyClangComplete.view_config_manager.trigger_info,
             args=[view, tooltip_request, settings])
@@ -479,7 +524,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         # submit async completion job
         job = ThreadJob(
-            name=EasyClangComplete.COMPLETE_JOB_TAG,
+            name=ThreadJob.COMPLETE_TAG,
             callback=self.completion_finished,
             function=EasyClangComplete.view_config_manager.trigger_completion,
             args=[view, completion_request])

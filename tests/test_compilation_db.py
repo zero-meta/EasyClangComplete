@@ -78,8 +78,6 @@ class TestCompilationDb(TestCase):
         self.assertEqual(expected_lib, db.get_flags(lib_file_path, scope))
         self.assertEqual(expected_lib, db.get_flags(lib_file_path_h, scope))
         self.assertEqual(expected_main, db.get_flags(main_file_path, scope))
-        lib_file_path = path.splitext(lib_file_path)[0]
-        main_file_path = path.splitext(main_file_path)[0]
         self.assertIn(lib_file_path, db._cache)
         self.assertIn(main_file_path, db._cache)
         path_to_db = path.join(path.dirname(__file__),
@@ -118,8 +116,6 @@ class TestCompilationDb(TestCase):
         scope = SearchScope(from_folder=path_to_db)
         self.assertEqual(expected_lib, db.get_flags(lib_file_path, scope))
         self.assertEqual(expected_main, db.get_flags(main_file_path, scope))
-        lib_file_path = path.splitext(lib_file_path)[0]
-        main_file_path = path.splitext(main_file_path)[0]
         # check persistence
         self.assertGreater(len(db._cache), 2)
         self.assertEqual(path.join(path_to_db, "compile_commands.json"),
@@ -142,3 +138,20 @@ class TestCompilationDb(TestCase):
                                'directory')
         scope = SearchScope(from_folder=path_to_db)
         self.assertEqual(expected, db.get_flags(search_scope=scope))
+
+    def test_get_c_flags(self):
+        """Test argument filtering for c language."""
+        include_prefixes = ['-I']
+        db = CompilationDb(include_prefixes)
+
+        main_file_path = path.normpath('/home/blah.c')
+        # also try to test a header
+        path_to_db = path.join(path.dirname(__file__),
+                               'compilation_db_files',
+                               'command_c')
+        scope = SearchScope(from_folder=path_to_db)
+        flags = db.get_flags(main_file_path, scope)
+        self.assertNotIn(Flag('-c'), flags)
+        self.assertNotIn(Flag('-o'), flags)
+        self.assertIn(Flag('-Wno-poison-system-directories'), flags)
+        self.assertIn(Flag('-march=armv7-a'), flags)

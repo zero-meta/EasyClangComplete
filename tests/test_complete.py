@@ -36,8 +36,7 @@ def should_run_objc_tests():
 
 
 class BaseTestCompleter(object):
-    """
-    Base class for tests that are independent of the Completer implementation.
+    """Base class for tests independent of the Completer implementation.
 
     Attributes:
         view (sublime.View): view
@@ -45,7 +44,7 @@ class BaseTestCompleter(object):
     """
 
     def set_up_completer(self):
-        """Utility method to set up a completer for the current view.
+        """Set up a completer for the current view.
 
         Returns:
             BaseCompleter: completer for the current view.
@@ -60,7 +59,7 @@ class BaseTestCompleter(object):
         return completer
 
     def tear_down_completer(self):
-        """Utility method to set up a completer for the current view.
+        """Tear down completer for the current view.
 
         Returns:
             BaseCompleter: completer for the current view.
@@ -194,7 +193,7 @@ class BaseTestCompleter(object):
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
-        expected = ['begin\titerator begin()', 'begin()']
+        expected = ['clear\tvoid clear()', 'clear()']
         self.assertIn(expected, completions)
         self.tear_down_completer()
         self.tear_down()

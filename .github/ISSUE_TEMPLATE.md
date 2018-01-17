@@ -12,5 +12,5 @@
     + set `"verbose": true` in plugin settings
     + restart Sublime Text
     + open the file or do the action that causes trouble
-    + open console with <kbd>Ctrl</kbd>+<kbd>P</kbd>
+    + open console with <kbd>Ctrl</kbd>+<kbd>`</kbd>
     + copy *full* output to a text file and link it to this issue

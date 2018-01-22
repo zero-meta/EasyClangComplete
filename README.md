@@ -12,7 +12,7 @@ C, C++, Objective-C, and Objective-C++.
 [![Codacy Badge][img-codacy]][codacy]
 [![Coverage Badge][img-coverage]][coverage]
 [![Donate][img-paypal]][donate-paypal]
-[![Gratipay][img-gratipay]][gratipay]
+[![Bountysource][img-bountysource]][bountysource-link]
 
 # Jump right in! #
 You are just three simple steps away!
@@ -171,7 +171,6 @@ Please ensure, that your code conforms to this.
 [![Flattr this git repo][img-flattr]][donate-flattr]
 [![Bountysource][img-bountysource]][bountysource-link]
 [![Beerpay][img-beerpay]][beerpay]
-[![Gratipay][img-gratipay]][gratipay]
 
 Current sponsor of this project is my sleep.
 Please buy me a cup of tea if you appreciate the effort.

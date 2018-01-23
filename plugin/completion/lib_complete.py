@@ -16,7 +16,7 @@ from ..tools import Tools
 from ..tools import SublBridge
 from ..tools import PKG_NAME
 from ..clang.utils import ClangUtils
-from ..settings.settings_storage import SettingsStorage
+from ..popups.popups import Popup
 
 from threading import RLock
 from os import path
@@ -36,6 +36,8 @@ cindex_dict = {
     '5.0': PKG_NAME + ".plugin.clang.cindex50",
     '6.0': PKG_NAME + ".plugin.clang.cindex50",  # FIXME
 }
+
+GLOBAL_TRIGGERS = ["::", "\t", " "]  # Triggers that should show types.
 
 
 class Completer(BaseCompleter):
@@ -231,7 +233,7 @@ class Completer(BaseCompleter):
         else:
             point = completion_request.get_trigger_position()
             trigger = view.substr(point - 2) + view.substr(point - 1)
-            if trigger != "::":
+            if trigger not in GLOBAL_TRIGGERS:
                 excluded = self.bigger_ignore_list
             else:
                 excluded = self.default_ignore_list
@@ -255,10 +257,10 @@ class Completer(BaseCompleter):
                 info details read from the translation unit.
 
         """
-        empty_info = (tooltip_request, "")
+        empty_info = (tooltip_request, None)
         with Completer.rlock:
             if not self.tu:
-                return (tooltip_request, "")
+                return empty_info
             view = tooltip_request.get_view()
             (row, col) = SublBridge.cursor_pos(
                 view, tooltip_request.get_trigger_position())
@@ -268,13 +270,12 @@ class Completer(BaseCompleter):
             if not cursor:
                 return empty_info
             if cursor.kind == self.cindex.CursorKind.OBJC_MESSAGE_EXPR:
-                info_details = ClangUtils.build_objc_message_info_details(
-                    cursor)
-                return (tooltip_request, info_details)
+                info_popup = Popup.info_objc(cursor)
+                return tooltip_request, info_popup
             if cursor.referenced:
-                info_details = ClangUtils.build_info_details(
+                info_popup = Popup.info(
                     cursor.referenced, self.cindex, settings)
-                return (tooltip_request, info_details)
+                return tooltip_request, info_popup
             return empty_info
 
     def update(self, view, settings):
@@ -328,7 +329,7 @@ class Completer(BaseCompleter):
             log.debug("reparsed in %s seconds", end - start)
             # Store and potentially show errors to the user.
             self.save_errors(self.tu.diagnostics)  # Store for the future.
-            if settings.errors_style != SettingsStorage.NONE_STYLE:
+            if settings.show_errors:
                 self.show_errors(view)
             return True
         log.error("no translation unit for view id %s", v_id)

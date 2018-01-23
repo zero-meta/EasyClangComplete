@@ -38,6 +38,8 @@ class SettingsStorage:
     """
     FLAG_SOURCES = ["CMakeLists.txt",
                     "compile_commands.json",
+                    "CppProperties.json",
+                    "c_cpp_properties.json",
                     ".clang_complete"]
     FLAG_SOURCES_ENTRIES_WITH_PATHS = ["search_in", "prefix_paths"]
 
@@ -49,13 +51,9 @@ class SettingsStorage:
 
     PROGRESS_STYLES = [COLOR_SUBLIME_STYLE_TAG, MOON_STYLE_TAG, NONE_STYLE_TAG]
 
-    POPUPS_STYLE = "popups"
-    PHANTOMS_STYLE = "phantoms"
-    NONE_STYLE = "none"
-    ERROR_STYLES = [POPUPS_STYLE, PHANTOMS_STYLE, NONE_STYLE]
-
     GUTTER_COLOR_STYLE = "color"
     GUTTER_MONO_STYLE = "mono"
+    NONE_STYLE = "none"
     GUTTER_STYLES = [GUTTER_COLOR_STYLE, GUTTER_MONO_STYLE, NONE_STYLE]
 
     # refer to Preferences.sublime-settings for usage explanation
@@ -66,7 +64,6 @@ class SettingsStorage:
         "cmake_binary",
         "common_flags",
         "cpp_flags",
-        "errors_style",
         "flags_sources",
         "hide_default_completions",
         "include_file_folder",
@@ -78,12 +75,18 @@ class SettingsStorage:
         "objective_cpp_flags",
         "progress_style",
         "show_type_info",
+        "show_errors",
         "show_type_body",
         "triggers",
         "use_libclang",
         "use_libclang_caching",
         "verbose",
         "header_to_source_mapping",
+        "use_target_compiler_built_in_flags",
+        "target_c_compiler",
+        "target_cpp_compiler",
+        "target_objective_c_compiler",
+        "target_objective_cpp_compiler",
     ]
 
     def __init__(self, settings_handle):
@@ -110,7 +113,7 @@ class SettingsStorage:
             view (sublime.View): current view
         """
         try:
-            # init current and parrent folders:
+            # init current and parent folders:
             if not Tools.is_valid_view(view):
                 log.error("no view to populate common flags from")
                 return
@@ -170,10 +173,6 @@ class SettingsStorage:
             error_msg = "Progress style '{}' is not one of {}".format(
                 self.progress_style, SettingsStorage.PROGRESS_STYLES)
             return False, error_msg
-        if self.errors_style not in SettingsStorage.ERROR_STYLES:
-            error_msg = "Error style '{}' is not one of {}".format(
-                self.errors_style, SettingsStorage.ERROR_STYLES)
-            return False, error_msg
         if self.gutter_style not in SettingsStorage.GUTTER_STYLES:
             error_msg = "Gutter style '{}' is not one of {}".format(
                 self.gutter_style, SettingsStorage.GUTTER_STYLES)
@@ -188,6 +187,20 @@ class SettingsStorage:
                     source_dict["file"], SettingsStorage.FLAG_SOURCES)
                 return False, error_msg
         return True, ""
+
+    @property
+    def target_compilers(self):
+        """A dictionary with the target compilers to use."""
+        result = dict()
+        if hasattr(self, "target_c_compiler"):
+            result["c"] = self.target_c_compiler
+        if hasattr(self, "target_cpp_compiler"):
+            result["c++"] = self.target_cpp_compiler
+        if hasattr(self, "target_objective_c_compiler"):
+            result["objective-c"] = self.target_objective_c_compiler
+        if hasattr(self, "target_objective_cpp_compiler"):
+            result["objective-c++"] = self.target_objective_cpp_compiler
+        return result
 
     def __load_vars_from_settings(self, settings, project_specific=False):
         """Load all settings and add them as attributes of self.

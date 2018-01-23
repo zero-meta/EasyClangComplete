@@ -4,23 +4,17 @@ Attributes:
     log (logging): this module logger
 """
 import logging
-from os import path
-from string import Template
-
 import sublime
+from os import path
 
 from ..completion.compiler_variant import LibClangCompilerVariant
 from ..settings.settings_storage import SettingsStorage
+from ..popups.popups import Popup
+from ..tools import Tools
 
 log = logging.getLogger("ECC")
 
-PATH_TO_HTML_FOLDER = path.join(
-    path.dirname(path.dirname(__file__)), 'html')
-
 PATH_TO_ICON = "Packages/EasyClangComplete/pics/icons/{icon}"
-
-POPUP_ERROR_HTML_FILE = path.join(PATH_TO_HTML_FOLDER, "error_popup.html")
-POPUP_WARNING_HTML_FILE = path.join(PATH_TO_HTML_FOLDER, "warning_popup.html")
 
 
 class PopupErrorVis:
@@ -30,14 +24,8 @@ class PopupErrorVis:
         err_regions (dict): dictionary of error regions for view ids
     """
     _TAG = "easy_clang_complete_errors"
-    _MAX_POPUP_WIDTH = 1800
     _ERROR_FLAGS = sublime.DRAW_EMPTY | sublime.DRAW_NO_FILL
     _ERROR_SCOPE = "invalid.illegal"
-
-    ERROR_HTML_TEMPLATE = Template(
-        open(POPUP_ERROR_HTML_FILE, encoding='utf8').read())
-    WARNING_HTML_TEMPLATE = Template(
-        open(POPUP_WARNING_HTML_FILE, encoding='utf8').read())
 
     def __init__(self, gutter_style=None):
         """Initialize error visualization.
@@ -144,11 +132,17 @@ class PopupErrorVis:
         """
         if view.buffer_id() not in self.err_regions:
             return
+
         current_err_region_dict = self.err_regions[view.buffer_id()]
         if row in current_err_region_dict:
             errors_dict = current_err_region_dict[row]
-            errors_html = PopupErrorVis._as_html(errors_dict)
-            view.show_popup(errors_html, max_width=self._MAX_POPUP_WIDTH)
+            max_severity, error_list = PopupErrorVis._as_msg_list(errors_dict)
+            text_to_show = Tools.to_md(error_list)
+            if max_severity > 2:
+                popup = Popup.error(text_to_show)
+            else:
+                popup = Popup.warning(text_to_show)
+            popup.show(view)
         else:
             log.debug("no error regions for row: %s", row)
 
@@ -166,27 +160,21 @@ class PopupErrorVis:
         del self.err_regions[view.buffer_id()]
 
     @staticmethod
-    def _as_html(errors_dict):
-        """Show error as html.
+    def _as_msg_list(errors_dicts):
+        """Return errors as list.
 
         Args:
-            errors_dict (dict): Current error
+            errors_dicts (dict[]): A list of error dicts
         """
-        import cgi
-        errors_html_mask = PopupErrorVis.WARNING_HTML_TEMPLATE
-        errors_html = ""
-        for entry in errors_dict:
-            processed_error = cgi.escape(entry['error'])
-            # Add non-breaking space to prevent popup from getting a newline
-            # after every word
-            processed_error = processed_error.replace(' ', '&nbsp;')
+        error_list = []
+        max_severity = 0
+        for entry in errors_dicts:
+            error_list.append(entry['error'])
             if LibClangCompilerVariant.SEVERITY_TAG in entry:
                 severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
-                if severity > 2:
-                    errors_html_mask = PopupErrorVis.ERROR_HTML_TEMPLATE
-            errors_html += "<div>" + processed_error + "</div>"
-        # add error to html template
-        return errors_html_mask.substitute(content=errors_html)
+                if severity > max_severity:
+                    max_severity = severity
+        return max_severity, error_list
 
     @staticmethod
     def _as_region_list(err_regions_dict):

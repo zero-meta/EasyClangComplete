@@ -1,0 +1,53 @@
+Version 5.0.0
+=============
+
+Improvements and bug fixes:
+---------------------------
+- Implement clever headers location lookup, thanks @mhoeher for the PR
+- Support VS config files, thanks @mclayton7 for the PR
+- Move the popups to use mdpopups to have them in a consistent style
+- Remove use of phantoms
+- Fix a bug with duplicating the cache, thanks @braindevices for reporting
+- Fix a bug where types in global namespace could not be completed
+
+Settings deprecation:
+---------------------
+- "errors_style" -> "show_errors" as we do not support phantoms any more
+
+New settings:
+-------------
+- "use_target_compiler_built_in_flags": defines if we use the built in includes
+  that come along with the compiler
+- "target_LANGUAGE_compiler": define the target compiler of your toolchain here
+- Check for more details in the default settings file
+
+Show your support!
+------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it
+
+Money talk:
+-----------
+I am a PhD student working full time towards getting a degree in Robotics. Life
+does not stand in one place and there is a lot happening like moving between
+continents, internships, family etc. I created this plugin to make it simple to
+use mostly working nights and weekends. As anyone, sometimes I am very
+frustrated at the pace at which the plugin gets developed and how few time I
+have in a day, so this is why your support matters a lot!
+
+This plugin is now nearly 3 years old. For these 3 years of development the
+plugin has been installed more than 14 000 times and I have received €106,89
+from 13 supporters. That is less than a Euro Cent per install, 12 Euro Cent per
+commit, and approximately a Euro per merged PR.
+
+Last but not least, there have been 28 people who have contributed code to the
+repository one way or another. You are the best! I hope I could fulfill your
+expectations with the rate of reviews, even if they lacked some speed at times.
+Please go on with this attitude and thanks so much for all your contributions.
+
+Overall, I believe in open source and it is not really about the money. But it
+is about the support. If you make use of the plugin, please support its
+development either with money or just by telling how you are using it or
+contributing. Both of these ways will show me that I am not doing this for
+nothing.
+

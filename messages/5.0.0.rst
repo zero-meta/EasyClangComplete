@@ -16,6 +16,10 @@ Settings deprecation:
 
 New settings:
 -------------
+- "header_to_source_mapping": a mapping of where to search for source files that
+  correspond to a header. This is useful when using a compilation database as it
+  does not contain header files, but the correct compilation parameters can be
+  read from a corresponding source file
 - "use_target_compiler_built_in_flags": defines if we use the built in includes
   that come along with the compiler
 - "target_LANGUAGE_compiler": define the target compiler of your toolchain here

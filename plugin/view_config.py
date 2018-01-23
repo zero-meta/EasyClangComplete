@@ -22,7 +22,6 @@ from .utils.unique_list import UniqueList
 from .completion import lib_complete
 from .completion import bin_complete
 
-from .error_vis.phantom_error_vis import PhantomErrorVis
 from .error_vis.popup_error_vis import PopupErrorVis
 
 from .flags_sources.flags_file import FlagsFile
@@ -31,8 +30,6 @@ from .flags_sources.flags_source import FlagsSource
 from .flags_sources.c_cpp_properties import CCppProperties
 from .flags_sources.CppProperties import CppProperties
 from .flags_sources.compilation_db import CompilationDb
-
-from .settings.settings_storage import SettingsStorage
 
 log = logging.getLogger("ECC")
 
@@ -270,10 +267,7 @@ class ViewConfig(object):
         Returns:
             Completer: A completer. Can be lib completer or bin completer.
         """
-        if settings.errors_style == SettingsStorage.PHANTOMS_STYLE:
-            error_vis = PhantomErrorVis(settings.gutter_style)
-        else:
-            error_vis = PopupErrorVis(settings.gutter_style)
+        error_vis = PopupErrorVis(settings.gutter_style)
 
         completer = None
         if settings.use_libclang:

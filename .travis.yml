@@ -13,9 +13,9 @@ matrix:
       env: DISTRO="Ubuntu"
       dist: trusty
       sudo: required
-    - os: osx
-      env: DISTRO="OSX"
-      language: generic
+    # - os: osx
+    #   env: DISTRO="OSX"
+    #   language: generic
 
 before_install:
     - curl -OL https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/travis.sh

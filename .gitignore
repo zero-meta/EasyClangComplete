@@ -20,3 +20,7 @@
 EasyClangComplete.sublime-workspace
 
 *.pyc
+
+/docs/.sass-cache/
+
+/site/

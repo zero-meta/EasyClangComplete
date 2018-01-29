@@ -1,0 +1,14 @@
+Version 5.0.3
+=============
+
+Improvements and bug fixes:
+---------------------------
+- Fix Windows bug occuring when reparsing a translation unit (issue #321)
+
+Thanks for your support!
+------------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it
+
+Don't hesitate to tell me where and how you use it!
+

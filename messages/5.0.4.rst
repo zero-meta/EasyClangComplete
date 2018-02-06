@@ -10,7 +10,7 @@ Improvements and bug fixes:
 - Hide popups on movin mouse away, thanks @papadokolos
 - Log error with std flags instead of bugging the user
 
-Thanks for your support!
+Support the development!
 ------------------------
 💜 this plugin? Please consider buying me a 🍵
 https://github.com/niosus/EasyClangComplete#support-it

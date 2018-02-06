@@ -1,6 +1,0 @@
-Version 4.1.2
-=============
-
-Improvement:
----------------
-- Allow using C++ (Colorcode) syntax with this plugin.

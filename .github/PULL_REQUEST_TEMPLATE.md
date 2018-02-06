@@ -1,7 +1,10 @@
-`YOUR PR DESCRIPTION GOES HERE`
+# Before submitting make sure #
+- Make sure your branch is based on `dev`
+- Reference an issue that this PR closes if there is one
+- Add your PR descriptions below the line
+- Remove this prefix (everything above the line)
 
----
+--------------------------------------------------------
 
-# Requirements #
-- [ ] Reference an issue in this PR. Create new one if needed.
-- [ ] Make sure your branch is based on `dev`.
+YOUR PR DESCRIPTION GOES HERE
+

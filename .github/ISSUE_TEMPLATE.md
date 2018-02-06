@@ -1,16 +1,36 @@
 # Please do this before submitting: #
-- [ ] check for already solved issues
-- [ ] try restarting Sublime Text
+- Check for already solved issues
+- Try restarting Sublime Text
+- Remove this header and fill info below the line
 
-# Please state the following: #
+# Create minimal example if you can #
+If you can create a minimal example and link it here.
+- Ideally it should compile on Linux
+- It must work if I build it from the terminal
+
+# Copy the log #
+To capture the log:
+- Set `"verbose": true` in plugin settings
+- Restart Sublime Text
+- Open the file or do the action that causes trouble
+- Open console with <kbd>Ctrl</kbd>+<kbd>`</kbd>
+- Copy *full* output to a text file and link it to this issue
+- Or copy it below under `<LOG GOES HERE>`
+-
+--------------------------------------------------------
+
+# System info: #
 - Sublime Text version: `<here>`
-- which system are you on: `<here>`
+- Which system are you on: `<here>`
 
-# What I need to help you: #
-- The best way is to provide a minimal example that illustrates the issue in a small repo on GitHub. This way, I can probably run it on my machine and solve it locally.
-- If you can't create it, please provide a full log output from the plugin. Without it I cannot do anything. To capture the log:
-    + set `"verbose": true` in plugin settings
-    + restart Sublime Text
-    + open the file or do the action that causes trouble
-    + open console with <kbd>Ctrl</kbd>+<kbd>`</kbd>
-    + copy *full* output to a text file and link it to this issue
+# What happens:  #
+Describe your issue here.
+
+<details>
+<summary>Log that illustrates the issue: </summary>
+```
+<LOG GOES HERE>
+```
+</details>
+
+

@@ -2,6 +2,7 @@
 
 import sublime
 import mdpopups
+import markupsafe
 import logging
 
 from ..utils.macro_parser import MacroParser
@@ -146,7 +147,7 @@ class Popup:
             declaration_text += " const"
         # Save declaration text.
         popup.__text = DECLARATION_TEMPLATE.format(
-            type_declaration=declaration_text)
+            type_declaration=markupsafe.escape(declaration_text))
         # Doxygen comments
         if cursor.brief_comment:
             popup.__text += BRIEF_DOC_TEMPLATE.format(
@@ -167,6 +168,7 @@ class Popup:
         # Show type declaration
         if settings.show_type_body and is_type and cursor.extent:
             body = Popup.get_text_by_extent(cursor.extent)
+            body = Popup.prettify_body(body)
             popup.__text += BODY_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="c++", code=body))
         return popup
@@ -184,6 +186,7 @@ class Popup:
                             max_height=Popup.MAX_POPUP_HEIGHT,
                             wrapper_class=Popup.WRAPPER_CLASS,
                             css=self.CSS,
+                            flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY,
                             location=location,
                             on_navigate=on_navigate)
 
@@ -278,6 +281,19 @@ class Popup:
                   errors='ignore') as f:
             lines = f.readlines()
             return "".join(lines[extent.start.line - 1:extent.end.line])
+
+    @staticmethod
+    def prettify_body(body):
+        """Format some declaration body for viewing.
+
+        Args:
+            body (str): Body text.
+        """
+        # remove any global indentation
+        import textwrap
+        body = textwrap.dedent(body)
+
+        return body
 
     @staticmethod
     def info_objc(cursor):

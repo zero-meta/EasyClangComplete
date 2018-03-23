@@ -11,11 +11,12 @@
   -(void)protocolMethodVoidOneStringParameter:(NSString*)s1;
   -(void)protocolMethodVoidTwoStringParameters:(NSString*)s1
     stringParam2:(NSString*)s2;
+  +(void)protocolClassMethod;
   @property (assign) BOOL protocolPropertyBool;
 @end
 
 @interface Interface : NSObject<Protocol>
-  -(void)interfaceMethodVoidNoParameters;
+  -(void)interfaceMethodVoidNoParameters; ///< Brief comment.
   -(BOOL)interfaceMethodBoolNoParameters;
   -(void)interfaceMethodVoidOneStringParameter:(NSString*)s1;
   -(void)interfaceMethodVoidTwoStringParameters:(NSString*)s1
@@ -30,7 +31,7 @@
 @implementation Interface
   @synthesize protocolPropertyBool;
 
-  -(void)interfaceMethodVoidNoParameters { NSLog(@"VoidMethod"); }
+  -(void)interfaceMethodVoidNoParameters {}
   -(BOOL)interfaceMethodBoolNoParameters { return YES; }
   -(void)interfaceMethodVoidOneStringParameter:(NSString*)s1 {}
   -(void)interfaceMethodVoidTwoStringParameters:(NSString*)s1
@@ -45,6 +46,7 @@
   -(void)protocolMethodVoidOneStringParameter:(NSString*)s1 {}
   -(void)protocolMethodVoidTwoStringParameters:(NSString*)s1
     stringParam2:(NSString*)s2 {}
+  +(void)protocolClassMethod {}
 
 @end
 
@@ -73,6 +75,7 @@ int main(int argc, const char * argv[])
   [interface protocolMethodBoolNoParameters];
   [interface protocolMethodVoidOneStringParameter:nil];
   [interface protocolMethodVoidTwoStringParameters:nil stringParam2:nil];
+  [Interface protocolClassMethod];
   interface.protocolPropertyBool = YES;
 
   [interface categoryMethodVoidNoParameters];

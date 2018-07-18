@@ -13,8 +13,6 @@ C, C++, Objective-C, and Objective-C++.
 [![Coverage Badge][img-coverage]][coverage]
 [![Donate][img-paypal]][donate-paypal]
 [![Bountysource][img-bountysource]][bountysource-link]
-[![Backers on Open Collective](https://opencollective.com/EasyClangComplete/backers/badge.svg)](#backers)
-[![Sponsors on Open Collective](https://opencollective.com/EasyClangComplete/sponsors/badge.svg)](#sponsors) 
 
 # Jump right in! #
 You are just three simple steps away!
@@ -188,15 +186,7 @@ plugin! The more people use it - the merrier.
 ### Contributors
 
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="graphs/contributors"><img src="https://opencollective.com/EasyClangComplete/contributors.svg?width=890&button=false" /></a>
-
-
-### Backers
-
-Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/EasyClangComplete#backer)]
-
-<a href="https://opencollective.com/EasyClangComplete#backers" target="_blank"><img src="https://opencollective.com/EasyClangComplete/backers.svg?width=890"></a>
-
+<a href="graphs/contributors"><img src="https://opencollective.com/EasyClangComplete/contributors.svg?width=890&button=false" /></a><a href="https://opencollective.com/EasyClangComplete#backers" target="_blank"><img src="https://opencollective.com/EasyClangComplete/backers.svg?width=890"></a>
 
 ### Sponsors
 

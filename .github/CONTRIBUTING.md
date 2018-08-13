@@ -28,3 +28,12 @@ There are two branches:
   + `pep257`: ignoring `["D209", "D203", "D204", "D213", "D406", "D407"]`
 
 Please ensure, that your code conforms to this.
+
+## Tests ##
+Most crucial functionality is covered with unit tests using
+[UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin.
+
+Whenever you contribute new functionality, please make sure it is covered 
+by unit tests. It helps to maintain the quality of this software and to 
+deal with all complex parts. I will not merge the PRs without unit tests 
+covering the new functionality. 

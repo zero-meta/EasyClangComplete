@@ -136,10 +136,6 @@ The progress indicator idea is from
 Some functionality is there only because of the awesome contributors to this
 project. To see their names plese check out the contributors page.
 
-## Tests ##
-Most crucial functionality is covered with unit tests using
-[UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin.
-
 # Support it! #
 [![Donate][img-paypal]][donate-paypal]
 [![Flattr this git repo][img-flattr]][donate-flattr]

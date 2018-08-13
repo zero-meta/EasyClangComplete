@@ -140,37 +140,6 @@ project. To see their names plese check out the contributors page.
 Most crucial functionality is covered with unit tests using
 [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin.
 
-## Contributing ##
-Contributions are welcome! Look at the issue list. If there is something you
-think you can tackle, write about it in that issue and submit a Pull Request.
-
-### Follow issue template! ###
-Please follow the issue template *exactly* when creating a new issue.
-I will be closing issues that do not follow that template. Please understand
-that maintaining this codebase takes time and I expect at least well-formatted
-issue statement to be able to tackle it. It is very demotivating to format 
-the issues instead of the original submitter.
-
-Please don't jump into creating a Pull Request straight away and open an issue
-first. This way, we can synchronize our views on the problem, so that everyone
-avoids losing time.
-
-### Branches ###
-There are two branches:
-- `master`: should be stable and generally following the last release. Used for
-  urgent bug fixing.
-- `dev`: used to develop new features. Merges with master right before a new
-  release.
-
-### Code style ###
-- Line width is `80` characters
-- Every public function should be documented.
-- The code *must* pass linters:
-  + `pep8`
-  + `pep257`: ignoring `["D209", "D203", "D204", "D213", "D406", "D407"]`
-
-Please ensure, that your code conforms to this.
-
 # Support it! #
 [![Donate][img-paypal]][donate-paypal]
 [![Flattr this git repo][img-flattr]][donate-flattr]
@@ -183,9 +152,9 @@ Please buy me a cup of tea if you appreciate the effort.
 Also, pull requests are welcome! And don't forget to tell people about this
 plugin! The more people use it - the merrier.
 
-### Contributors
+### Contributing
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+This project exists thanks to all the people who contribute. [[Contribute](.github/CONTRIBUTING.md)].
 <a href="graphs/contributors"><img src="https://opencollective.com/EasyClangComplete/contributors.svg?width=890&button=false" /></a><a href="https://opencollective.com/EasyClangComplete#backers" target="_blank"><img src="https://opencollective.com/EasyClangComplete/backers.svg?width=890"></a>
 
 ### Sponsors

@@ -167,6 +167,15 @@ class CleanCmakeCommand(sublime_plugin.TextCommand):
             log.debug("Nothing to clean")
 
 
+class EccShowPopupInfoCommand(sublime_plugin.TextCommand):
+    """Command that shows popup info on current cursor location."""
+
+    def run(self, edit):
+        """Run show popup info command."""
+        position = self.view.sel()[0].begin()
+        EasyClangComplete.begin_show_info_job(self.view, position)
+
+
 class EasyClangComplete(sublime_plugin.EventListener):
     """Base class for this plugin.
 
@@ -176,6 +185,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     view_config_manager = None
     settings_manager = None
+    current_job_id = None
 
     def __init__(self):
         """Initialize the object."""
@@ -187,7 +197,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         # init instance variables to reasonable defaults
         self.current_completions = None
-        self.current_job_id = None
         self.loaded = False
 
     def on_plugin_unloaded(self):
@@ -260,9 +269,17 @@ class EasyClangComplete(sublime_plugin.EventListener):
             except AttributeError as e:
                 log.debug("cannot clear status, %s", e)
             return
+        settings = EasyClangComplete.settings_manager.settings_for_view(view)
+        if (not Tools.has_valid_syntax(view, settings)) \
+                or Tools.is_ignored(view.file_name(), settings.ignore_list):
+            try:
+                EasyClangComplete.thread_pool.progress_status.erase_status()
+            except AttributeError as e:
+                log.debug("cannot clear status, %s", e)
+            return
+
         EasyClangComplete.thread_pool.progress_status.showing = True
         log.debug("on_activated_async view id %s", view.buffer_id())
-        settings = EasyClangComplete.settings_manager.settings_for_view(view)
         # All is taken care of. The view is built if needed.
         job = ThreadJob(
             name=ThreadJob.UPDATE_TAG,
@@ -277,15 +294,21 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
-        if Tools.is_valid_view(view):
-            (row, _) = SublBridge.cursor_pos(view)
-            view_config = EasyClangComplete.view_config_manager.get_from_cache(
-                view)
-            if not view_config:
-                return
-            if not view_config.completer:
-                return
-            view_config.completer.error_vis.show_popup_if_needed(view, row)
+        if not Tools.is_valid_view(view):
+            return
+        settings = EasyClangComplete.settings_manager.settings_for_view(view)
+        if not Tools.has_valid_syntax(view, settings):
+            return
+        if Tools.is_ignored(view.file_name(), settings.ignore_list):
+            return
+        (row, _) = SublBridge.cursor_pos(view)
+        view_config = EasyClangComplete.view_config_manager.get_from_cache(
+            view)
+        if not view_config:
+            return
+        if not view_config.completer:
+            return
+        view_config.completer.error_vis.show_popup_if_needed(view, row)
 
     def on_modified_async(self, view):
         """Call in a worker thread when view is modified.
@@ -313,7 +336,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # disable on_activated_async when running tests
         if view.settings().get("disable_easy_clang_complete"):
             return
-        if not view.file_name():
+        if not Tools.is_valid_view(view):
             return
         if view.file_name().endswith('.sublime-project'):
             if not EasyClangComplete.settings_manager:
@@ -321,18 +344,20 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 return
             log.debug("Project file changed. Reloading settings.")
             EasyClangComplete.settings_manager.on_settings_changed()
-        if Tools.is_valid_view(view):
-            log.debug("saving view: %s", view.buffer_id())
-            settings = EasyClangComplete.settings_manager.settings_for_view(
-                view)
-            job = ThreadJob(
-                name=ThreadJob.UPDATE_TAG,
-                callback=EasyClangComplete.config_updated,
-                function=EasyClangComplete.view_config_manager.load_for_view,
-                args=[view, settings])
-            EasyClangComplete.thread_pool.new_job(job)
-            # invalidate current completions
-            self.current_completions = None
+        settings = EasyClangComplete.settings_manager.settings_for_view(view)
+        if not Tools.has_valid_syntax(view, settings):
+            return
+        if Tools.is_ignored(view.file_name(), settings.ignore_list):
+            return
+        log.debug("saving view: %s", view.buffer_id())
+        job = ThreadJob(
+            name=ThreadJob.UPDATE_TAG,
+            callback=EasyClangComplete.config_updated,
+            function=EasyClangComplete.view_config_manager.load_for_view,
+            args=[view, settings])
+        EasyClangComplete.thread_pool.new_job(job)
+        # invalidate current completions
+        self.current_completions = None
 
     def on_close(self, view):
         """Call on closing the view.
@@ -395,7 +420,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         sublime.active_window().open_file(location, sublime.ENCODED_POSITION)
 
-    def info_finished(self, future):
+    @staticmethod
+    def info_finished(future):
         """Call this callback when additional information for tag is available.
 
         Creates popup containing information about text under the cursor
@@ -408,14 +434,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
         (tooltip_request, current_popup) = future.result()
         if not tooltip_request:
             return
-        if tooltip_request.get_identifier() != self.current_job_id:
+        if tooltip_request.get_identifier() != EasyClangComplete.current_job_id:
             return
         if not current_popup:
             return
         view = tooltip_request.get_view()
         current_popup.show(view,
                            location=tooltip_request.get_trigger_position(),
-                           on_navigate=self.on_open_declaration)
+                           on_navigate=EasyClangComplete.on_open_declaration)
 
     def completion_finished(self, future):
         """Call this callback when completion async function has returned.
@@ -433,7 +459,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         (completion_request, completions) = future.result()
         if not completion_request:
             return
-        if completion_request.get_identifier() != self.current_job_id:
+        current_job_id = EasyClangComplete.current_job_id
+        if completion_request.get_identifier() != current_job_id:
             return
         active_view = sublime.active_window().active_view()
         if completion_request.is_suitable_for_view(active_view):
@@ -453,20 +480,32 @@ class EasyClangComplete(sublime_plugin.EventListener):
         cursor.
 
         """
+        if hover_zone != sublime.HOVER_TEXT:
+            return
+        EasyClangComplete.begin_show_info_job(view, point)
+
+    @staticmethod
+    def begin_show_info_job(view, position):
+        """Start thead job to show popup info.
+
+        Triggers showing popup with additional information about about
+        element at position.
+        """
         if not Tools.is_valid_view(view):
             return
 
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
+        if not Tools.has_valid_syntax(view, settings):
+            return
         if not settings.show_type_info:
             return
-        if hover_zone != sublime.HOVER_TEXT:
-            return
-        tooltip_request = tools.ActionRequest(view, point)
-        self.current_job_id = tooltip_request.get_identifier()
+
+        tooltip_request = tools.ActionRequest(view, position)
+        EasyClangComplete.current_job_id = tooltip_request.get_identifier()
 
         job = ThreadJob(
             name=ThreadJob.INFO_TAG,
-            callback=self.info_finished,
+            callback=EasyClangComplete.info_finished,
             function=EasyClangComplete.view_config_manager.trigger_info,
             args=[view, tooltip_request, settings])
         EasyClangComplete.thread_pool.new_job(job)
@@ -487,6 +526,17 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug("not a valid view")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
+        # get settings for this view
+        settings = EasyClangComplete.settings_manager.settings_for_view(view)
+
+        if not Tools.has_valid_syntax(view, settings):
+            log.debug("we don't work with this syntax")
+            return Tools.SHOW_DEFAULT_COMPLETIONS
+
+        if Tools.is_ignored(view.file_name(), settings.ignore_list):
+            log.debug("This file matches 'ignore_list' setting. Ignoring.")
+            return Tools.SHOW_DEFAULT_COMPLETIONS
+
         log.debug("on_query_completions view id %s", view.buffer_id())
         log.debug("prefix: %s, locations: %s" % (prefix, locations))
         trigger_pos = locations[0] - len(prefix)
@@ -494,10 +544,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         current_pos_id = completion_request.get_identifier()
         log.debug("this position has identifier: '%s'", current_pos_id)
 
-        # get settings for this view
-        settings = EasyClangComplete.settings_manager.settings_for_view(view)
-
-        if self.current_completions and current_pos_id == self.current_job_id:
+        current_job_id = EasyClangComplete.current_job_id
+        if self.current_completions and current_pos_id == current_job_id:
             log.debug("returning existing completions")
             return SublBridge.format_completions(
                 self.current_completions,
@@ -519,9 +567,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug("showing default completions")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
-        self.current_job_id = current_pos_id
+        EasyClangComplete.current_job_id = current_pos_id
         log.debug("starting async auto_complete with id: %s",
-                  self.current_job_id)
+                  EasyClangComplete.current_job_id)
 
         # submit async completion job
         job = ThreadJob(

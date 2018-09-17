@@ -22,14 +22,15 @@
     // this is needed to include the correct headers for clang
     "-I/usr/lib/clang/$clang_version/include",
   ],
-  // C specific flags. Prepend common_flags for C files.
-  "c_flags" : [ "-std=c11" ],
-  // C++ specific flags. Prepend common_flags for C++ files.
-  "cpp_flags" : [ "-std=c++11" ],
-  // Objective-C specific flags. Prepend common_flags for Objective-C files.
-  "objective_c_flags" : [ "-std=c11" ],
-  // Objective-C++ specific flags. Prepend common_flags for Objective-C++ files.
-  "objective_cpp_flags" : [ "-std=c++11" ],
+
+  // Language-specific flags. Prepend common_flags for files of given language.
+  // When adapting to your needs, make sure to keep all language keys.
+  "lang_flags": {
+    "C": ["-std=c11"],
+    "CPP": ["-std=c++11"],
+    "OBJECTIVE_C": ["-std=c11"],
+    "OBJECTIVE_CPP": ["-std=c++11"],
+  },
 
   // Define how we search needed flags. Prioritized from top to bottom.
   // Possible entries for "file":
@@ -60,8 +61,28 @@
   // Possible styles: "color", "mono", "none"
   "gutter_style": "color",
 
-  // triggers for auto-completion
+  // Triggers for auto-completion
   "triggers" : [ ".", "->", "::", " ", "	", "(", "[" ],
+
+  // A dictionary that defines a mapping from language to an array of valid
+  // syntaxes for it. The values here are good defaults, but feel free to
+  // customize the list to your liking. When modifying this setting make sure
+  // that all 4 languages have values.
+  "valid_lang_syntaxes": {
+    "C":              ["C", "C Improved", "C99"],
+    "CPP":            ["C++", "C++11"],
+    "OBJECTIVE_C":    ["Objective-C"],
+    "OBJECTIVE_CPP":  ["Objective-C++"]
+  },
+
+  // Do not run the plugin for any files that match these paths. Use
+  // glob/fnmatch shell-style filename expansion. In addition, you can still use
+  // '~' to mark the home directory.
+  "ignore_list": [
+    "~/some_folder/*",
+    "/some/absolute/file.ext",
+    "$project_base_path/some/project/path/*",
+  ],
 
   // Use libclang.
   // If set to false will use clang_binary and parse the output of
@@ -184,4 +205,11 @@
   "target_cpp_compiler": null,
   "target_objective_c_compiler": null,
   "target_objective_cpp_compiler": null,
+
+  // Expand template types and add more hyperlinks when showing info on hover.
+  // For example, "std::shared_ptr<Foo> foo" will expand to show hyperlinks
+  // to both std::shared_ptr and the template type, Foo. This may cause
+  // some types and typedefs to be verbose. For example, "std::string foo"
+  // expands to "std::string<char, char_traits<char>, allocator<char>> foo".
+  "expand_template_types": true,
 }

@@ -60,34 +60,34 @@ class SettingsStorage:
     # refer to Preferences.sublime-settings for usage explanation
     NAMES_ENUM = [
         "autocomplete_all",
-        "c_flags",
         "clang_binary",
         "cmake_binary",
         "common_flags",
-        "cpp_flags",
+        "ignore_list",
+        "expand_template_types",
         "flags_sources",
+        "gutter_style",
+        "header_to_source_mapping",
         "hide_default_completions",
         "include_file_folder",
         "include_file_parent_folder",
+        "lang_flags",
         "libclang_path",
-        "gutter_style",
         "max_cache_age",
-        "objective_c_flags",
-        "objective_cpp_flags",
         "progress_style",
-        "show_type_info",
         "show_errors",
         "show_type_body",
-        "triggers",
-        "use_libclang",
-        "use_libclang_caching",
-        "verbose",
-        "header_to_source_mapping",
-        "use_target_compiler_built_in_flags",
+        "show_type_info",
         "target_c_compiler",
         "target_cpp_compiler",
         "target_objective_c_compiler",
         "target_objective_cpp_compiler",
+        "triggers",
+        "use_libclang",
+        "use_libclang_caching",
+        "use_target_compiler_built_in_flags",
+        "valid_lang_syntaxes",
+        "verbose",
     ]
 
     def __init__(self, settings_handle):
@@ -114,17 +114,18 @@ class SettingsStorage:
             view (sublime.View): current view
         """
         try:
-            # init current and parent folders:
+            # Init current and parent folders.
             if not Tools.is_valid_view(view):
                 log.error("no view to populate common flags from")
                 return
             self.__load_vars_from_settings(view.settings(),
                                            project_specific=True)
-            # initialize wildcard values with view
+            # Initialize wildcard values with view.
             self.__update_wildcard_values(view)
-            # replace wildcards
+            # Replace wildcards in various paths.
             self.__populate_common_flags(view.file_name())
             self.__populate_flags_source_paths()
+            self.__update_ignore_list()
             self.libclang_path = self.__replace_wildcard_if_needed(
                 self.libclang_path)
             self.clang_binary = self.__replace_wildcard_if_needed(
@@ -187,11 +188,21 @@ class SettingsStorage:
                 error_msg = "flag source '{}' is not one of {}".format(
                     source_dict["file"], SettingsStorage.FLAG_SOURCES)
                 return False, error_msg
+        # Check if all languages are present in language-specific settings.
+        for lang_tag in Tools.LANG_TAGS:
+            if lang_tag not in self.lang_flags.keys():
+                error_msg = "lang '{}' is not in {}".format(
+                    lang_tag, self.lang_flags)
+                return False, error_msg
+            if lang_tag not in self.valid_lang_syntaxes:
+                error_msg = "No '{}' in syntaxes '{}'".format(
+                    lang_tag, self.valid_lang_syntaxes)
+                return False, error_msg
         return True, ""
 
     @property
     def target_compilers(self):
-        """A dictionary with the target compilers to use."""
+        """Create a dictionary with the target compilers to use."""
         result = dict()
         if hasattr(self, "target_c_compiler"):
             result["c"] = self.target_c_compiler
@@ -275,6 +286,15 @@ class SettingsStorage:
         file_parent_folder = path.dirname(file_current_folder)
         if self.include_file_parent_folder:
             self.common_flags.append("-I" + file_parent_folder)
+
+    def __update_ignore_list(self):
+        """Populate variables inside flags sources."""
+        if not self.ignore_list:
+            log.critical(" Cannot update paths of ignore list.")
+            return
+        for idx, path_to_ignore in enumerate(self.ignore_list):
+            self.ignore_list[idx] = self.__replace_wildcard_if_needed(
+                path_to_ignore)
 
     def __replace_wildcard_if_needed(self, line):
         """Replace wildcards in a line if they are present there.

@@ -36,6 +36,84 @@ BODY_TEMPLATE = """### Body: ###
 """
 
 
+def log_location(location, name):
+    """Log info about a cindex.SourceLocation."""
+    if location is None:
+        log.debug("%s: none" % name)
+        return
+    log.debug("%s" % str(location))
+    file_name = "none"
+    if location.file and location.file.name:
+        file_name = location.file.name
+    log.debug("%s: file: %s" % (name, file_name))
+    log.debug("%s: line: %u" % (name, location.line))
+    log.debug("%s: col: %u" % (name, location.column))
+
+
+def log_type(clang_type, name):
+    """Log info about a cindex.Type."""
+    if clang_type is None:
+        log.debug("%s: none" % name)
+        return
+    log.debug("%s" % str(clang_type))
+    log.debug("%s.kind: %s" % (name, clang_type.kind))
+    log_location(Popup.location_from_type(clang_type), "%s.location" % name)
+    log.debug("%s.spelling: %s" % (name, clang_type.spelling or "none"))
+    num_template_arguments = clang_type.get_num_template_arguments()
+    log.debug("%s.get_num_template_arguments(): %i" % (
+        name, num_template_arguments))
+    if num_template_arguments != -1:
+        for arg_index in range(num_template_arguments):
+            templ_type = clang_type.get_template_argument_type(arg_index)
+            log.debug("%s.template_argument[%i].spelling: %s" % (
+                name, arg_index, templ_type.spelling))
+            log_location(Popup.location_from_type(templ_type),
+                         "%s.template_argument[%i].location" % (
+                         name, arg_index))
+    log.debug("%s.get_declaration().get_num_template_arguments(): %i" % (
+        name,
+        clang_type.get_declaration().get_num_template_arguments()))
+    log.debug("%s.get_declaration().spelling: %s" % (
+        name,
+        clang_type.get_declaration().spelling))
+
+
+def log_cursor(cursor, name):
+    """Log info about a cindex.Cursor."""
+    if cursor is None:
+        log.debug("%s: none" % name)
+        return
+    log.debug("%s.kind: %s" % (name, cursor.kind))
+    log.debug("%s.spelling: %s" % (name, cursor.spelling or "none"))
+    log.debug("%s.displayname: %s" % (name, cursor.displayname or "none"))
+    log.debug("%s.get_usr(): %s" % (name, cursor.get_usr() or "none"))
+    log.debug("%s.is_definition(): %s" % (name, cursor.is_definition()))
+    # I've never seen this 'num_template_args' be anything other than -1.
+    num_template_args = cursor.get_num_template_arguments()
+    log.debug("%s.get_num_template_arguments(): %i" % (name, num_template_args))
+    log_type(cursor.type, "%s.type" % name)
+    log_type(cursor.result_type, "%s.result_type" % name)
+    log_location(cursor.location, "%s.location" % name)
+    log.debug("%s.extent: %r" % (name, cursor.extent or "none"))
+
+
+def log_extent(extent, name):
+    """Log info about a cindex.SourceRange."""
+    if extent is None:
+        log.debug("%s: none" % name)
+        return
+    if extent and extent.start and extent.start.file:
+        log.debug("%s.start.file.name: %s" % (name, extent.start.file.name))
+        log.debug("%s.start.line: %i" % (name, extent.start.line))
+        log.debug("%s.end.file.name: %s" % (name, extent.end.file.name))
+        log.debug("%s.start.end.line: %i" % (name, extent.end.line))
+    else:
+        log.debug("%s.start.file.name: none" % name)
+        log.debug("%s.start.line: none" % name)
+        log.debug("%s.end.file.name: none" % name)
+        log.debug("%s.start.end.line: none" % name)
+
+
 class Popup:
     """Incapsulate popup creation."""
 
@@ -64,27 +142,96 @@ class Popup:
         return popup
 
     @staticmethod
+    def declaration_for_type(clang_type, cindex, expand_template_types):
+        """Get declaration for a cindex.Type.
+
+        Includes a hyperlink to the type's definition, and, if type
+        has template parameters, to the the definitions of each
+        template paremeter's type too.
+        """
+        if clang_type.kind == cindex.TypeKind.POINTER:
+            pointee_type = clang_type.get_pointee()
+            pointee_text = Popup.declaration_for_type(pointee_type, cindex,
+                                                      expand_template_types)
+            return pointee_text + ' \\*'
+        if clang_type.kind == cindex.TypeKind.LVALUEREFERENCE:
+            referee_type = clang_type.get_pointee()
+            referee_text = Popup.declaration_for_type(referee_type, cindex,
+                                                      expand_template_types)
+            return referee_text + ' &'
+        if clang_type.spelling is None or clang_type.spelling == "":
+            # This happens, for example, when using an integer literal as
+            # a template parameter, e.g. in 'std::array<Foo, 5> fooArray;',
+            # when hovering over fooArray, we iterate through
+            # fooArray's template arguments, but the argument for '5' has
+            # None for spelling.
+            # For now, just show a placeholder 'unknown' message because
+            # we can't easily determine what to show here.
+            # @todo: In the future, we could find a way to parse this and
+            # correctly show '5' instead of 'unknown'.
+            # cursor.spelling for 'fooArray' is the text 'std::array<Foo, 5>'.
+            # We generally ignore cursor.spelling here because iterating
+            # through template types lets us put a hyperlink to Foo's
+            # definition. With more effort, we could parse the '5' out of
+            # cursor.spelling and insert that here.
+            return "*ECC: unknown*"  # in italics
+
+        num_template_args = clang_type.get_num_template_arguments()
+        declaration_text = ''
+        if not expand_template_types or num_template_args <= 0:
+            # Just link to the type
+            declaration_text += Popup.link_from_location(
+                Popup.location_from_type(clang_type),
+                clang_type.spelling,
+                trailing_space=False)
+        else:
+            # Link-ify the class and all the class's template parameters.
+            # e.g. 'link to std::shared_ptr'<'link to Foo'>
+            spelling_without_template = clang_type.spelling.split('<')[0]
+            declaration_text += Popup.link_from_location(
+                Popup.location_from_type(clang_type),
+                spelling_without_template,
+                trailing_space=False)
+            declaration_text += '<'
+            for arg_index in range(num_template_args):
+                templ_type = clang_type.get_template_argument_type(arg_index)
+                declaration_text += Popup.declaration_for_type(
+                    templ_type,
+                    cindex,
+                    expand_template_types)
+                if arg_index + 1 != num_template_args:
+                    declaration_text += ", "
+            declaration_text += '>'
+        return declaration_text
+
+    @staticmethod
     def info(cursor, cindex, settings):
         """Initialize a new warning popup."""
         popup = Popup()
         popup.__popup_type = 'panel-info "ECC: Info"'
-        type_decl = [
+        is_type_decl = cursor.kind in [
             cindex.CursorKind.STRUCT_DECL,
             cindex.CursorKind.UNION_DECL,
             cindex.CursorKind.CLASS_DECL,
             cindex.CursorKind.ENUM_DECL,
             cindex.CursorKind.TYPEDEF_DECL,
-            cindex.CursorKind.CLASS_TEMPLATE,
             cindex.CursorKind.TYPE_ALIAS_DECL,
             cindex.CursorKind.TYPE_REF
         ]
-        # Initialize the text the declaration.
-        declaration_text = ''
+        is_macro = cursor.kind == cindex.CursorKind.MACRO_DEFINITION
+        is_class_template = cursor.kind == cindex.CursorKind.CLASS_TEMPLATE
+
         # Show the return type of the function/method if applicable,
         # macros just show that they are a macro.
         macro_parser = None
-        is_macro = cursor.kind == cindex.CursorKind.MACRO_DEFINITION
-        is_type = cursor.kind in type_decl
+        body_cursor = None
+        if is_type_decl:
+            body_cursor = cursor
+        elif is_class_template:
+            body_cursor = cursor.get_definition()
+
+        # Initialize the text the declaration.
+        declaration_text = ''
         if is_macro:
             macro_parser = MacroParser(cursor.spelling, cursor.location)
             declaration_text += r'\#define '
@@ -95,15 +242,16 @@ class Popup:
                 result_type = cursor.type
             else:
                 result_type = None
-                log.warning("No spelling for type provided in info.")
-                return ""
             if cursor.is_static_method():
                 declaration_text += "static "
-            if cursor.spelling != cursor.type.spelling:
+            result_type_not_none = result_type is not None
+            if result_type_not_none and cursor.spelling != cursor.type.spelling:
                 # Don't show duplicates if the user focuses type, not variable
-                declaration_text += Popup.link_from_location(
-                    Popup.location_from_type(result_type),
-                    result_type.spelling)
+                declaration_text += Popup.declaration_for_type(
+                    result_type,
+                    cindex,
+                    settings.expand_template_types)
+                declaration_text += " "
         # Link to declaration of item under cursor
         if cursor.location:
             declaration_text += Popup.link_from_location(cursor.location,
@@ -119,13 +267,14 @@ class Popup:
         else:
             args = []
             for arg in cursor.get_arguments():
-                arg_type_location = Popup.location_from_type(arg.type)
-                arg_type_link = Popup.link_from_location(arg_type_location,
-                                                         arg.type.spelling)
+                arg_type_decl = Popup.declaration_for_type(
+                    arg.type,
+                    cindex,
+                    settings.expand_template_types)
                 if arg.spelling:
-                    args.append(arg_type_link + arg.spelling)
+                    args.append(arg_type_decl + " " + arg.spelling)
                 else:
-                    args.append(arg_type_link)
+                    args.append(arg_type_decl)
             if cursor.kind in [cindex.CursorKind.FUNCTION_DECL,
                                cindex.CursorKind.CXX_METHOD,
                                cindex.CursorKind.CONSTRUCTOR,
@@ -166,8 +315,8 @@ class Popup:
                 content=CODE_TEMPLATE.format(lang="c++",
                                              code=macro_parser.body_string))
         # Show type declaration
-        if settings.show_type_body and is_type and cursor.extent:
-            body = Popup.get_text_by_extent(cursor.extent)
+        if settings.show_type_body and body_cursor and body_cursor.extent:
+            body = Popup.get_text_by_extent(body_cursor.extent)
             body = Popup.prettify_body(body)
             popup.__text += BODY_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="c++", code=body))

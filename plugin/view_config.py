@@ -357,23 +357,22 @@ class ViewConfig(object):
             Flag[]: A list of language-specific flags.
         """
         from .utils.compiler_builtins import CompilerBuiltIns
-        current_lang = Tools.get_view_lang(view)
+        current_lang = Tools.get_view_lang(view, settings)
         lang_flags = []
         target_compilers = settings.target_compilers
         target_lang = None
         lang_args = list()
-        if current_lang == "Objective-C":
+        if current_lang == Tools.LANG_OBJECTIVE_C_TAG:
             target_lang = "objective-c"
-            lang_args = settings.objective_c_flags
-        elif current_lang == "Objective-C++":
+        elif current_lang == Tools.LANG_OBJECTIVE_CPP_TAG:
             target_lang = "objective-c++"
-            lang_args = settings.objective_cpp_flags
-        elif current_lang == 'C':
+        elif current_lang == Tools.LANG_C_TAG:
             target_lang = "c"
-            lang_args = settings.c_flags
-        else:
+        elif current_lang == Tools.LANG_CPP_TAG:
             target_lang = "c++"
-            lang_args = settings.cpp_flags
+        else:
+            log.error("unrecognized language '%s'!", target_lang)
+        lang_args = settings.lang_flags[current_lang]
         if need_lang_flags:
             lang_flags += ["-x", target_lang]
         lang_flags += lang_args

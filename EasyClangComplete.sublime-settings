@@ -58,7 +58,7 @@
   "show_errors": true,
 
   // Show gutter icon for highlighted errors on the side bar.
-  // Possible styles: "color", "mono", "none"
+  // Possible styles: "color", "mono", "dot", "none"
   "gutter_style": "color",
 
   // Triggers for auto-completion

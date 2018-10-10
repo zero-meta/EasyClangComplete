@@ -9,6 +9,7 @@ from ..tools import File
 from ..tools import Tools
 from ..tools import SearchScope
 from ..utils.singleton import CMakeFileCache
+from ..utils.catkinizer import Catkinizer
 
 from os import path
 
@@ -75,7 +76,14 @@ class CMakeFile(FlagsSource):
         log.debug("[cmake]:[get]: for file %s", file_path)
         cached_cmake_path = self._get_cached_from(file_path)
         log.debug("[cmake]:[cached]: '%s'", cached_cmake_path)
-        current_cmake_path = self._find_current_in(search_scope, 'project')
+        current_cmake_file = File.search(
+            file_name=self._FILE_NAME,
+            search_scope=search_scope,
+            search_content='project(')
+        if not current_cmake_file:
+            log.debug("No CMakeLists.txt file with 'project' in it found.")
+            return None
+        current_cmake_path = current_cmake_file.full_path
         log.debug("[cmake]:[current]: '%s'", current_cmake_path)
 
         parsed_before = current_cmake_path in self._cache
@@ -104,6 +112,11 @@ class CMakeFile(FlagsSource):
                     from_folder=path.dirname(db_file_path))
                 return db.get_flags(file_path, db_search_scope)
 
+        # Check if CMakeLists.txt is a catkin project and add needed settings.
+        catkinizer = Catkinizer(current_cmake_file)
+        catkinizer.catkinize_if_needed()
+
+        # Generate a new compilation database file and return flags from it.
         log.debug("[cmake]:[generate new db]")
         db_file = CMakeFile.__compile_cmake(
             cmake_file=File(current_cmake_path),
@@ -116,13 +129,13 @@ class CMakeFile(FlagsSource):
         if file_path:
             # write the current cmake file to cache
             self._cache[file_path] = current_cmake_path
-            self._cache[current_cmake_path] = db_file.full_path()
+            self._cache[current_cmake_path] = db_file.full_path
             File.update_mod_time(current_cmake_path)
         db = CompilationDb(
             self._include_prefixes,
             self.__header_to_source_mapping,
             self.__use_target_compiler_builtins)
-        db_search_scope = SearchScope(from_folder=db_file.folder())
+        db_search_scope = SearchScope(from_folder=db_file.folder)
         flags = db.get_flags(file_path, db_search_scope)
         return flags
 
@@ -167,8 +180,8 @@ class CMakeFile(FlagsSource):
             flags = []
 
         cmake_cmd = [cmake_binary, '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'] \
-            + flags + [cmake_file.folder()]
-        tempdir = CMakeFile.unique_folder_name(cmake_file.full_path())
+            + flags + [cmake_file.folder]
+        tempdir = CMakeFile.unique_folder_name(cmake_file.full_path)
         try:
             os.makedirs(tempdir)
         except OSError:

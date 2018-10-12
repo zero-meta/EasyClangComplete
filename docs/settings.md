@@ -60,16 +60,25 @@ Specify common flags that are passed to clang for **every** compilation. These
 usually include common include paths that are needed for finding STL etc. Below
 are typical defaults for Linux.
 
-!!! example "Default value"
+??? example "Good defaults for Linux & MacOS <small>(click to expand)</small>"
     ```json  
     "common_flags" : [
-      // some example includes
       "-I/usr/include",
       "-I$project_base_path/src",
       // this is needed to include the correct headers for clang
       "-I/usr/lib/clang/$clang_version/include",
     ],
     ```
+
+??? example "Good defaults for Windows with MinGW <small>(click to expand)</small>"
+    ```json  
+    "common_flags" : [
+        "-IC:\\MinGW\\lib\\gcc\\mingw32\\6.3.0\\include\\c++",
+        "-IC:\\MinGW\\lib\\gcc\\mingw32\\6.3.0\\include\\c++\\mingw32"
+    ],
+    ```
+
+    Here I have installed MinGW from [MinGW downloads page](https://osdn.net/projects/mingw/releases/). Everything seems to work including the STL support.
 
 ### **`lang_flags`**
 These flags are language-specific. They prepend `common_flags` when compiling files of a particular language. This is a good place to define flags for a standard library etc.

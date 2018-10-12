@@ -5,6 +5,7 @@ C, C++, Objective-C, and Objective-C++.
 
 ![Example](pics/autocomplete.gif)
 
+[![Documentation][img-docs]][docs]
 [![Release][img-release]][release]
 [![Downloads Month][img-downloads]][downloads]
 [![Travis Build][img-travis]][travis]
@@ -89,13 +90,14 @@ missing functionality or fix a bug. Check out the contribution
 [beerpay]: https://beerpay.io/niosus/EasyClangComplete
 [gratipay]: https://gratipay.com/EasyClangComplete/
 [maintainerd]: https://github.com/divmain/maintainerd
+[docs]: https://niosus.github.io/EasyClangComplete/
 
 [img-gratipay]: https://img.shields.io/gratipay/user/niosus.svg?style=flat-square
 [img-beerpay]: https://beerpay.io/niosus/EasyClangComplete/badge.svg?style=flat-square
 [img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg?style=flat-square
 [img-appveyor]: https://img.shields.io/appveyor/ci/niosus/easyclangcomplete/master.svg?style=flat-square&label=windows
 [img-travis]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?style=flat-square&label=linux%20|%20osx
-[img-codacy]: https://img.shields.io/codacy/grade/254f8db44b004dffa76b8cebfece4c06.svg?style=flat-square
+[img-codacy]: https://img.shields.io/codacy/grade/254f8db44b004dffa76b8cebfece4c06.svg?style=flat-square&label=quality
 [img-coverage]: https://img.shields.io/codacy/coverage/254f8db44b004dffa76b8cebfece4c06.svg?style=flat-square
 [img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?style=flat-square
 [img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600&style=flat-square
@@ -105,5 +107,6 @@ missing functionality or fix a bug. Check out the contribution
 [img-paypal]: https://img.shields.io/badge/Donate-PayPal-blue.svg?style=flat-square
 [img-flattr]: https://img.shields.io/badge/Donate-Flattr-blue.svg?style=flat-square
 [img-gitter]: https://badges.gitter.im/niosus/EasyClangComplete.svg?style=flat-square
+[img-docs]: https://img.shields.io/badge/docs-ready-blue.svg?longCache=true&style=flat-square
 
 

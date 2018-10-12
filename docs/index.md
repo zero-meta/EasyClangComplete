@@ -1,6 +1,6 @@
 # EasyClangComplete <small> auto-completion for human beings </small>
 
-![Example](img/autocomplete.gif)
+![Example](img/AutoComplete.gif)
 
 [![Release][img-release]][release]
 [![Downloads Month][img-downloads]][downloads]

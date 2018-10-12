@@ -42,13 +42,12 @@ Don't worry! There are plenty of ways to configure the plugin! Read the
 [related documentation](https://niosus.github.io/EasyClangComplete/configs/)
 for more info!
 
-## Extensive documentation
+## [Extensive documentation](https://niosus.github.io/EasyClangComplete/)
 There are so many things I want to tell you! There is so much the plugin is
 capable of! Read the [docs](https://niosus.github.io/EasyClangComplete/) to get
 started!
 
-
-## Contribute to the project
+## [Contribute to the project](.github/CONTRIBUTING.md)
 This project exists thanks to all the people who contribute. Feel free to open
 an issue if something is not clear or a PR if you want to implement some
 missing functionality or fix a bug. Check out the contribution

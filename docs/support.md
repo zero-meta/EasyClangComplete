@@ -1,61 +1,21 @@
-# EasyClangComplete #
-
-Plugin for Sublime Text 3 for easy to use, out of the box autocompletions for
-C, C++, Objective-C, and Objective-C++.
-
-![Example](pics/autocomplete.gif)
-
-[![Release][img-release]][release]
-[![Downloads Month][img-downloads]][downloads]
-[![Travis Build][img-travis]][travis]
-[![Windows Build][img-appveyor]][appveyor]
-[![Codacy Badge][img-codacy]][codacy]
-[![Coverage Badge][img-coverage]][coverage]
+# Support the project
 [![Donate][img-paypal]][donate-paypal]
+[![Flattr this git repo][img-flattr]][donate-flattr]
 [![Bountysource][img-bountysource]][bountysource-link]
+[![Beerpay][img-beerpay]][beerpay]
 
-# Simple start in just 3 steps! #
+This project cost me a ton of sleepless nights. Liters of tea and coke have
+been consumed while writing this code. If you feel like this unhealthy behavior
+is something you might want to support - smash one of the buttons above (or
+below)! You're awesome! :+1:
 
-## 1. Install this plugin ##
-- In Sublime Text press <kbd>CTRL</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and
-  install **EasyClangComplete** using [Package Control](https://packagecontrol.io/installation).
+## Become a contributor!
+Want to support the development and make me sleep even less? Submit a PR or throw some money at me. Your avatar will magically appear below!
 
-## 2. Install clang ##
-- **Ubuntu**        : `sudo apt-get install clang`
-- **OSX**           : ships `clang` by default. You are all set!
-- **Windows**       : install the latest release from clang website.
-- **Other Systems** : use your package manager or install from clang website.
-- clang website: http://llvm.org/releases/download.html
+<a href="https://github.com/niosus/EasyClangComplete/graphs/contributors"><img src="https://opencollective.com/EasyClangComplete/contributors.svg?width=890&button=false" /></a><a href="https://opencollective.com/EasyClangComplete#backers" target="_blank"><img src="https://opencollective.com/EasyClangComplete/backers.svg?width=890"></a>
 
-## 3. Configure your compiler flags and include folders ##
-
-#### Do you use CMake?
-You're in luck! The plugin will run cmake on a proper `CMakeLists.txt` in your
-project folder and will use information from it to complete your code out of
-the box! For more details, read the plugin
-[docs](https://niosus.github.io/EasyClangComplete/configs/#using-cmake-recommended)
-about CMake.
-
-#### Don't like CMake?
-Don't worry! There are plenty of ways to configure the plugin! Read the
-[related documentation](https://niosus.github.io/EasyClangComplete/configs/)
-for more info!
-
-## Extensive documentation
-There are so many things I want to tell you! There is so much the plugin is
-capable of! Read the [docs](https://niosus.github.io/EasyClangComplete/) to get
-started!
-
-
-## Contribute to the project
-This project exists thanks to all the people who contribute. Feel free to open
-an issue if something is not clear or a PR if you want to implement some
-missing functionality or fix a bug. Check out the contribution
-[guide](.github/CONTRIBUTING.md) for that.
-
-## [Support this project!](https://niosus.github.io/EasyClangComplete/support/)
-
-<a href="graphs/contributors"><img src="https://opencollective.com/EasyClangComplete/contributors.svg?width=890&button=false" /></a><a href="https://opencollective.com/EasyClangComplete#backers" target="_blank"><img src="https://opencollective.com/EasyClangComplete/backers.svg?width=890"></a>
+## Become a sponsor!
+Are you using this plugin at work company? Fight your manager to support the development of this plugin! It will make you so much productive and your company avatar will appear below! Imagine how good you will feel afterwards! :smile:
 
 <a href="https://opencollective.com/EasyClangComplete/sponsor/0/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/EasyClangComplete/sponsor/1/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/1/avatar.svg"></a>
@@ -68,11 +28,6 @@ missing functionality or fix a bug. Check out the contribution
 <a href="https://opencollective.com/EasyClangComplete/sponsor/8/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/EasyClangComplete/sponsor/9/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/9/avatar.svg"></a>
 
-
-
-                         ╔═╗┌─┐┌─┐┬ ┬  ╔═╗┬  ┌─┐┌┐┌┌─┐  ╔═╗┌─┐┌┬┐┌─┐┬  ┌─┐┌┬┐┌─┐
-                         ║╣ ├─┤└─┐└┬┘  ║  │  ├─┤││││ ┬  ║  │ ││││├─┘│  ├┤  │ ├┤
-                         ╚═╝┴ ┴└─┘ ┴   ╚═╝┴─┘┴ ┴┘└┘└─┘  ╚═╝└─┘┴ ┴┴  ┴─┘└─┘ ┴ └─┘
 
 [release]: https://github.com/niosus/EasyClangComplete/releases
 [downloads]: https://packagecontrol.io/packages/EasyClangComplete
@@ -98,12 +53,10 @@ missing functionality or fix a bug. Check out the contribution
 [img-codacy]: https://img.shields.io/codacy/grade/254f8db44b004dffa76b8cebfece4c06.svg?style=flat-square
 [img-coverage]: https://img.shields.io/codacy/coverage/254f8db44b004dffa76b8cebfece4c06.svg?style=flat-square
 [img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?style=flat-square
-[img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600&style=flat-square
+[img-downloads]: https://img.shields.io/packagecontrol/dm/EasyClangComplete.svg?maxAge=3600&style=flat-square
 [img-downloads-month]: https://img.shields.io/packagecontrol/dm/EasyClangComplete.svg?maxAge=2592000&style=flat-square
 [img-subl]: https://img.shields.io/badge/Sublime%20Text-3-green.svg?style=flat-square
 [img-mit]: https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
 [img-paypal]: https://img.shields.io/badge/Donate-PayPal-blue.svg?style=flat-square
 [img-flattr]: https://img.shields.io/badge/Donate-Flattr-blue.svg?style=flat-square
 [img-gitter]: https://badges.gitter.im/niosus/EasyClangComplete.svg?style=flat-square
-
-

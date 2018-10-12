@@ -1,51 +1,37 @@
-# EasyClangComplete #
+# EasyClangComplete <small> auto-completion for human beings </small>
 
-Sublime Text 3 plugin that offers clang-based auto-completion for C, C++,
-Objective-C, and Objective-C++.
+![Example](img/autocomplete.gif)
 
-![Example](../pics/autocomplete.gif)
+## **Simple start in just 3 steps!**
 
-# Simple setup! #
-You are just three simple steps away!
+### **1. Install this plugin**
 
-## 1. Install this plugin ##
-- Best is to use [Package Control](https://packagecontrol.io/installation)
-  + <kbd>CTRL</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and install
-    `EasyClangComplete`
+- In Sublime Text press <kbd>CTRL</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and
+  install `EasyClangComplete`
 
-## 2. Install clang ##
+### **2. Install clang**
 - **Ubuntu**        : `sudo apt-get install clang`
 - **OSX**           : ships `clang` by default. You are all set!
 - **Windows**       : install the latest release from clang website.
 - **Other Systems** : use your package manager or install from clang website.
 - clang website: http://llvm.org/releases/download.html
 
-## 3. Configure your includes ##
+### **3. Configure your compiler flags and include folders**
 
-### Using CMake? ###
-Plugin will run cmake on a proper `CMakeLists.txt` in your project folder and
-will use information from it to complete your code out of the box. You're all
-set!
+#### Do you use CMake?
+You're in luck! The plugin will run cmake on a proper `CMakeLists.txt` in your
+project folder and will use information from it to complete your code out of
+the box! For more details, read the plugin docs about
+[CMake](https://niosus.github.io/EasyClangComplete/configs/#using-cmake-recommended).
 
-### Have a compilation database? ###
-Plugin will search for a compilation database `compile_commands.json` in the
-project folder and will load it to complete your code.
+#### Don't like CMake?
+Don't worry! There are plenty of ways to configure the plugin! Read the related
+documentation [page](https://niosus.github.io/EasyClangComplete/configs/) for
+more info!
 
-If you want to specify a custom path to a compilation database you can do it in
-settings:
+## Extensive documentation
+There are so many things I want to tell you! There is so much the plugin is
+capable of! Read the [docs](https://niosus.github.io/EasyClangComplete/) to get
+started!
 
-```json
-"flags_sources": [
-    {"file": "compile_commands.json", "search_in": "<YOUR_PATH>"},
-]
-```
-
-### None of the above? ###
-You will need a little bit of manual setup for now. Please see the following
-[instructions][no_cmake].
-
-# You're all set! #
-For more information please refer to the [GitHub][github_page] page.
-
-[no_cmake]: https://github.com/niosus/EasyClangComplete#none-of-the-above
-[github_page]: https://github.com/niosus/EasyClangComplete
+## [Support this project!](https://niosus.github.io/EasyClangComplete/support/)

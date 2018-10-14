@@ -64,7 +64,7 @@ If this documentation cannot answer your question, or you have suggestions on
 how to improve it, do not hesitate to fire up an
 [issue](https://github.com/niosus/EasyClangComplete/issues).
 
-## [Support this project!](support.md)
+## [**Support this project!**](support.md)
 
 
 

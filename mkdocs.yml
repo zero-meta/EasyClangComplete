@@ -11,7 +11,7 @@ theme:
   name: 'material'
   palette:
     primary: 'teal'
-    accent: 'teal'
+    accent: 'cyan'
   logo: 'img/ecc.png'
   favicon: 'img/favicon.ico'
 extra:

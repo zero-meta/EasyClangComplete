@@ -53,7 +53,7 @@ an issue if something is not clear or a PR if you want to implement some
 missing functionality or fix a bug. Check out the contribution
 [guide](.github/CONTRIBUTING.md) for that.
 
-## [Support this project!](https://niosus.github.io/EasyClangComplete/support/)
+## [**Support this project!**](https://niosus.github.io/EasyClangComplete/support/)
 
 <a href="https://github.com/niosus/EasyClangComplete/graphs/contributors"><img src="https://opencollective.com/EasyClangComplete/contributors.svg?width=890&button=false" /></a><a href="https://opencollective.com/EasyClangComplete#backers" target="_blank"><img src="https://opencollective.com/EasyClangComplete/backers.svg?width=890"></a>
 

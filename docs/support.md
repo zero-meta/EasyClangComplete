@@ -15,7 +15,11 @@ Want to support the development and make me sleep even less? Submit a PR or thro
 <a href="https://github.com/niosus/EasyClangComplete/graphs/contributors"><img src="https://opencollective.com/EasyClangComplete/contributors.svg?width=890&button=false" /></a><a href="https://opencollective.com/EasyClangComplete#backers" target="_blank"><img src="https://opencollective.com/EasyClangComplete/backers.svg?width=890"></a>
 
 ## Become a sponsor!
-Are you using this plugin at work company? Fight your manager to support the development of this plugin! It will make you so much productive and your company avatar will appear below! Imagine how good you will feel afterwards! :smile:
+Are you using this plugin at work company? Fight your manager to support the
+development of this plugin as it will totally make you so much more productive!
+Plus your company avatar will appear below this message and they can boast that
+they support Open Source! Imagine how good you and your company will feel
+afterwards! :smile:
 
 <a href="https://opencollective.com/EasyClangComplete/sponsor/0/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/EasyClangComplete/sponsor/1/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/1/avatar.svg"></a>

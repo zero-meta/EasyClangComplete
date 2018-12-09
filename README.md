@@ -54,20 +54,9 @@ missing functionality or fix a bug. Check out the contribution
 [guide](.github/CONTRIBUTING.md) for that.
 
 ## [**Support this project!**](https://niosus.github.io/EasyClangComplete/support/)
-
-<a href="https://github.com/niosus/EasyClangComplete/graphs/contributors"><img src="https://opencollective.com/EasyClangComplete/contributors.svg?width=890&button=false" /></a><a href="https://opencollective.com/EasyClangComplete#backers" target="_blank"><img src="https://opencollective.com/EasyClangComplete/backers.svg?width=890"></a>
-
-<a href="https://opencollective.com/EasyClangComplete/sponsor/0/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/0/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/1/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/1/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/2/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/2/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/3/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/3/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/4/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/4/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/5/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/5/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/6/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/6/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/7/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/7/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/8/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/8/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/9/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/9/avatar.svg"></a>
-
+<a href="https://opencollective.com/easyclangcomplete/donate" target="_blank">
+  <img src="https://opencollective.com/easyclangcomplete/donate/button@2x.png?color=blue" width=300 />
+</a>
 
 
                          ╔═╗┌─┐┌─┐┬ ┬  ╔═╗┬  ┌─┐┌┐┌┌─┐  ╔═╗┌─┐┌┬┐┌─┐┬  ┌─┐┌┬┐┌─┐

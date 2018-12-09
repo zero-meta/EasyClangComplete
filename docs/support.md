@@ -9,28 +9,21 @@ been consumed while writing this code. If you feel like this unhealthy behavior
 is something you might want to support - smash one of the buttons above (or
 below)! You're awesome! :+1:
 
+<script src="https://opencollective.com/easyclangcomplete/banner.js"></script>
+
 ## Become a contributor!
 Want to support the development and make me sleep even less? Submit a PR or throw some money at me. Your avatar will magically appear below!
 
-<a href="https://github.com/niosus/EasyClangComplete/graphs/contributors"><img src="https://opencollective.com/EasyClangComplete/contributors.svg?width=890&button=false" /></a><a href="https://opencollective.com/EasyClangComplete#backers" target="_blank"><img src="https://opencollective.com/EasyClangComplete/backers.svg?width=890"></a>
+<a href="https://github.com/niosus/EasyClangComplete/graphs/contributors"><img src="https://opencollective.com/EasyClangComplete/contributors.svg?width=890&button=false" /></a>
 
 ## Become a sponsor!
-Are you using this plugin at work company? Fight your manager to support the
-development of this plugin as it will totally make you so much more productive!
-Plus your company avatar will appear below this message and they can boast that
-they support Open Source! Imagine how good you and your company will feel
-afterwards! :smile:
+Are you using this plugin at work at a company? Fight your manager/boss to
+support the development of this plugin as it will totally make you so much more
+productive :wink:! Plus your company avatar will appear on the main page so
+that they can boast that they support Open Source! Imagine how good you and
+your company will feel afterwards! :smile:
 
-<a href="https://opencollective.com/EasyClangComplete/sponsor/0/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/0/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/1/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/1/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/2/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/2/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/3/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/3/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/4/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/4/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/5/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/5/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/6/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/6/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/7/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/7/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/8/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/8/avatar.svg"></a>
-<a href="https://opencollective.com/EasyClangComplete/sponsor/9/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/9/avatar.svg"></a>
+<script src="https://opencollective.com/easyclangcomplete/donate/button.js" color="blue"></script>
 
 
 [release]: https://github.com/niosus/EasyClangComplete/releases

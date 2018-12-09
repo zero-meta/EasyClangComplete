@@ -31,8 +31,8 @@
 
 #### CMake and .sublime-project
 - Your code is inside a valid
-  [`.sublime-project`](https://www.sublimetext.com/docs/3/projects.html).
-- You are using `CMake` as your build system.
+  [`.sublime-project`](https://www.sublimetext.com/docs/3/projects.html)?
+- You are using `CMake` as your build system?
 
 You're in luck! The plugin will run cmake on a proper `CMakeLists.txt` in your
 project folder and will use information from it to complete your code out of
@@ -72,6 +72,7 @@ how to improve it, do not hesitate to fire up an
 
 ## [**Support this project!**](support.md)
 
+<script src="https://opencollective.com/easyclangcomplete/banner.js"></script>
 
 
 [release]: https://github.com/niosus/EasyClangComplete/releases

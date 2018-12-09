@@ -5,9 +5,9 @@ nav:
     - Complete includes: includes_completion.md
     - Full settings guide: settings.md
     - Available commands: commands.md
-    - Support project: support.md
     - About me: about.md
     - Credits: credits.md
+    - Support project: support.md
 theme:
   name: 'material'
   palette:
@@ -22,7 +22,7 @@ extra:
     - type: 'linkedin'
       link: 'https://www.linkedin.com/in/igor-bogoslavskyi-72650b43/'
 
-copyright: 'Copyright &copy; 2015 - 2018 Igor Bogoslavskyi'
+copyright: 'Copyright &copy; 2015 - 2019 Igor Bogoslavskyi'
 
 markdown_extensions:
   - admonition

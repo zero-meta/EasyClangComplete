@@ -35,3 +35,6 @@ capable of! Read the [docs](https://niosus.github.io/EasyClangComplete/) to get
 started!
 
 ## [Support this project!](https://niosus.github.io/EasyClangComplete/support/)
+<a href="https://opencollective.com/easyclangcomplete/donate" target="_blank">
+  <img src="https://opencollective.com/easyclangcomplete/donate/button@2x.png?color=blue" width=300 />
+</a>

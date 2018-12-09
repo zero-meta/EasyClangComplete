@@ -12,7 +12,11 @@ POPUP_CSS_FILE = "Packages/EasyClangComplete/plugin/popups/popup.css"
 
 log = logging.getLogger("ECC")
 
-MD_TEMPLATE = """!!! {type}
+MD_TEMPLATE = """\
+---
+allow_code_wrap: true
+---
+!!! {type}
     {contents}
 """
 
@@ -119,25 +123,31 @@ class Popup:
     """Incapsulate popup creation."""
 
     WRAPPER_CLASS = "ECC"
-    MAX_POPUP_WIDTH = 1800
-    MAX_POPUP_HEIGHT = 800
 
-    def __init__(self):
-        """Initialize basic needs."""
+    def __init__(self, max_dimensions):
+        """Initialize basic needs.
+
+        'max_dimensions' is a tuple of (maximum_width, maximum_height) in
+        pixels."""
         self.CSS = sublime.load_resource(POPUP_CSS_FILE)
+        self.max_width, self.max_height = max_dimensions
 
     @staticmethod
-    def error(text):
+    def error(text, settings):
         """Initialize a new error popup."""
-        popup = Popup()
+        popup = Popup((
+            settings.popup_maximum_width, settings.popup_maximum_height
+        ))
         popup.__popup_type = 'panel-error "ECC: Error"'
         popup.__text = markupsafe.escape(text)
         return popup
 
     @staticmethod
-    def warning(text):
+    def warning(text, settings):
         """Initialize a new warning popup."""
-        popup = Popup()
+        popup = Popup((
+            settings.popup_maximum_width, settings.popup_maximum_height
+        ))
         popup.__popup_type = 'panel-warning "ECC: Warning"'
         popup.__text = markupsafe.escape(text)
         return popup
@@ -234,8 +244,9 @@ class Popup:
     @staticmethod
     def info(cursor, cindex, settings):
         """Initialize a new warning popup."""
-        log.debug("CURSOR NUM: %s", cursor.get_num_template_arguments())
-        popup = Popup()
+        popup = Popup((
+            settings.popup_maximum_width, settings.popup_maximum_height
+        ))
         popup.__popup_type = 'panel-info "ECC: Info"'
         is_type_decl = cursor.kind in [
             cindex.CursorKind.STRUCT_DECL,
@@ -355,8 +366,8 @@ class Popup:
     def show(self, view, location=-1, on_navigate=None):
         """Show this popup."""
         mdpopups.show_popup(view, self.as_markdown(),
-                            max_width=Popup.MAX_POPUP_WIDTH,
-                            max_height=Popup.MAX_POPUP_HEIGHT,
+                            max_width=self.max_width,
+                            max_height=self.max_height,
                             wrapper_class=Popup.WRAPPER_CLASS,
                             css=self.CSS,
                             flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY,
@@ -470,7 +481,9 @@ class Popup:
 
     def info_objc(cursor, cindex, settings):
         """Provide information about Objective C cursors."""
-        popup = Popup()
+        popup = Popup((
+            settings.popup_maximum_width, settings.popup_maximum_height
+        ))
         popup.__popup_type = 'panel-info "ECC: Info"'
         is_message = cursor.kind in [
             cindex.CursorKind.OBJC_MESSAGE_EXPR,

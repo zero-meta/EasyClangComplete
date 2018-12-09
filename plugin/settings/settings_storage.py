@@ -70,6 +70,8 @@ class SettingsStorage:
         "common_flags",
         "flags_sources",
         "gutter_style",
+        "popup_maximum_width",
+        "popup_maximum_height",
         "header_to_source_mapping",
         "hide_default_completions",
         "ignore_list",

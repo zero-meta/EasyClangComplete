@@ -162,18 +162,40 @@ class TestErrorVis:
 
     def test_error(self):
         """Test getting text from multiline extent."""
-        error_popup = Popup.error("error_text")
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+        _, settings = self.set_up_completer()
+        settings.popup_maximum_width = 1800
+        settings.popup_maximum_height = 800
+        error_popup = Popup.error("error_text", settings)
         md_text = error_popup.as_markdown()
-        expected_error = """!!! panel-error "ECC: Error"
+        expected_error = """\
+---
+allow_code_wrap: true
+---
+!!! panel-error "ECC: Error"
     error_text
 """
         self.assertEqual(md_text, expected_error)
 
     def test_warning(self):
         """Test generating a simple warning."""
-        error_popup = Popup.warning("warning_text")
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+        _, settings = self.set_up_completer()
+        settings.popup_maximum_width = 1800
+        settings.popup_maximum_height = 800
+        error_popup = Popup.warning("warning_text", settings)
         md_text = error_popup.as_markdown()
-        expected_error = """!!! panel-warning "ECC: Warning"
+        expected_error = """\
+---
+allow_code_wrap: true
+---
+!!! panel-warning "ECC: Warning"
     warning_text
 """
         self.assertEqual(md_text, expected_error)
@@ -206,7 +228,11 @@ class TestErrorVis:
         pos = self.view.text_point(6, 7)
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     int [main]({file}:7:5) (int argc, const char *[] argv)
 """.format(file=file_name)
@@ -230,7 +256,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     [MyCoolClass]({file}:4:7)
     ### Brief documentation: ###
@@ -277,7 +307,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     void [foo]({file}:14:8) (int a, int b)
     ### Brief documentation: ###
@@ -315,7 +349,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     void [foo]({file}:5:8) ([Foo]({file}:1:7) a, [Foo]({file}:1:7) \\* b)
 """.format(file=file_name)
@@ -345,7 +383,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     -(void)[interfaceMethodVoidNoParameters]({file}:19:10)
     ### Brief documentation: ###
@@ -381,10 +423,15 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        fmt = '!!! panel-info "ECC: Info"\n'
-        fmt += '    ## Declaration: ##\n'
-        fmt += '    -(void)[interfaceMethodVoidTwoParametersSecondUnnamed]'
-        fmt += '({file}:24:10):(int)int1 :(int)int2\n'
+        fmt = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    -(void)[interfaceMethodVoidTwoParametersSecondUnnamed]\
+({file}:24:10):(int)int1 :(int)int2
+"""
         expected_info_msg = fmt.format(file=file_name)
 
         # Make sure we remove trailing spaces on the right to comply with how
@@ -415,11 +462,15 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        fmt = '!!! panel-info "ECC: Info"\n'
-        fmt += '    ## Declaration: ##\n'
-        fmt += '    +([Foo *]({file}:6:8))[interfaceClassMethodFooTwoFoo'
-        fmt += 'Parameters]({file}:26:10):([Foo *]({file}:6:8))f1 '
-        fmt += 'fooParam2:([Foo *]({file}:6:8))f2\n'
+        fmt = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    +([Foo *]({file}:6:8))[interfaceClassMethodFooTwoFooParameters]\
+({file}:26:10):([Foo *]({file}:6:8))f1 fooParam2:([Foo *]({file}:6:8))f2
+"""
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
@@ -447,7 +498,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     -(void)[protocolMethodVoidNoParameters]({file}:9:10)
     ### Brief documentation: ###
@@ -481,7 +536,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     +(void)[protocolClassMethod]({file}:14:10)
 """.format(file=file_name)
@@ -511,7 +570,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     -(void)[categoryMethodVoidNoParameters]({file}:54:10)
 """.format(file=file_name)
@@ -542,7 +605,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     -(void)[interfaceMethodVoidNoParameters]({file}:34:10)
     ### Brief documentation: ###
@@ -576,7 +643,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     +(void)[protocolClassMethod]({file}:14:10)
 """.format(file=file_name)
@@ -606,7 +677,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     [Protocol]({file}:8:11)
     ### Body: ###
@@ -649,7 +724,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     [Category]({file}:53:12)
     ### Body: ###
@@ -686,7 +765,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     [Interface]({file}:18:12)
     ### Body: ###
@@ -733,7 +816,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     -([MyCovariant&lt;Foo *&gt; *]({file}:3:12))[covariantMethod]({file}:4:22)
 """.format(file=file_name)
@@ -765,10 +852,15 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        fmt = '!!! panel-info "ECC: Info"\n'
-        fmt += '    ## Declaration: ##\n'
-        fmt += '    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7), int, '
-        fmt += '123&gt; [instanceClassTypeInt]({file}:9:32)\n'
+        fmt = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7), int, \
+123&gt; [instanceClassTypeInt]({file}:9:32)
+"""
         expected_info_msg = fmt.format(file=file_name)
 
         # Make sure we remove trailing spaces on the right to comply with how
@@ -798,11 +890,16 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        fmt = '!!! panel-info "ECC: Info"\n'
-        fmt += '    ## Declaration: ##\n'
-        fmt += '    [TemplateClass]({file}:3:7)'
-        fmt += '&lt;[Foo]({file}:1:7), int, 123&gt; '
-        fmt += '[instanceClassTypeInt]({file}:9:32)\n'
+        fmt = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [TemplateClass]({file}:3:7)\
+&lt;[Foo]({file}:1:7), int, 123&gt; \
+[instanceClassTypeInt]({file}:9:32)
+"""
         expected_info_msg = fmt.format(file=file_name)
 
         # Make sure we remove trailing spaces on the right to comply with how
@@ -833,10 +930,15 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        fmt = '!!! panel-info "ECC: Info"\n'
-        fmt += '    ## Declaration: ##\n'
-        fmt += '    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7)&gt; '
-        fmt += '[instanceClassAndDefaults]({file}:10:22)\n'
+        fmt = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7)&gt; \
+[instanceClassAndDefaults]({file}:10:22)
+"""
         expected_info_msg = fmt.format(file=file_name)
 
         # Make sure we remove trailing spaces on the right to comply with how
@@ -867,10 +969,15 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        fmt = '!!! panel-info "ECC: Info"\n'
-        fmt += '    ## Declaration: ##\n'
-        fmt += '    [TemplateClass]({file}:3:7)&lt;[TemplateClass]({file}:3:7)'
-        fmt += '&lt;[Foo]({file}:1:7)&gt;&gt; [instanceNested]({file}:11:37)\n'
+        fmt = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [TemplateClass]({file}:3:7)&lt;[TemplateClass]({file}:3:7)&lt;\
+[Foo]({file}:1:7)&gt;&gt; [instanceNested]({file}:11:37)
+"""
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
@@ -900,10 +1007,15 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        fmt = '!!! panel-info "ECC: Info"\n'
-        fmt += '    ## Declaration: ##\n'
-        fmt += '    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) \\*&gt; '
-        fmt += '[instancePointer]({file}:12:23)\n'
+        fmt = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) \\*&gt; \
+[instancePointer]({file}:12:23)
+"""
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
@@ -932,10 +1044,15 @@ class TestErrorVis:
         pos = self.view.text_point(12, 23)
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
-        fmt = '!!! panel-info "ECC: Info"\n'
-        fmt += '    ## Declaration: ##\n'
-        fmt += '    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) &amp;&gt; '
-        fmt += '[instanceRef]({file}:13:23)\n'
+        fmt = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) &amp;&gt; \
+[instanceRef]({file}:13:23)
+"""
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
@@ -965,10 +1082,15 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        fmt = '!!! panel-info "ECC: Info"\n'
-        fmt += '    ## Declaration: ##\n'
-        fmt += '    [TemplateClass]({file}:3:7)&lt;[Foo &amp;&amp;]'
-        fmt += '({file}:1:7)&gt; [instanceRValueRef]({file}:14:24)\n'
+        fmt = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [TemplateClass]({file}:3:7)&lt;[Foo &amp;&amp;]({file}:1:7)&gt; \
+[instanceRValueRef]({file}:14:24)
+"""
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
@@ -998,7 +1120,11 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
+        expected_info_msg = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
     ## Declaration: ##
     [TemplateClass]({file}:3:7)
     ### Body: ###
@@ -1039,10 +1165,15 @@ class TestErrorVis:
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        fmt = '!!! panel-info "ECC: Info"\n'
-        fmt += '    ## Declaration: ##\n'
-        fmt += '    void [foo]({file}:6:8) ([TemplateClass]({file}:3:7)&lt;Foo '
-        fmt += '&amp;&amp;, int, 12&gt;)\n'
+        fmt = """\
+---
+allow_code_wrap: true
+---
+!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    void [foo]({file}:6:8) ([TemplateClass]({file}:3:7)&lt;Foo \
+&amp;&amp;, int, 12&gt;)
+"""
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.

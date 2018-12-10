@@ -7,7 +7,7 @@ nav:
     - Available commands: commands.md
     - About me: about.md
     - Credits: credits.md
-    - Support project: support.md
+    - Support this project: support.md
 theme:
   name: 'material'
   palette:

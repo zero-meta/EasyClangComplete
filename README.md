@@ -13,7 +13,7 @@ C, C++, Objective-C, and Objective-C++.
 [![Codacy Badge][img-codacy]][codacy]
 [![Coverage Badge][img-coverage]][coverage]
 [![Donate][img-paypal]][donate-paypal]
-[![Bountysource][img-bountysource]][bountysource-link]
+[![OpenCollective Backers][img-open-backers]][opencollective]
 
 # Simple start in just 3 steps! #
 
@@ -79,6 +79,7 @@ missing functionality or fix a bug. Check out the contribution
 [gratipay]: https://gratipay.com/EasyClangComplete/
 [maintainerd]: https://github.com/divmain/maintainerd
 [docs]: https://niosus.github.io/EasyClangComplete/
+[opencollective]: https://opencollective.com/easyclangcomplete/#contributors
 
 [img-gratipay]: https://img.shields.io/gratipay/user/niosus.svg?style=flat-square
 [img-beerpay]: https://beerpay.io/niosus/EasyClangComplete/badge.svg?style=flat-square
@@ -95,6 +96,8 @@ missing functionality or fix a bug. Check out the contribution
 [img-paypal]: https://img.shields.io/badge/Donate-PayPal-blue.svg?style=flat-square
 [img-flattr]: https://img.shields.io/badge/Donate-Flattr-blue.svg?style=flat-square
 [img-gitter]: https://badges.gitter.im/niosus/EasyClangComplete.svg?style=flat-square
-[img-docs]: https://img.shields.io/badge/docs-ready-blue.svg?longCache=true&style=flat-square
+[img-docs]: https://img.shields.io/badge/docs-ready-brightgreen.svg?longCache=true&style=flat-square
+[img-open-backers]: https://opencollective.com/easyclangcomplete/backers/badge.svg?style=flat-square
+[img-open-sponsors]: https://opencollective.com/easyclangcomplete/sponsors/badge.svg?style=flat-square
 
 

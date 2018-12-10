@@ -1,8 +1,9 @@
 # Support the project
 [![Donate][img-paypal]][donate-paypal]
-[![Flattr this git repo][img-flattr]][donate-flattr]
 [![Bountysource][img-bountysource]][bountysource-link]
 [![Beerpay][img-beerpay]][beerpay]
+[![OpenCollective Backers][img-open-backers]][opencollective]
+[![OpenCollective Sponsors][img-open-sponsors]][opencollective]
 
 This project cost me a ton of sleepless nights. Liters of tea and coke have
 been consumed while writing this code. If you feel like this unhealthy behavior
@@ -41,6 +42,7 @@ your company will feel afterwards! :smile:
 [beerpay]: https://beerpay.io/niosus/EasyClangComplete
 [gratipay]: https://gratipay.com/EasyClangComplete/
 [maintainerd]: https://github.com/divmain/maintainerd
+[opencollective]: https://opencollective.com/easyclangcomplete/#contributors
 
 [img-gratipay]: https://img.shields.io/gratipay/user/niosus.svg?style=flat-square
 [img-beerpay]: https://beerpay.io/niosus/EasyClangComplete/badge.svg?style=flat-square
@@ -57,3 +59,5 @@ your company will feel afterwards! :smile:
 [img-paypal]: https://img.shields.io/badge/Donate-PayPal-blue.svg?style=flat-square
 [img-flattr]: https://img.shields.io/badge/Donate-Flattr-blue.svg?style=flat-square
 [img-gitter]: https://badges.gitter.im/niosus/EasyClangComplete.svg?style=flat-square
+[img-open-backers]: https://opencollective.com/easyclangcomplete/backers/badge.svg?style=flat-square
+[img-open-sponsors]: https://opencollective.com/easyclangcomplete/sponsors/badge.svg?style=flat-square

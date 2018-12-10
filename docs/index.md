@@ -10,6 +10,7 @@
 [![Coverage Badge][img-coverage]][coverage]
 [![Donate][img-paypal]][donate-paypal]
 
+
 ## **Simple start in just 3 steps!**
 
 ### **1. Install this plugin from [Package Control](https://packagecontrol.io/)** 
@@ -106,3 +107,5 @@ how to improve it, do not hesitate to fire up an
 [img-paypal]: https://img.shields.io/badge/Donate-PayPal-blue.svg?style=flat-square
 [img-flattr]: https://img.shields.io/badge/Donate-Flattr-blue.svg?style=flat-square
 [img-gitter]: https://badges.gitter.im/niosus/EasyClangComplete.svg?style=flat-square
+[img-open-backers]: https://opencollective.com/easyclangcomplete/backers/badge.svg?style=flat-square
+[img-open-sponsors]: https://opencollective.com/easyclangcomplete/sponsors/badge.svg?style=flat-square

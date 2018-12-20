@@ -1,5 +1,5 @@
 # Read instructions carefully! #
-- I know its annoying, but bare with me
+- I know its annoying, but bear with me
 - Take 2 minutes to make sure your issue is readable
 - I will close malformed issues
 

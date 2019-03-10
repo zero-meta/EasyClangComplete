@@ -1,10 +1,16 @@
 """Tests for settings."""
 import sublime
+import imp
 
 from os import path
 
-from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
 from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
+
+from EasyClangComplete.plugin.settings import settings_manager
+
+imp.reload(settings_manager)
+
+SettingsManager = settings_manager.SettingsManager
 
 
 class test_settings(GuiTestWrapper):
@@ -22,8 +28,6 @@ class test_settings(GuiTestWrapper):
         manager = SettingsManager()
         settings = manager.user_settings()
         self.assertIsNotNone(settings.verbose)
-        self.assertIsNotNone(settings.include_file_folder)
-        self.assertIsNotNone(settings.include_file_parent_folder)
         self.assertIsNotNone(settings.triggers)
         self.assertIsNotNone(settings.common_flags)
         self.assertIsNotNone(settings.clang_binary)
@@ -66,10 +70,6 @@ class test_settings(GuiTestWrapper):
         settings = manager.settings_for_view(self.view)
         dirs = settings.common_flags
 
-        current_folder = path.dirname(self.view.file_name())
-        parent_folder = path.dirname(current_folder)
         self.assertTrue(len(initial_common_flags) <= len(dirs))
         self.assertTrue(initial_common_flags[0] in dirs)
         self.assertFalse(initial_common_flags[1] in dirs)
-        self.assertTrue(("-I" + current_folder) in dirs)
-        self.assertTrue(("-I" + parent_folder) in dirs)

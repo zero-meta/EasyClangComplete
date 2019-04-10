@@ -1,0 +1,1470 @@
+
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+      
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
+    
+    
+      
+        <title>Full settings guide - EasyClangComplete</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application.3020aac5.css">
+      
+        <link rel="stylesheet" href="../assets/stylesheets/application-palette.224b79ff.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#009688">
+      
+    
+    
+      <script src="../assets/javascripts/modernizr.01ccdecf.js"></script>
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="../assets/fonts/material-icons.css">
+    
+    
+    
+      
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#three-levels-of-settings-for-easyclangcomplete" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href=".." title="EasyClangComplete" class="md-header-nav__button md-logo">
+          
+            <img src="../img/ecc.png" width="24" height="24">
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            <span class="md-header-nav__topic">
+              EasyClangComplete
+            </span>
+            <span class="md-header-nav__topic">
+              Full settings guide
+            </span>
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+          
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href=".." title="EasyClangComplete" class="md-nav__button md-logo">
+      
+        <img src="../img/ecc.png" width="48" height="48">
+      
+    </a>
+    EasyClangComplete
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Getting started" class="md-nav__link">
+      Getting started
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../configs/" title="Configure compiler flags" class="md-nav__link">
+      Configure compiler flags
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../includes_completion/" title="Complete includes" class="md-nav__link">
+      Complete includes
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Full settings guide
+      </label>
+    
+    <a href="./" title="Full settings guide" class="md-nav__link md-nav__link--active">
+      Full settings guide
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#settings-hierarchy" title="Settings hierarchy" class="md-nav__link">
+    Settings hierarchy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-path-wildcards" title="Common path wildcards" class="md-nav__link">
+    Common path wildcards
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-environmental-variables" title="Using environmental variables" class="md-nav__link">
+    Using environmental variables
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-define-project-settings" title="How to define project settings" class="md-nav__link">
+    How to define project settings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-settings-list" title="Complete settings list" class="md-nav__link">
+    Complete settings list
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common_flags" title="common_flags" class="md-nav__link">
+    common_flags
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lang_flags" title="lang_flags" class="md-nav__link">
+    lang_flags
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flags_sources" title="flags_sources" class="md-nav__link">
+    flags_sources
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#possible-options" title="Possible options" class="md-nav__link">
+    Possible options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmake-specific-options" title="CMake-specific options" class="md-nav__link">
+    CMake-specific options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-order" title="Search order" class="md-nav__link">
+    Search order
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show_errors" title="show_errors" class="md-nav__link">
+    show_errors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gutter_style" title="gutter_style" class="md-nav__link">
+    gutter_style
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#possible-values" title="Possible values" class="md-nav__link">
+    Possible values
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#popup_maximum_width" title="popup_maximum_width" class="md-nav__link">
+    popup_maximum_width
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#popup_maximum_height" title="popup_maximum_height" class="md-nav__link">
+    popup_maximum_height
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#triggers" title="triggers" class="md-nav__link">
+    triggers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#valid_lang_syntaxes" title="valid_lang_syntaxes" class="md-nav__link">
+    valid_lang_syntaxes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ignore_list" title="ignore_list" class="md-nav__link">
+    ignore_list
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use_libclang" title="use_libclang" class="md-nav__link">
+    use_libclang
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use_default_includes" title="use_default_includes" class="md-nav__link">
+    use_default_includes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verbose" title="verbose" class="md-nav__link">
+    verbose
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#include_file_folder" title="include_file_folder" class="md-nav__link">
+    include_file_folder
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#include_file_parent_folder" title="include_file_parent_folder" class="md-nav__link">
+    include_file_parent_folder
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clang_binary" title="clang_binary" class="md-nav__link">
+    clang_binary
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmake_binary" title="cmake_binary" class="md-nav__link">
+    cmake_binary
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autocomplete_all" title="autocomplete_all" class="md-nav__link">
+    autocomplete_all
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hide_default_completions" title="hide_default_completions" class="md-nav__link">
+    hide_default_completions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max_cache_age" title="max_cache_age" class="md-nav__link">
+    max_cache_age
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show_type_info" title="show_type_info" class="md-nav__link">
+    show_type_info
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show_type_body" title="show_type_body" class="md-nav__link">
+    show_type_body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show_index_references" title="show_index_references" class="md-nav__link">
+    show_index_references
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#libclang_path" title="libclang_path" class="md-nav__link">
+    libclang_path
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#progress_style" title="progress_style" class="md-nav__link">
+    progress_style
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use_libclang_caching" title="use_libclang_caching" class="md-nav__link">
+    use_libclang_caching
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#header_to_source_mapping" title="header_to_source_mapping" class="md-nav__link">
+    header_to_source_mapping
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#target_compilers" title="target_compilers" class="md-nav__link">
+    target_compilers
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../commands/" title="Available commands" class="md-nav__link">
+      Available commands
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../about/" title="About me" class="md-nav__link">
+      About me
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../credits/" title="Credits" class="md-nav__link">
+      Credits
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../support/" title="Support this project" class="md-nav__link">
+      Support this project
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#settings-hierarchy" title="Settings hierarchy" class="md-nav__link">
+    Settings hierarchy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-path-wildcards" title="Common path wildcards" class="md-nav__link">
+    Common path wildcards
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-environmental-variables" title="Using environmental variables" class="md-nav__link">
+    Using environmental variables
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-define-project-settings" title="How to define project settings" class="md-nav__link">
+    How to define project settings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-settings-list" title="Complete settings list" class="md-nav__link">
+    Complete settings list
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common_flags" title="common_flags" class="md-nav__link">
+    common_flags
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lang_flags" title="lang_flags" class="md-nav__link">
+    lang_flags
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flags_sources" title="flags_sources" class="md-nav__link">
+    flags_sources
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#possible-options" title="Possible options" class="md-nav__link">
+    Possible options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmake-specific-options" title="CMake-specific options" class="md-nav__link">
+    CMake-specific options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-order" title="Search order" class="md-nav__link">
+    Search order
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show_errors" title="show_errors" class="md-nav__link">
+    show_errors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gutter_style" title="gutter_style" class="md-nav__link">
+    gutter_style
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#possible-values" title="Possible values" class="md-nav__link">
+    Possible values
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#popup_maximum_width" title="popup_maximum_width" class="md-nav__link">
+    popup_maximum_width
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#popup_maximum_height" title="popup_maximum_height" class="md-nav__link">
+    popup_maximum_height
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#triggers" title="triggers" class="md-nav__link">
+    triggers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#valid_lang_syntaxes" title="valid_lang_syntaxes" class="md-nav__link">
+    valid_lang_syntaxes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ignore_list" title="ignore_list" class="md-nav__link">
+    ignore_list
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use_libclang" title="use_libclang" class="md-nav__link">
+    use_libclang
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use_default_includes" title="use_default_includes" class="md-nav__link">
+    use_default_includes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verbose" title="verbose" class="md-nav__link">
+    verbose
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#include_file_folder" title="include_file_folder" class="md-nav__link">
+    include_file_folder
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#include_file_parent_folder" title="include_file_parent_folder" class="md-nav__link">
+    include_file_parent_folder
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clang_binary" title="clang_binary" class="md-nav__link">
+    clang_binary
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmake_binary" title="cmake_binary" class="md-nav__link">
+    cmake_binary
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autocomplete_all" title="autocomplete_all" class="md-nav__link">
+    autocomplete_all
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hide_default_completions" title="hide_default_completions" class="md-nav__link">
+    hide_default_completions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max_cache_age" title="max_cache_age" class="md-nav__link">
+    max_cache_age
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show_type_info" title="show_type_info" class="md-nav__link">
+    show_type_info
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show_type_body" title="show_type_body" class="md-nav__link">
+    show_type_body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show_index_references" title="show_index_references" class="md-nav__link">
+    show_index_references
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#libclang_path" title="libclang_path" class="md-nav__link">
+    libclang_path
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#progress_style" title="progress_style" class="md-nav__link">
+    progress_style
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use_libclang_caching" title="use_libclang_caching" class="md-nav__link">
+    use_libclang_caching
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#header_to_source_mapping" title="header_to_source_mapping" class="md-nav__link">
+    header_to_source_mapping
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#target_compilers" title="target_compilers" class="md-nav__link">
+    target_compilers
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="three-levels-of-settings-for-easyclangcomplete">Three levels of settings for EasyClangComplete<a class="headerlink" href="#three-levels-of-settings-for-easyclangcomplete" title="Permanent link">&para;</a></h1>
+<ul>
+<li>Default settings <small>(shipped with the plugin)</small></li>
+<li>Global user settings <small>(defined globally for the whole plugin)</small></li>
+<li>Project settings <small> (defined in a <a href="https://www.sublimetext.com/docs/3/projects.html"><code class="codehilite"><span class="na">.sublime-project</span></code></a> file for a specific project)
+  </small></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Project-related settings will only work when your code has a
+<code class="codehilite"><span class="na">.sublime-project</span></code> file related to it. For documentation on using the
+Sublime Text projects please refer <a href="https://www.sublimetext.com/docs/3/projects.html">here</a>.</p>
+</div>
+<h2 id="settings-hierarchy">Settings hierarchy<a class="headerlink" href="#settings-hierarchy" title="Permanent link">&para;</a></h2>
+<ol>
+<li>If no settings are defined the <strong>Default</strong> ones are used</li>
+<li><strong>User</strong> settings have precedence over the <strong>Default</strong> ones</li>
+<li><strong>Project</strong> settings have precedence over the <strong>User</strong> and <strong>Default</strong> ones</li>
+</ol>
+<h2 id="common-path-wildcards">Common path wildcards<a class="headerlink" href="#common-path-wildcards" title="Permanent link">&para;</a></h2>
+<p>Every path variable in settings can contain wildcards:</p>
+<ul>
+<li><code class="codehilite">$project_base_path</code> is replaced by the full path to the project to which
+  the currently opened view belongs.</li>
+<li><code class="codehilite">$project_name</code> is replaced by the name of the current project.</li>
+<li><code class="codehilite">$clang_version</code> is replaced by the numeric version of used clang.</li>
+<li><code class="codehilite">~</code> is replaced by the path to user home directory.</li>
+<li><code class="codehilite">*</code> when put at the end of folder path expands to all folders in that
+  folder. Not recursive.</li>
+</ul>
+<h2 id="using-environmental-variables">Using environmental variables<a class="headerlink" href="#using-environmental-variables" title="Permanent link">&para;</a></h2>
+<p>In addition to the variables described above, you can use your environment
+variables:</p>
+<ul>
+<li>OSX and Linux: <code class="codehilite">$variable_name</code> or <code class="codehilite"><span class="cp">${</span><span class="n">variable_name</span><span class="cp">}</span></code></li>
+<li>Windows: <code class="codehilite">$variable_name</code>, <code class="codehilite"><span class="cp">${</span><span class="n">variable_name</span><span class="cp">}</span></code> or <code class="codehilite"><span class="nf">%variable_name</span><span class="o">%</span></code></li>
+</ul>
+<h2 id="how-to-define-project-settings">How to define project settings<a class="headerlink" href="#how-to-define-project-settings" title="Permanent link">&para;</a></h2>
+<p>The project-specific settings are only available when the code is within a Sublime Text project defined by a <code class="codehilite">*.sublime-project</code> file. They must be stored under the <code class="codehilite">&quot;settings&quot;</code> tab in the project file with either of the two prefixes: <code class="codehilite">ecc_</code> or <code class="codehilite">easy_clang_complete_</code>. See example below for more clarifications.</p>
+<div class="admonition example">
+<p class="admonition-title">Example of setting <code class="codehilite">verbose</code> and <code class="codehilite">use_libclang</code> project-specific settings</p>
+<div class="superfences-tabs">
+<input name="__tabs_1" type="radio" id="__tab_1_0" checked="checked" />
+<label for="__tab_1_0">my_project.sublime-project</label>
+<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;settings&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;easy_clang_complete_verbose&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+        <span class="nt">&quot;ecc_use_libclang&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div></div>
+</div>
+<p>Note that for <code class="codehilite">verbose</code> setting a prefix <code class="codehilite">easy_clang_complete_</code> is used,
+while for <code class="codehilite">use_libclang</code> we use <code class="codehilite">ecc_</code> prefix.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Project settings override User and Default settings</p>
+<p>The settings defined in the <code class="codehilite">*.sublime-project</code> file override User and Default settings. Keep that in mind when specifying them! They are <strong>not appended</strong>, they <strong>override</strong> these settings.</p>
+</div>
+<h2 id="complete-settings-list">Complete settings list<a class="headerlink" href="#complete-settings-list" title="Permanent link">&para;</a></h2>
+<p>This is a complete guide over all settings. Here we look at every setting in
+detail, explain where they are used and what are their default values.</p>
+<h3 id="common_flags"><strong><code class="codehilite">common_flags</code></strong><a class="headerlink" href="#common_flags" title="Permanent link">&para;</a></h3>
+<p>Specify common flags that are passed to clang for <strong>every</strong> compilation. These
+usually include common include paths that are needed for finding STL etc. Below
+are typical defaults for Linux.</p>
+<details class="example"><summary>Good defaults for Linux <small>(click to expand)</small></summary><div class="codehilite"><pre><span></span><span class="s2">&quot;common_flags&quot;</span> <span class="err">:</span> <span class="p">[</span>
+    <span class="s2">&quot;-I/usr/include&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;-I$project_base_path/src&quot;</span><span class="p">,</span>
+    <span class="err">//</span> <span class="err">this</span> <span class="err">is</span> <span class="err">needed</span> <span class="err">to</span> <span class="err">include</span> <span class="err">the</span> <span class="err">correct</span> <span class="err">headers</span> <span class="err">for</span> <span class="err">clang</span>
+    <span class="s2">&quot;-I/usr/lib/clang/$clang_version/include&quot;</span><span class="p">,</span>
+<span class="p">]</span><span class="err">,</span>
+</pre></div>
+
+</details>
+<details class="example"><summary>Good defaults MacOS <small>(click to expand)</small></summary><div class="codehilite"><pre><span></span><span class="s2">&quot;common_flags&quot;</span> <span class="err">:</span> <span class="p">[</span>
+    <span class="err">//</span> <span class="err">some</span> <span class="err">example</span> <span class="err">includes</span>
+    <span class="s2">&quot;-I/usr/include/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;-I/usr/local/include&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;-I/Library/Developer/CommandLineTools/usr/lib/clang/$clang_version&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;-I/Library/Developer/CommandLineTools/usr/include/c++/v1&quot;</span><span class="p">,</span>       
+<span class="p">]</span><span class="err">,</span>
+</pre></div>
+
+</details>
+<details class="example"><summary>Good defaults for Windows with MinGW <small>(click to expand)</small></summary><div class="codehilite"><pre><span></span><span class="s2">&quot;common_flags&quot;</span> <span class="err">:</span> <span class="p">[</span>
+    <span class="s2">&quot;-IC:\\MinGW\\lib\\gcc\\mingw32\\6.3.0\\include\\c++&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;-IC:\\MinGW\\lib\\gcc\\mingw32\\6.3.0\\include\\c++\\mingw32&quot;</span>
+<span class="p">]</span><span class="err">,</span>
+</pre></div>
+
+<p>Here I have installed MinGW from <a href="https://osdn.net/projects/mingw/releases/">MinGW downloads page</a>. Everything seems to work including the STL support.</p>
+</details>
+<h3 id="lang_flags"><strong><code class="codehilite">lang_flags</code></strong><a class="headerlink" href="#lang_flags" title="Permanent link">&para;</a></h3>
+<p>These flags are language-specific. They prepend <code class="codehilite">common_flags</code> when compiling files of a particular language. This is a good place to define flags for a standard library etc.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;lang_flags&quot;</span><span class="err">:</span> <span class="p">{</span>
+  <span class="nt">&quot;C&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-std=c11&quot;</span><span class="p">],</span>
+  <span class="nt">&quot;CPP&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-std=c++11&quot;</span><span class="p">],</span>
+  <span class="nt">&quot;OBJECTIVE_C&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-std=c11&quot;</span><span class="p">],</span>
+  <span class="nt">&quot;OBJECTIVE_CPP&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-std=c++11&quot;</span><span class="p">],</span>
+<span class="p">}</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When specifying this setting in your user or project settings make sure to
+keep ALL language keys.</p>
+</div>
+<h3 id="flags_sources"><strong><code class="codehilite">flags_sources</code></strong><a class="headerlink" href="#flags_sources" title="Permanent link">&para;</a></h3>
+<p>This setting defines external sources for the compilation flags. If you have a
+build system <small>(e.g. CMake)</small> in place or have an external file that
+defines all the compilation flags for your project <small>(e.g. a compilation
+database <code class="codehilite">compile_commands.json</code>)</small>, you can load the flags directly from
+there. For more details on differences between the flag sources refer to <a href="../configs/#geting-correct-compiler-flags">this
+page</a> of the documentation.</p>
+<div class="admonition tip">
+<p class="admonition-title"><code class="codehilite">common_flags</code> and <code class="codehilite">lang_flags</code> are never overridden by external flag sources</p>
+<p>The flags from <a href="#common_flags-flags-added-to-each-compilation"><code class="codehilite">common_flags</code></a> and from <a href="#lang_flags-language-specific-flags"><code class="codehilite">lang_flags</code></a> are <strong>ALWAYS</strong> present in the compilation. The flags loaded from the flag sources are appended to those and <strong>DO NOT OVERRIDE</strong> them.</p>
+</div>
+<h4 id="possible-options">Possible options<a class="headerlink" href="#possible-options" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code class="codehilite">&quot;file&quot;</code> <small>MANDATORY</small> - defines the name of the flags source. Can
+  be one of:<ul>
+<li><code class="codehilite">&quot;CMakeLists.txt&quot;</code> <small> looks for a <code class="codehilite">CMakeLists.txt</code> file that
+  contains a line that starts with <code class="codehilite">&quot;project&quot;</code> in it </small></li>
+<li><code class="codehilite">&quot;compile_commands.json&quot;</code></li>
+<li><code class="codehilite">&quot;CppProperties.json&quot;</code></li>
+<li><code class="codehilite">&quot;c_cpp_properties.json&quot;</code></li>
+<li><code class="codehilite">&quot;.clang_complete&quot;</code></li>
+<li><code class="codehilite">&quot;Makefile&quot;</code></li>
+</ul>
+</li>
+<li><code class="codehilite">&quot;search_in&quot;: &lt;path&gt;</code> <small>OPTIONAL</small> - defines a <em>folder</em> in which
+  the file should be searched. If it is not defined, the search starts from the current file up the directory tree. </li>
+</ul>
+<h4 id="cmake-specific-options">CMake-specific options<a class="headerlink" href="#cmake-specific-options" title="Permanent link">&para;</a></h4>
+<p>CMake is handled in a special way and there are additional settings that can be specified for this type of flag source:</p>
+<ul>
+<li><code class="codehilite">&quot;flags&quot;: [&lt;flags&gt;]</code> <small>OPTIONAL</small> - defines a list of flags that can be passed to the <code class="codehilite">cmake</code> program upon calling it</li>
+<li><code class="codehilite">&quot;prefix_paths&quot;: [&lt;paths&gt;]</code> <small>OPTIONAL</small> - defines a list of paths that will be set as prefix paths when running <code class="codehilite">cmake</code></li>
+</ul>
+<h4 id="search-order">Search order<a class="headerlink" href="#search-order" title="Permanent link">&para;</a></h4>
+<p>The flag sources are searched in a strictly hierarchical order from top to
+bottom. First the top-most <code class="codehilite">&quot;file&quot;</code> is searched for. If this search fails, the
+second <code class="codehilite">&quot;file&quot;</code> is searched. This continues until either one of the flag
+sources is found or the list has finished. See example below for more
+explanations.</p>
+<details class="example"><summary>Example flag sources <small>(click to expand)</small></summary><p>In this example we define a number of flag sources with some additional options:
+<div class="codehilite"><pre><span></span><span class="s2">&quot;flags_sources&quot;</span><span class="err">:</span> <span class="p">[</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CMakeLists.txt&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;flags&quot;</span><span class="p">:</span>
+    <span class="p">[</span>
+      <span class="s2">&quot;-DCMAKE_BUILD_TYPE=Release&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="nt">&quot;prefix_paths&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;/opt/ros/indigo&quot;</span><span class="p">]</span>
+  <span class="p">},</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;Makefile&quot;</span>
+  <span class="p">},</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;.clang_complete&quot;</span>
+  <span class="p">}</span>
+<span class="p">]</span><span class="err">,</span>
+</pre></div>
+Here, first the plugin tries to find a <code class="codehilite">CMakeLists.txt</code> with <code class="codehilite">project(&lt;smth&gt;)</code> inside of it. If this is successful, then it invokes a command 
+<div class="codehilite"><pre><span></span>cmake -DCMAKE_PREFIX_PATHS<span class="o">=</span>/opt/ros/indigo -DCMAKE_BUILD_TYPE<span class="o">=</span>Release &lt;folder_to_CMakeLists.txt&gt;
+</pre></div>
+storing the generated files in a temporary build folder.</p>
+<p>If the <code class="codehilite">CMakeLists.txt</code> file cannot be found, the plugin continues to search for a <code class="codehilite">Makefile</code> and if that fails - for a <code class="codehilite"><span class="na">.clang_complete</span></code> file</p>
+</details>
+<h3 id="show_errors"><strong><code class="codehilite">show_errors</code></strong><a class="headerlink" href="#show_errors" title="Permanent link">&para;</a></h3>
+<p>When this option is <code class="codehilite">true</code> the errors will be highlighted upon every file save.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;show_errors&quot;</span><span class="err">:</span> <span class="kc">true</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="gutter_style"><strong><code class="codehilite">gutter_style</code></strong><a class="headerlink" href="#gutter_style" title="Permanent link">&para;</a></h3>
+<p>Defines the style of the gutter icon shown on the sidebar.</p>
+<h4 id="possible-values">Possible values<a class="headerlink" href="#possible-values" title="Permanent link">&para;</a></h4>
+<ul>
+<li><img alt="image" src="../img/error_color.png" />: <code class="codehilite">&quot;color&quot;</code> <small>default</small></li>
+<li><img alt="image" src="../img/error_mono.png" />: <code class="codehilite">&quot;mono&quot;</code> </li>
+<li><img alt="image" src="../img/error_dot.png" />: <code class="codehilite">&quot;dot&quot;</code> </li>
+<li><code class="codehilite">&quot;none&quot;</code></li>
+</ul>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;gutter_style&quot;</span><span class="err">:</span> <span class="s2">&quot;color&quot;</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="popup_maximum_width"><strong><code class="codehilite">popup_maximum_width</code></strong><a class="headerlink" href="#popup_maximum_width" title="Permanent link">&para;</a></h3>
+<p>Setting that controls the maximum width of the popups generated by the plugin.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;popup_maximum_width&quot;</span><span class="err">:</span> <span class="mi">1800</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="popup_maximum_height"><strong><code class="codehilite">popup_maximum_height</code></strong><a class="headerlink" href="#popup_maximum_height" title="Permanent link">&para;</a></h3>
+<p>Setting that controls the maximum height of the popups generated by the plugin.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;popup_maximum_height&quot;</span><span class="err">:</span> <span class="mi">800</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="triggers"><strong><code class="codehilite">triggers</code></strong><a class="headerlink" href="#triggers" title="Permanent link">&para;</a></h3>
+<p>Defines all characters that trigger auto-completion. The default value is:</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;triggers&quot;</span> <span class="err">:</span> <span class="p">[</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;-&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;::&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="s2">&quot;(&quot;</span><span class="p">,</span> <span class="s2">&quot;[&quot;</span> <span class="p">]</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="valid_lang_syntaxes"><strong><code class="codehilite">valid_lang_syntaxes</code></strong><a class="headerlink" href="#valid_lang_syntaxes" title="Permanent link">&para;</a></h3>
+<p>A dictionary that defines a mapping from language to an array of valid
+syntaxes for it. The values here are good defaults, but feel free to
+customize the list to your liking. When modifying this setting make sure
+that all 4 languages have values.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;valid_lang_syntaxes&quot;</span><span class="err">:</span> <span class="p">{</span>
+<span class="nt">&quot;C&quot;</span><span class="p">:</span>              <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;C Improved&quot;</span><span class="p">,</span> <span class="s2">&quot;C99&quot;</span><span class="p">],</span>
+<span class="nt">&quot;CPP&quot;</span><span class="p">:</span>            <span class="p">[</span><span class="s2">&quot;C++&quot;</span><span class="p">,</span> <span class="s2">&quot;C++11&quot;</span><span class="p">],</span>
+<span class="nt">&quot;OBJECTIVE_C&quot;</span><span class="p">:</span>    <span class="p">[</span><span class="s2">&quot;Objective-C&quot;</span><span class="p">],</span>
+<span class="nt">&quot;OBJECTIVE_CPP&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;Objective-C++&quot;</span><span class="p">]</span>
+<span class="p">}</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When specifying this setting in your user or project settings make sure to
+keep ALL language keys.</p>
+</div>
+<h3 id="ignore_list"><strong><code class="codehilite">ignore_list</code></strong><a class="headerlink" href="#ignore_list" title="Permanent link">&para;</a></h3>
+<p>Do not run the plugin for any files that match these paths. Use
+<code class="codehilite">glob/fnmatch</code> shell-style filename expansion. In addition, you can still use
+<code class="codehilite">&#39;~&#39;</code> to mark the home directory.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;ignore_list&quot;</span><span class="err">:</span> <span class="p">[</span>
+    <span class="s2">&quot;~/some_folder/*&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;/some/absolute/file.ext&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;$project_base_path/some/project/path/*&quot;</span><span class="p">,</span>
+<span class="p">]</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="use_libclang"><strong><code class="codehilite">use_libclang</code></strong><a class="headerlink" href="#use_libclang" title="Permanent link">&para;</a></h3>
+<p>If set to <code class="codehilite">true</code> will use <code class="codehilite">libclang</code> through python bindings. This offers much better performance generally, but can be buggy on some systems. When set to <code class="codehilite">false</code> will use clang_binary and parse the output of <code class="codehilite">clang -Xclang -code-complete-at &lt;some_file&gt;</code> instead.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;use_libclang&quot;</span> <span class="err">:</span> <span class="kc">true</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="use_default_includes"><strong><code class="codehilite">use_default_includes</code></strong><a class="headerlink" href="#use_default_includes" title="Permanent link">&para;</a></h3>
+<p>If set to <code class="codehilite">true</code> there will be default includes added to the <code class="codehilite">&quot;common_flags&quot;</code>. We generate these includes from running the following command on some empty temp file <code class="codehilite">test.cc</code>:</p>
+<div class="codehilite"><pre><span></span>&lt;clang_binary&gt; -c test.cc -v 
+</pre></div>
+
+<p>See <a href="#clang_binary"><code class="codehilite">clang_binary</code></a> setting for more details on what clang binary will be in use.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;use_default_includes&quot;</span> <span class="err">:</span> <span class="kc">true</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="verbose"><strong><code class="codehilite">verbose</code></strong><a class="headerlink" href="#verbose" title="Permanent link">&para;</a></h3>
+<p>Output lots of additional information in the console. Useful for debugging. Off by default.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;verbose&quot;</span> <span class="err">:</span> <span class="kc">false</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="include_file_folder"><strong><code class="codehilite">include_file_folder</code></strong><a class="headerlink" href="#include_file_folder" title="Permanent link">&para;</a></h3>
+<p>Add the folder with current file with <code class="codehilite">-I</code> flag.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;include_file_folder&quot;</span> <span class="err">:</span> <span class="kc">true</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="include_file_parent_folder"><strong><code class="codehilite">include_file_parent_folder</code></strong><a class="headerlink" href="#include_file_parent_folder" title="Permanent link">&para;</a></h3>
+<p>Add the parent folder of the current file's one with <code class="codehilite">-I</code> flag</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;include_file_parent_folder&quot;</span> <span class="err">:</span> <span class="kc">true</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="clang_binary"><strong><code class="codehilite">clang_binary</code></strong><a class="headerlink" href="#clang_binary" title="Permanent link">&para;</a></h3>
+<p>Pick the clang binary used by the plugin. This is used to determine the
+version of the plugin and pick correct libclang bindings or for code completion when the setting <a href="#use_libclang"><code class="codehilite">use_libclang</code></a> is set to <code class="codehilite">false</code>.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;clang_binary&quot;</span> <span class="err">:</span> <span class="s2">&quot;clang++&quot;</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="cmake_binary"><strong><code class="codehilite">cmake_binary</code></strong><a class="headerlink" href="#cmake_binary" title="Permanent link">&para;</a></h3>
+<p>Pick the binary used for <code class="codehilite">cmake</code>. </p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;cmake_binary&quot;</span> <span class="err">:</span> <span class="s2">&quot;cmake&quot;</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Please make sure the binary you provide is accessible from the command line on your system.</p>
+</div>
+<h3 id="autocomplete_all"><strong><code class="codehilite">autocomplete_all</code></strong><a class="headerlink" href="#autocomplete_all" title="Permanent link">&para;</a></h3>
+<p>Ignore triggers and try to complete after each character</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;autocomplete_all&quot;</span> <span class="err">:</span> <span class="kc">false</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>Can be very slow! Enable only if you know what you are doing!</p>
+</div>
+<h3 id="hide_default_completions"><strong><code class="codehilite">hide_default_completions</code></strong><a class="headerlink" href="#hide_default_completions" title="Permanent link">&para;</a></h3>
+<p>Hide the completions generated by Sublime Text and other plugins.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;hide_default_completions&quot;</span><span class="err">:</span> <span class="kc">false</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="max_cache_age"><strong><code class="codehilite">max_cache_age</code></strong><a class="headerlink" href="#max_cache_age" title="Permanent link">&para;</a></h3>
+<p>Plugin uses smart caching to not load the data for the translation units (TUs)
+more times than needed. To save space we want to clear the unused data, so we
+remove cache data older than specified time.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<ul>
+<li>Minimum value is 30 seconds.</li>
+<li>Format: <code class="codehilite">&lt;hours&gt;:&lt;minutes&gt;:&lt;seconds&gt;: &quot;HH:MM:SS&quot;</code>.</li>
+</ul>
+</div>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;max_cache_age&quot;</span><span class="err">:</span> <span class="s2">&quot;00:30:00&quot;</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="show_type_info"><strong><code class="codehilite">show_type_info</code></strong><a class="headerlink" href="#show_type_info" title="Permanent link">&para;</a></h3>
+<p>Show additional information on hover over function call/variable etc.
+This replaces default sublime on hover behavior.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;show_type_info&quot;</span><span class="err">:</span> <span class="kc">true</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="show_type_body"><strong><code class="codehilite">show_type_body</code></strong><a class="headerlink" href="#show_type_body" title="Permanent link">&para;</a></h3>
+<p>Show body of struct/class/typedef declaration in a tooltip invoked by calling
+info enabled by the setting
+<a href="/#show_type_info"><code class="codehilite">show_type_info</code></a>.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;show_type_body&quot;</span> <span class="err">:</span> <span class="kc">true</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="show_index_references"><strong><code class="codehilite">show_index_references</code></strong><a class="headerlink" href="#show_index_references" title="Permanent link">&para;</a></h3>
+<p>We only can get declarations from clang AST. This can show references to the
+symbol under cursor taking them from Sublime Text index.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;show_index_references&quot;</span><span class="err">:</span> <span class="kc">true</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="libclang_path"><strong><code class="codehilite">libclang_path</code></strong><a class="headerlink" href="#libclang_path" title="Permanent link">&para;</a></h3>
+<p>If the libclang library cannot be found in standard places, the user can
+provide a path to <code class="codehilite">libclang</code>. This path can either be a full path to the
+libclang library, e.g. <code class="codehilite">/usr/lib/libclang.so</code> or a folder that contains
+libclang library, e.g. <code class="codehilite">/usr/lib/</code>. This setting generally should not be
+needed.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;libclang_path&quot;</span><span class="err">:</span> <span class="s2">&quot;&lt;some_path_here&gt;&quot;</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="progress_style"><strong><code class="codehilite">progress_style</code></strong><a class="headerlink" href="#progress_style" title="Permanent link">&para;</a></h3>
+<p>Pick the progress style. There are currently these styles available:</p>
+<ul>
+<li><code class="codehilite">ColorSublime</code> : ⣾⣽⣻⢿⡿⣟⣯⣷</li>
+<li><code class="codehilite">Moon</code>         : 🌑🌒🌓🌔🌕🌖🌗🌘</li>
+<li><code class="codehilite">None</code></li>
+</ul>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;progress_style&quot;</span><span class="err">:</span> <span class="s2">&quot;Moon&quot;</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="use_libclang_caching"><strong><code class="codehilite">use_libclang_caching</code></strong><a class="headerlink" href="#use_libclang_caching" title="Permanent link">&para;</a></h3>
+<p>Controls if <code class="codehilite">libclang</code> caches the results. This works faster, but in rare cases
+can generate wrong completions. Usually it works just fine, so it is <code class="codehilite">true</code> by
+default.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;use_libclang_caching&quot;</span><span class="err">:</span> <span class="kc">true</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<h3 id="header_to_source_mapping"><strong><code class="codehilite">header_to_source_mapping</code></strong><a class="headerlink" href="#header_to_source_mapping" title="Permanent link">&para;</a></h3>
+<p>Templates to find source files for headers in case we use a compilation
+database: Such a DB does not contain the required compile flags for header
+files. In order to find a best matching source file instead, you can use
+templates. Such templates describe how to find (relative to the header file) a
+source file which we can use to get compile flags for. In the simplest case,
+one can just use the (relative) path to where the source files are relative to
+your header file. For example, if your headers are in a subdirectory <code class="codehilite">&quot;inc&quot;</code>
+and your sources in a subdirectory <code class="codehilite">&quot;src&quot;</code> next to the first one, then you can
+use <code class="codehilite">&quot;../src/&quot;</code> as lookup. If needed, you can also use finer granular lookup
+templates by using UNIX style globbing patterns and placeholders. Placeholders
+are of the form <code class="codehilite">&#39;{placeholdername}&#39;</code>. The following placeholders can be used:</p>
+<ul>
+<li><code class="codehilite">basename:</code>  The base file name without the directory part.</li>
+<li><code class="codehilite">stamp:</code>     Like <code class="codehilite">&quot;basename&quot;</code>, but with the file name extension removed.</li>
+<li><code class="codehilite">ext:</code>       The file name extension of the header file.</li>
+</ul>
+<details class="example"><summary>Default header - source mappings <small>(click to expand)</small></summary><div class="codehilite"><pre><span></span><span class="s2">&quot;header_to_source_mapping&quot;</span><span class="err">:</span> <span class="p">[</span>
+    <span class="err">//</span> <span class="err">Look</span> <span class="err">for</span> <span class="err">related</span> <span class="err">files</span> <span class="err">in</span> <span class="err">the</span> <span class="err">header&#39;s</span> <span class="err">directory:</span>
+    <span class="s2">&quot;./&quot;</span><span class="p">,</span>
+
+    <span class="err">//</span> <span class="err">And</span> <span class="err">in</span> <span class="err">the</span> <span class="s2">&quot;src&quot;</span> <span class="err">directory:</span>
+    <span class="s2">&quot;../src/&quot;</span><span class="p">,</span>
+
+    <span class="err">//</span> <span class="err">And</span> <span class="err">in</span> <span class="err">the</span> <span class="s2">&quot;source&quot;</span> <span class="err">directory:</span>
+    <span class="s2">&quot;../source/&quot;</span><span class="p">,</span>
+
+    <span class="err">//</span> <span class="err">Example:</span> <span class="err">Use</span> <span class="err">flags</span> <span class="err">but</span> <span class="err">only</span> <span class="err">from</span> <span class="err">the</span> <span class="err">source</span> <span class="err">file</span>
+    <span class="err">//</span> <span class="err">belonging</span> <span class="err">to</span> <span class="err">the</span> <span class="err">header</span> <span class="err">in</span> <span class="err">question:</span>
+    <span class="err">//</span> <span class="s2">&quot;{stamp}.cpp&quot;</span><span class="p">,</span>
+
+    <span class="err">//</span> <span class="err">Example:</span> <span class="err">Use</span> <span class="err">flags</span> <span class="err">from</span> <span class="err">a</span> <span class="err">file</span> <span class="err">with</span> <span class="err">an</span>
+    <span class="err">//</span> <span class="s2">&quot;exotic&quot;</span> <span class="err">file</span> <span class="err">name</span> <span class="err">suffix:</span>
+    <span class="err">//</span> <span class="err">&quot;</span><span class="p">{</span><span class="err">stamp</span><span class="p">}</span><span class="err">.mycustomext</span>
+<span class="p">]</span><span class="err">,</span>
+</pre></div>
+
+</details>
+<h3 id="target_compilers"><strong><code class="codehilite">target_compilers</code></strong><a class="headerlink" href="#target_compilers" title="Permanent link">&para;</a></h3>
+<p>Controls if we try to retrieve built-in flags from a target compiler. If a
+compiler is not <code class="codehilite">null</code>, we try to ask it for the defines and include paths it
+sets implicitly and pass them to the clang compiler which is used to generate
+the code completion. If your completions require the knowledge about the
+toolchain, this option should improve the quality of the completions, however,
+in some corner cases it might cause completions to fail entirely.</p>
+<div class="admonition example">
+<p class="admonition-title">Default value</p>
+<div class="codehilite"><pre><span></span><span class="s2">&quot;target_compilers&quot;</span><span class="err">:</span> <span class="p">{</span>
+    <span class="nt">&quot;C&quot;</span><span class="p">:</span>              <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;CPP&quot;</span><span class="p">:</span>            <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;OBJECTIVE_C&quot;</span><span class="p">:</span>    <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;OBJECTIVE_CPP&quot;</span><span class="p">:</span>  <span class="kc">null</span>
+<span class="p">}</span><span class="err">,</span>
+</pre></div>
+
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When specifying this setting in your user or project settings make sure to
+keep <strong>ALL</strong> language keys. Otherwise the plugin will show you an error dialog and ask you to specify all of them. Put <code class="codehilite">null</code> for those you don't want to use.</p>
+<details class="example"><summary>Example: set only C/C++ compilers</summary><div class="codehilite"><pre><span></span><span class="s2">&quot;target_compilers&quot;</span><span class="err">:</span> <span class="p">{</span>
+    <span class="nt">&quot;C&quot;</span><span class="p">:</span>              <span class="s2">&quot;gcc&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;CPP&quot;</span><span class="p">:</span>            <span class="s2">&quot;g++&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;OBJECTIVE_C&quot;</span><span class="p">:</span>    <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;OBJECTIVE_CPP&quot;</span><span class="p">:</span>  <span class="kc">null</span>
+<span class="p">}</span><span class="err">,</span>
+</pre></div>
+
+</details>
+</div>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../includes_completion/" title="Complete includes" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Complete includes
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../commands/" title="Available commands" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Available commands
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2015 - 2019 Igor Bogoslavskyi
+          </div>
+        
+        powered by
+        <a href="https://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+  <div class="md-footer-social">
+    <link rel="stylesheet" href="../assets/fonts/font-awesome.css">
+    
+      <a href="https://github.com/niosus" class="md-footer-social__link fa fa-github"></a>
+    
+      <a href="https://www.linkedin.com/in/igor-bogoslavskyi-72650b43/" class="md-footer-social__link fa fa-linkedin"></a>
+    
+  </div>
+
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application.dc02f8ce.js"></script>
+      
+      <script>app.initialize({version:"1.0.4",url:{base:".."}})</script>
+      
+    
+  </body>
+</html>

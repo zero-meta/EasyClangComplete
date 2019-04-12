@@ -201,4 +201,7 @@
     "OBJECTIVE_C":    null,
     "OBJECTIVE_CPP":  null
   },
+
+  // If true, on Windows, the paths will have a '/' too.
+  "force_unix_includes": true,
 }

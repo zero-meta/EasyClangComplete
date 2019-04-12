@@ -492,4 +492,13 @@ in some corner cases it might cause completions to fail entirely.
         },
         ```
 
+### **`force_unix_includes`**
+
+Controls if the paths that we generate while completing the includes will have a `/` or a `\` in them. If `true` will force `/` even on Windows.
+
+!!! example "Default value"
+    ```json
+    "force_unix_includes": true,
+    ```
+
 [subl-proj]: https://www.sublimetext.com/docs/3/projects.html

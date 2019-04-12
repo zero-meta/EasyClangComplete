@@ -68,6 +68,7 @@ class SettingsStorage:
         "cmake_binary",
         "common_flags",
         "flags_sources",
+        "force_unix_includes",
         "gutter_style",
         "header_to_source_mapping",
         "hide_default_completions",

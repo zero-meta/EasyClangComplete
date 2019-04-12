@@ -155,7 +155,7 @@ class SublBridge:
         Returns:
             tuple: (completions, flags)
         """
-        if hide_default_completions:
+        if completions and hide_default_completions:
             log.debug("hiding default completions")
             return (completions, SublBridge.NO_DEFAULT_COMPLETIONS)
         else:

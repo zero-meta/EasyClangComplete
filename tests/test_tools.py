@@ -180,7 +180,6 @@ class test_tools(TestCase):
         """Check that expanding a star at the end of folder works."""
         this_folder = path.dirname(__file__)
         this_folder_with_star = path.join(this_folder, '*')
-        print(this_folder_with_star)
         expanded = Tools.expand_star_wildcard(this_folder_with_star)
         expected_folders = [
             path.join(this_folder, 'c_cpp_properties_files'),
@@ -291,7 +290,7 @@ class test_file(TestCase):
             original_path = "../hello/world.txt"
             folder = "D:\\folder"
             res = File.canonical_path(original_path, folder)
-            self.assertEqual(res, "d:\\hello\\world.txt")
+            self.assertEqual(res, "D:\\hello\\world.txt")
         else:
             original_path = "../hello/world.txt"
             folder = "/folder"
@@ -303,7 +302,7 @@ class test_file(TestCase):
         if platform.system() == "Windows":
             original_path = "D:\\hello\\world.txt"
             res = File.canonical_path(original_path)
-            self.assertEqual(res, "d:\\hello\\world.txt")
+            self.assertEqual(res, "D:\\hello\\world.txt")
         else:
             original_path = "/hello/world.txt"
             res = File.canonical_path(original_path)

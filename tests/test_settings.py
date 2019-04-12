@@ -7,10 +7,13 @@ from os import path
 from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 
 from EasyClangComplete.plugin.settings import settings_manager
+from EasyClangComplete.plugin.utils import flag
 
 imp.reload(settings_manager)
+imp.reload(flag)
 
 SettingsManager = settings_manager.SettingsManager
+Flag = flag.Flag
 
 
 class test_settings(GuiTestWrapper):
@@ -71,5 +74,11 @@ class test_settings(GuiTestWrapper):
         dirs = settings.common_flags
 
         self.assertTrue(len(initial_common_flags) <= len(dirs))
-        self.assertTrue(initial_common_flags[0] in dirs)
-        self.assertFalse(initial_common_flags[1] in dirs)
+
+        reference_flag_0 = Flag.Builder().from_unparsed_string(
+            initial_common_flags[0]).build()
+        self.assertIn(reference_flag_0, dirs)
+
+        reference_flag_1 = Flag.Builder().from_unparsed_string(
+            initial_common_flags[1]).build()
+        self.assertNotIn(reference_flag_1, dirs)

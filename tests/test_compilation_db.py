@@ -6,13 +6,15 @@ from unittest import TestCase
 from EasyClangComplete.plugin.flags_sources import compilation_db
 from EasyClangComplete.plugin import tools
 from EasyClangComplete.plugin.utils import flag
+from EasyClangComplete.plugin.utils import search_scope
 
 imp.reload(compilation_db)
 imp.reload(tools)
 imp.reload(flag)
+imp.reload(search_scope)
 
 CompilationDb = compilation_db.CompilationDb
-SearchScope = tools.SearchScope
+SearchScope = search_scope.TreeSearchScope
 Flag = flag.Flag
 
 

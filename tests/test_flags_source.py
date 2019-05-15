@@ -33,10 +33,10 @@ class TestFlagsSource(TestCase):
                              "-Iblah\n", "-I", "blah", "-I" + folder_to_expand]
         flags = Flag.tokenize_list(initial_str_flags, current_folder)
         expected_blah_path = path.join(current_folder, "blah")
+        self.assertIn(Flag("-I", current_folder, " "), flags)
         self.assertIn(Flag("-I", current_folder), flags)
-        self.assertIn(Flag("-I", current_folder), flags)
-        self.assertIn(Flag("-isystem", current_folder), flags)
-        self.assertIn(Flag("-I", expected_blah_path), flags)
+        self.assertIn(Flag("-isystem", current_folder, " "), flags)
+        self.assertIn(Flag("-I", expected_blah_path, " "), flags)
         self.assertIn(Flag("-I", expected_blah_path), flags)
         self.assertIn(Flag("", "-std=c++11"), flags)
 
@@ -47,5 +47,5 @@ class TestFlagsSource(TestCase):
                 self.assertIn(Flag("-I", child), flags)
 
         self.assertNotIn(Flag("", "-Iblah"), flags)
-        self.assertNotIn(Flag("-I", "blah"), flags)
+        self.assertNotIn(Flag("-I", "blah", " "), flags)
         self.assertNotIn(Flag("", "-isystem" + current_folder), flags)

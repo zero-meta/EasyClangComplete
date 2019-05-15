@@ -16,13 +16,14 @@ class Flag:
                                     second part as an input.
     """
 
-    def __init__(self, prefix, body, separator=' '):
+    def __init__(self, prefix, body, separator=''):
         """Initialize a flag with two parts.
 
         Args:
             prefix (str): Flag's prefix. Can be empty.
             body (str): The body of the flag that combined with the prefix
                 creates the full flag.
+            separator(str): A separator between the prefix and the body.
         """
         self.__body = body
         self.__prefix = prefix
@@ -37,6 +38,11 @@ class Flag:
     def body(self):
         """Body of the flag. Full flag if not separable."""
         return self.__body
+
+    @property
+    def separator(self):
+        """Separator of the flag. Empty if not separable."""
+        return self.__separator
 
     def as_list(self):
         """Return flag as list of its parts."""
@@ -53,7 +59,9 @@ class Flag:
     def __repr__(self):
         """Return flag as a printable string."""
         if self.__prefix:
-            return '({}, {})'.format(self.__prefix, self.__body)
+            return '({}{}{})'.format(self.__prefix,
+                                     self.__separator,
+                                     self.__body)
         return '({})'.format(self.__body)
 
     def __hash__(self):
@@ -64,7 +72,9 @@ class Flag:
 
     def __eq__(self, other):
         """Check if it is equal to another flag."""
-        return self.__prefix == other.prefix and self.__body == other.body
+        return self.__prefix == other.prefix\
+            and self.__body == other.body\
+            and self.__separator == other.separator
 
     @staticmethod
     def tokenize_list(all_split_line, current_folder=''):
@@ -79,17 +89,22 @@ class Flag:
         skip_next_entry = False
         log.debug("Tokenizing: %s", all_split_line)
         for i, entry in enumerate(all_split_line):
+            entry = entry.strip()
             if entry.startswith("#"):
                 continue
             if skip_next_entry:
+                # Previous entry was a separable flag, so this one is its
+                # contents and we have already processed it.
                 skip_next_entry = False
                 continue
             if entry in Flag.SEPARABLE_PREFIXES:
                 # add both this and next part to a flag
                 if (i + 1) < len(all_split_line):
+                    next_entry = all_split_line[i + 1].strip()
                     flags += Flag.Builder()\
-                        .with_prefix(all_split_line[i])\
-                        .with_body(all_split_line[i + 1])\
+                        .with_prefix(entry)\
+                        .with_separator(' ')\
+                        .with_body(next_entry)\
                         .build_with_expansion(current_folder)
                     skip_next_entry = True
                     continue
@@ -105,6 +120,7 @@ class Flag:
             """Initialize the empty internal flag."""
             self.__prefix = ''
             self.__body = ''
+            self.__separator = ''
 
         def from_unparsed_string(self, chunk):
             """Parse an unknown string into body and prefix."""
@@ -112,7 +128,11 @@ class Flag:
             for prefix in Flag.SEPARABLE_PREFIXES:
                 if chunk.startswith(prefix):
                     self.__prefix = prefix
-                    self.__body = chunk[len(prefix):]
+                    rest = chunk[len(prefix):]
+                    if rest and rest[0] in Flag.POSSIBLE_SEPARATORS:
+                        self.__separator = rest[0]
+                        rest = rest[1:]
+                    self.__body = rest.strip()
                     break
             # We did not find any separable prefix, so it's all body.
             if not self.__body:
@@ -122,6 +142,11 @@ class Flag:
         def with_body(self, body):
             """Set the body to the internal flag."""
             self.__body = body.strip()
+            return self
+
+        def with_separator(self, separator):
+            """Set the separator to the internal flag."""
+            self.__separator = separator
             return self
 
         def with_prefix(self, prefix):
@@ -139,16 +164,27 @@ class Flag:
                         input_path=self.__body,
                         wildcard_values=wildcard_values,
                         current_folder=current_folder):
-                    all_flags.append(Flag(self.__prefix, expanded_body))
+                    all_flags.append(Flag(prefix=self.__prefix,
+                                          body=expanded_body,
+                                          separator=self.__separator))
                 return all_flags
             # This does not hold a path. Therefore we don't need to expand it.
-            return [Flag(prefix=self.__prefix, body=self.__body)]
+            return [Flag(prefix=self.__prefix,
+                         body=self.__body,
+                         separator=self.__separator)]
 
         def build(self):
             """Create a flag."""
             if self.__prefix in Flag.PREFIXES_WITH_PATHS:
                 self.__body = File.canonical_path(self.__body)
-            return Flag(self.__prefix, self.__body)
+            return Flag(prefix=self.__prefix,
+                        body=self.__body,
+                        separator=self.__separator)
+
+    POSSIBLE_SEPARATORS = set([
+        " ",
+        "="
+    ])
 
     # All prefixes that denote includes.
     PREFIXES_WITH_PATHS = set([

@@ -151,7 +151,7 @@ class TestCompilationDb(TestCase):
         expected = [Flag('-I', path.normpath('/usr/local/foo')),
                     Flag('-I', path.normpath('/foo/bar/test/include')),
                     Flag('-I', path.normpath('/foo/include')),
-                    Flag('-isystem', path.normpath('/foo/bar/matilda'))]
+                    Flag('-isystem', path.normpath('/foo/bar/matilda'), ' ')]
 
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',

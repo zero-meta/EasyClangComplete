@@ -19,10 +19,11 @@ class TestFlag(TestCase):
         self.assertEqual(flag.prefix, "")
         self.assertEqual(flag.body, "hello")
         self.assertEqual(str(flag), "hello")
-        flag = Flag("hello", "world")
+        flag = Flag("hello", "world", " ")
         self.assertEqual(flag.as_list(), ["hello", "world"])
         self.assertEqual(flag.prefix, "hello")
         self.assertEqual(flag.body, "world")
+        self.assertEqual(flag.separator, " ")
         self.assertEqual(str(flag), "hello world")
 
     def test_hash(self):
@@ -53,9 +54,9 @@ class TestFlag(TestCase):
         split_str = ["-I", "hello", "-Iblah", "-isystem", "world"]
         list_of_flags = Flag.tokenize_list(split_str)
         self.assertTrue(len(list_of_flags), 3)
-        self.assertIn(Flag("-I", "hello"), list_of_flags)
+        self.assertIn(Flag("-I", "hello", " "), list_of_flags)
         self.assertIn(Flag("-I", "blah"), list_of_flags)
-        self.assertIn(Flag("-isystem", "world"), list_of_flags)
+        self.assertIn(Flag("-isystem", "world", " "), list_of_flags)
 
     def test_builder(self):
         """Test tokenizing a list of all split flags."""
@@ -65,3 +66,5 @@ class TestFlag(TestCase):
         self.assertEqual(Flag("", "hello world"), flag2)
         flag3 = Flag.Builder().from_unparsed_string('-Iworld').build()
         self.assertEqual(Flag("-I", "world"), flag3)
+        flag4 = Flag.Builder().from_unparsed_string('-include world').build()
+        self.assertEqual(Flag("-include", "world", " "), flag4)

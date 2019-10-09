@@ -7,9 +7,9 @@ from collections import namedtuple
 from EasyClangComplete.plugin.error_vis import popup_error_vis
 from EasyClangComplete.plugin.settings import settings_manager
 from EasyClangComplete.plugin.settings import settings_storage
-from EasyClangComplete.plugin.popups import popups
-from EasyClangComplete.plugin import view_config
-from EasyClangComplete.plugin import tools
+from EasyClangComplete.plugin.error_vis import popups
+from EasyClangComplete.plugin.view_config import view_config_manager
+from EasyClangComplete.plugin.utils import action_request
 
 from EasyClangComplete.tests import gui_test_wrapper
 
@@ -18,16 +18,16 @@ imp.reload(gui_test_wrapper)
 imp.reload(popup_error_vis)
 imp.reload(settings_manager)
 imp.reload(settings_storage)
-imp.reload(view_config)
+imp.reload(view_config_manager)
 imp.reload(popups)
-imp.reload(tools)
+imp.reload(action_request)
 
-ActionRequest = tools.ActionRequest
+ActionRequest = action_request.ActionRequest
 PopupErrorVis = popup_error_vis.PopupErrorVis
 GuiTestWrapper = gui_test_wrapper.GuiTestWrapper
 SettingsManager = settings_manager.SettingsManager
 SettingsStorage = settings_storage.SettingsStorage
-ViewConfigManager = view_config.ViewConfigManager
+ViewConfigManager = view_config_manager.ViewConfigManager
 Popup = popups.Popup
 
 test_file = namedtuple('test_file', 'name')
@@ -66,10 +66,8 @@ class TestErrorVis:
         settings = manager.settings_for_view(self.view)
         settings.use_libclang = self.use_libclang
 
-        view_config_manager = ViewConfigManager()
-        view_config = view_config_manager.load_for_view(self.view, settings)
-        completer = view_config.completer
-        return completer, settings
+        view_config = ViewConfigManager().load_for_view(self.view, settings)
+        return view_config.completer, settings
 
     def tear_down_completer(self):
         """Tear down a completer for the current view.

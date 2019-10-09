@@ -5,8 +5,9 @@ from os import path
 
 from EasyClangComplete.plugin.settings import settings_manager
 from EasyClangComplete.plugin.settings import settings_storage
-from EasyClangComplete.plugin import view_config
-from EasyClangComplete.plugin import tools
+from EasyClangComplete.plugin.view_config import view_config
+from EasyClangComplete.plugin.view_config import view_config_manager
+from EasyClangComplete.plugin.utils import file
 
 from EasyClangComplete.tests import gui_test_wrapper
 
@@ -14,13 +15,14 @@ imp.reload(gui_test_wrapper)
 imp.reload(settings_manager)
 imp.reload(settings_storage)
 imp.reload(view_config)
-imp.reload(tools)
+imp.reload(view_config_manager)
+imp.reload(file)
 
 SettingsManager = settings_manager.SettingsManager
 ViewConfig = view_config.ViewConfig
-ViewConfigManager = view_config.ViewConfigManager
+ViewConfigManager = view_config_manager.ViewConfigManager
 GuiTestWrapper = gui_test_wrapper.GuiTestWrapper
-File = tools.File
+File = file.File
 
 
 class TestViewConfig(GuiTestWrapper):

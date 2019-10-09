@@ -1,12 +1,12 @@
-Version 6.1.3
+Version 6.2.0
 =============
 
 Improvements and bug fixes:
 ---------------------------
-- Support Clang 9
-- Avoid crashing when expanding an invalid path
-- Allow working with ccache, thanks @maximmenshikov
-- Grammar fixes in docs, thanks @ryanpcmcquen
+- Add linter visualization settings, thanks @oakmountainapps
+- New setting: "linter_mark_style": "outline", see docs
+- Refactor getting default flags from compilers
+- Refactor tools module to aid future extensibility and testability
 
 Support the development!
 ------------------------

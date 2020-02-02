@@ -95,9 +95,11 @@ class CompilerBuiltIns:
                 # We should append these also with -I to avoid errors in g++.
                 include_path = path.normpath(lines[idx].strip())
                 if "framework directory" in include_path:
-                    includes.append('-F' + path.normpath(lines[idx].strip()))
+                    include_path = include_path \
+                        .replace("(framework directory)", "").strip()
+                    includes.append('-F' + include_path)
                 else:
-                    includes.append('-I' + path.normpath(lines[idx].strip()))
+                    includes.append('-I' + include_path)
             return includes
 
         def get_defines(clang_output):

@@ -170,6 +170,7 @@ class ViewConfig(object):
         Returns:
             (Completer, str[]): A completer bundled with flags as str list.
         """
+        import fnmatch
         if not SublBridge.is_valid_view(view):
             log.warning(" no flags for an invalid view %s.", view)
             return (None, [])
@@ -188,7 +189,17 @@ class ViewConfig(object):
             init_flags, lang_flags, common_flags, source_flags)
 
         flags_as_str_list = []
+        log.debug("Appending and filtering flags with ignore patterns: %s",
+                  settings.ignore_flags)
         for flag in flags:
+            ignore_this_flag = False
+            for pattern in settings.ignore_flags:
+                if fnmatch.fnmatch(flag.body, pattern):
+                    log.debug("Ignoring flag: %s", flag)
+                    ignore_this_flag = True
+                    break
+            if ignore_this_flag:
+                continue
             flags_as_str_list += flag.as_list()
 
         include_folders = ViewConfig.__get_include_folders(prefixes, flags)

@@ -338,6 +338,10 @@ class SettingsStorage:
         self._wildcard_values[Wildcards.PROJECT_NAME] = \
             variables.get("project_base_name", "")
 
+        # We need to expand clang binary path *before* we set all wildcards.
+        self.clang_binary = self.__replace_wildcard_if_needed(
+            query=self.clang_binary,
+            expand_globbing=False)[0]
         # get clang version string
         version_str = ClangUtils.get_clang_version_str(self.clang_binary)
         self._wildcard_values[Wildcards.CLANG_VERSION] = version_str

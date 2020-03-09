@@ -1,10 +1,9 @@
-Version 6.2.5
+Version 6.2.6
 =============
 
 Improvements and bug fixes:
 ---------------------------
-This is mostly a dev release that increases test coverage.
-No functionality should be changed on the user side.
+- Fix a bug using the wrong row for showing error popup
 
 💜 this plugin? Consider supporting its development! 💰💸💶
 ------------------------------------------------------------

@@ -30,6 +30,7 @@ from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 from .plugin.utils.subl import subl_bridge
 from .plugin.utils.subl import row_col
+from .plugin.flags_sources import bazel
 
 
 # Reload all modules modules ignoring those that contain the given string.
@@ -54,6 +55,7 @@ ThreadJob = thread_job.ThreadJob
 QuickPanelHandler = quick_panel_handler.QuickPanelHandler
 ActionRequest = action_request.ActionRequest
 ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
+Bazel = bazel.Bazel
 
 log = logging.getLogger("ECC")
 log.setLevel(logging.DEBUG)
@@ -173,6 +175,26 @@ class CleanCmakeCommand(sublime_plugin.TextCommand):
                 shutil.rmtree(temp_proj_dir, ignore_errors=True)
         except KeyError:
             log.debug("Nothing to clean")
+
+
+class GenerateBazelCompDbCommand(sublime_plugin.TextCommand):
+    """Command that generates a compilation database with bazel."""
+
+    def run(self, edit):
+        """Run compdb generation command.
+
+        Find a WORKSPACE file up the directory tree and run the compilation
+        database generation command there.
+        """
+        log.debug("Starting generating compilation database.")
+        if not SublBridge.is_valid_view(self.view):
+            return
+        job = ThreadJob(
+            name=ThreadJob.GENERATE_DB_TAG,
+            function=Bazel.generate_compdb,
+            callback=Bazel.compdb_generated,
+            args=[self.view])
+        EasyClangComplete.thread_pool.new_job(job)
 
 
 class EccShowPopupInfoCommand(sublime_plugin.TextCommand):

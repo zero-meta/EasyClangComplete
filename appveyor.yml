@@ -1,10 +1,8 @@
 environment:
     global:
-        # Your package name
         PACKAGE: "EasyClangComplete"
     matrix:
         - SUBLIME_TEXT_VERSION : "3"
-          PCINSTALL: true
           PYTHON: "C:\\Python36"
           PYTHON_VERSION: 3.6
 
@@ -12,10 +10,10 @@ init:
   - ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
 
 install:
-    - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+    - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%;
     - ps: appveyor DownloadFile "https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/appveyor.ps1"
     - ps: .\appveyor.ps1 "bootstrap" -verbose
-    - ps: if (${env:PCINSTALL} -eq $true) { .\appveyor.ps1 "install_package_control" -verbose }
+    - ps: .\appveyor.ps1 "install_package_control" -verbose
     # install Package Control
     # - ps: .\appveyor.ps1 "install_package_control" -verbose
     - "python --version"
@@ -27,5 +25,3 @@ build: off
 
 test_script:
     - ps: .\appveyor.ps1 "run_tests" -verbose
-    # testing syntax_test files
-    # - ps: .\appveyor.ps1 "run_syntax_tests" -verbose

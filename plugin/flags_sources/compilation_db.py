@@ -11,6 +11,7 @@ from ..utils.flag import Flag
 
 from os import path
 from fnmatch import fnmatch
+from threading import Lock
 
 import logging
 
@@ -33,6 +34,7 @@ class CompilationDb(FlagsSource):
     ALL_TAG = 'all'
 
     _FILE_NAME = "compile_commands.json"
+    _LOCK = Lock()
 
     def __init__(self,
                  include_prefixes,
@@ -147,10 +149,11 @@ class CompilationDb(FlagsSource):
         Returns: dict: A dict that stores a list of flags per view and all
             unique entries for CompilationDb.ALL_TAG entry.
         """
-        import json
+        import yaml
         data = None
         with open(current_db_path) as data_file:
-            data = json.load(data_file)
+            # We load our json file with yaml to allow for trailing commas.
+            data = yaml.load(data_file, Loader=yaml.FullLoader)
         if not data:
             return None
         parsed_db = {}

@@ -11,12 +11,10 @@ matrix:
     include:
     - os: linux
       dist: xenial
-      env: DISTRO="linux"
       sudo: required
       services:
       - xvfb
     - os: osx
-      env: DISTRO="darwin"
       language: generic
 
 before_install:
@@ -53,7 +51,7 @@ deploy:
  local_dir: site
  on:
     branch: master
-    condition: $DISTRO = Ubuntu
+    condition: $TRAVIS_OS_NAME = linux
 
 notifications:
     email: false

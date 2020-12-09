@@ -13,10 +13,10 @@ Hey! It's been a while!
 -----------------------
 There has not been updates for a while and I think it is good. The plugin still
 gets installed often but there is really not that many issues being opened. I
-undestand, however, that not everone will open an issue if something does not
+understand, however, that not everyone will open an issue if something does not
 work.
 
-At this point, I would like to ask you take action:
+At this point, I would like to ask you to take action:
 - If something does not work - please open an issue! It will force me to go
 back to work on this.
 - If everything has been working without much updates: consider supporting this
@@ -25,7 +25,7 @@ any to spare - shoot me an email (or open an issue) and tell about how you use
 the plugin.
 
 At this point, with >35K downloads I feel a bit discouraged by the lack of
-feedback and it is hard to put in work on issues that I don't personnaly
+feedback and it is hard to put in work on issues that I don't personally
 experience after a full day of work. If you appreciate this effort, do show
 your support.
 

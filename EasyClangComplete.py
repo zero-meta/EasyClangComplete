@@ -52,7 +52,8 @@ CMakeFileCache = singleton.CMakeFileCache
 GenericCache = singleton.GenericCache
 ThreadPool = thread_pool.ThreadPool
 ThreadJob = thread_job.ThreadJob
-QuickPanelHandler = quick_panel_handler.QuickPanelHandler
+ErrorQuickPanelHandler = quick_panel_handler.ErrorQuickPanelHandler
+IncludeCompleter = include_parser.IncludeCompleter
 ActionRequest = action_request.ActionRequest
 ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
 Bazel = bazel.Bazel
@@ -114,14 +115,9 @@ class EccShowAllErrorsCommand(sublime_plugin.TextCommand):
             return
         if not config.completer:
             log.error("No Completer for view: %s.", self.view.buffer_id())
-        handler = QuickPanelHandler(self.view, config.completer.latest_errors)
-        start_idx = 0
-        self.view.window().show_quick_panel(
-            handler.items_to_show(),
-            handler.on_done,
-            sublime.MONOSPACE_FONT,
-            start_idx,
-            handler.on_highlighted)
+        window = self.view.window()
+        ErrorQuickPanelHandler(
+            self.view, config.completer.latest_errors).show(window)
 
 
 class EccGotoDeclarationCommand(sublime_plugin.TextCommand):
@@ -145,6 +141,42 @@ class EccGotoDeclarationCommand(sublime_plugin.TextCommand):
             loc += ":" + str(location.column)
             log.debug("Navigating to declaration: %s", loc)
             sublime.active_window().open_file(loc, sublime.ENCODED_POSITION)
+
+
+class EccCompleteIncludesCommand(sublime_plugin.TextCommand):
+    """Handle easy_clang_goto_declaration command."""
+
+    def run(self, edit, opening_char):
+        """Run goto declaration command.
+
+        Navigates to delcaration of entity located by current position
+        of cursor.
+        """
+        def passthrough(view, trigger):
+            """Passthrough a trigger."""
+            return view.run_command("insert", {"characters": trigger})
+
+        if not SublBridge.is_valid_view(self.view):
+            return passthrough(self.view, opening_char)
+        settings = EasyClangComplete.settings_manager.settings_for_view(
+            self.view)
+        if not settings.autocomplete_includes:
+            log.debug("Includes completion disabled.")
+            return passthrough(self.view, opening_char)
+        config_manager = EasyClangComplete.view_config_manager
+        if not config_manager:
+            return passthrough(self.view, opening_char)
+        config = config_manager.get_from_cache(self.view)
+
+        if not config or not config.include_folders:
+            log.error("No ViewConfig for view: %s.", self.view.buffer_id())
+            return passthrough(self.view, opening_char)
+        panel_handler = IncludeCompleter(
+            view=self.view,
+            opening_char=opening_char,
+            thread_pool=EasyClangComplete.thread_pool)
+        panel_handler.start_completion(config.include_folders,
+                                       settings.force_unix_includes)
 
 
 class CleanCmakeCommand(sublime_plugin.TextCommand):
@@ -334,8 +366,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if File.is_ignored(view.file_name(), settings.ignore_list):
             return
         row_col = ZeroIndexedRowCol.from_current_cursor_pos(view)
-        view_config = EasyClangComplete.view_config_manager.get_from_cache(
-            view)
+        view_config = EasyClangComplete.view_config_manager.get_from_cache(view)
         if not view_config:
             return
         if not view_config.completer:
@@ -611,22 +642,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 callback=self.completion_finished,
                 function=config_manager.trigger_completion,
                 args=[view, completion_request])
-            EasyClangComplete.thread_pool.new_job(job)
-        elif pos_status == PosStatus.COMPLETE_INCLUDES:
-            log.debug("Completing includes")
-            # submit async completion job
-            config_manager = EasyClangComplete.view_config_manager
-            view_config = config_manager.get_from_cache(view)
-            include_folders = view_config.include_folders
-            # submit async completion job for getting headers
-            job = ThreadJob(
-                name=ThreadJob.COMPLETE_INCLUDES_TAG,
-                callback=self.completion_finished,
-                function=include_parser.get_all_headers,
-                args=[include_folders,
-                      prefix,
-                      settings.force_unix_includes,
-                      completion_request])
             EasyClangComplete.thread_pool.new_job(job)
 
         # show default completions for now if allowed

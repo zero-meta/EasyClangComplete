@@ -3,16 +3,15 @@
 import logging
 import sublime
 
-from EasyClangComplete.plugin.error_vis.popup_error_vis \
-    import MIN_ERROR_SEVERITY
+from ..error_vis.popup_error_vis import MIN_ERROR_SEVERITY
 
 log = logging.getLogger("ECC")
 
-ENTRY_TEMPLATE = "{type}: {error}"
 
-
-class QuickPanelHandler(object):
+class ErrorQuickPanelHandler():
     """Handle the quick panel."""
+
+    ENTRY_TEMPLATE = "{type}: {error}"
 
     def __init__(self, view, errors):
         """Initialize the object.
@@ -33,16 +32,12 @@ class QuickPanelHandler(object):
                 error_type = 'WARNING'
             contents.append(
                 [
-                    ENTRY_TEMPLATE.format(type=error_type,
-                                          error=error_dict['error']),
+                    ErrorQuickPanelHandler.ENTRY_TEMPLATE.format(
+                        type=error_type,
+                        error=error_dict['error']),
                     error_dict['file']
                 ])
         return contents
-
-    def on_highlighted(self, idx):
-        """Peek into a file upon highlighting the error from it."""
-        log.debug("Navigated to idx: %s", idx)
-        pass
 
     def on_done(self, idx):
         """Pick this error to navigate to a file."""
@@ -57,3 +52,12 @@ class QuickPanelHandler(object):
         return "{file}:{row}:{col}".format(file=picked_entry['file'],
                                            row=picked_entry['row'],
                                            col=picked_entry['col'])
+
+    def show(self, window):
+        """Show the quick panel."""
+        start_idx = 0
+        window.show_quick_panel(
+            self.items_to_show(),
+            self.on_done,
+            sublime.MONOSPACE_FONT,
+            start_idx)

@@ -1,22 +1,26 @@
 """Test c_cpp_properties flags generation."""
 import imp
+import platform
 from os import path, environ
 from unittest import TestCase
 
 from EasyClangComplete.plugin.flags_sources import c_cpp_properties
 from EasyClangComplete.plugin.utils import tools
 from EasyClangComplete.plugin.utils import flag
+from EasyClangComplete.plugin.utils import file
 from EasyClangComplete.plugin.utils import search_scope
 
 
 imp.reload(c_cpp_properties)
 imp.reload(tools)
 imp.reload(flag)
+imp.reload(file)
 imp.reload(search_scope)
 
 CCppProperties = c_cpp_properties.CCppProperties
 SearchScope = search_scope.TreeSearchScope
 Flag = flag.Flag
+File = file.File
 
 
 class TestCCppProperties(TestCase):
@@ -52,10 +56,15 @@ class TestCCppProperties(TestCase):
 
     def test_no_db_in_folder(self):
         """Test if no json is found."""
+        if platform.system() == "Darwin":
+            # This test is disabled as the current path is trying to reach a
+            # network resource on MacOS. I guess we have to deal with this at
+            # some point later.
+            return
         include_prefixes = ['-I']
         db = CCppProperties(include_prefixes)
 
-        flags = db.get_flags(path.normpath('/home/user/dummy_main.cpp'))
+        flags = db.get_flags(File.canonical_path('/home/user/dummy_main.cpp'))
         self.assertTrue(flags is None)
 
     def test_empty_include_and_defines(self):

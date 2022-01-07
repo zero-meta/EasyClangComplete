@@ -1,38 +1,15 @@
 
-
-
-
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
-      <meta http-equiv="x-ua-compatible" content="ie=edge">
       
       
       
-      
-        <meta name="lang:clipboard.copy" content="Copy to clipboard">
-      
-        <meta name="lang:clipboard.copied" content="Copied to clipboard">
-      
-        <meta name="lang:search.language" content="en">
-      
-        <meta name="lang:search.pipeline.stopwords" content="True">
-      
-        <meta name="lang:search.pipeline.trimmer" content="True">
-      
-        <meta name="lang:search.result.none" content="No matching documents">
-      
-        <meta name="lang:search.result.one" content="1 matching document">
-      
-        <meta name="lang:search.result.other" content="# matching documents">
-      
-        <meta name="lang:search.tokenizer" content="[\s\-]+">
-      
-      <link rel="shortcut icon" href="../img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
+      <link rel="icon" href="../img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.4">
     
     
       
@@ -40,98 +17,117 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.3020aac5.css">
-      
-        <link rel="stylesheet" href="../assets/stylesheets/application-palette.224b79ff.css">
-      
+      <link rel="stylesheet" href="../assets/stylesheets/main.bb3983ee.min.css">
       
         
+        <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
         
-        <meta name="theme-color" content="#009688">
+          
+          
+          <meta name="theme-color" content="#009485">
+        
       
-    
-    
-      <script src="../assets/javascripts/modernizr.01ccdecf.js"></script>
-    
-    
-      
-        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
-        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
-      
-    
-    <link rel="stylesheet" href="../assets/fonts/material-icons.css">
     
     
     
       
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
     
     
   </head>
   
-    
-    
-    <body dir="ltr" data-md-color-primary="teal" data-md-color-accent="cyan">
   
-    <svg class="md-svg">
-      <defs>
-        
-        
-      </defs>
-    </svg>
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
-    
-      <a href="#geting-correct-compiler-flags" tabindex="1" class="md-skip">
-        Skip to content
-      </a>
-    
-    
-      <header class="md-header" data-md-component="header">
-  <nav class="md-header-nav md-grid">
-    <div class="md-flex">
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <a href=".." title="EasyClangComplete" class="md-header-nav__button md-logo">
-          
-            <img src="../img/ecc.png" width="24" height="24">
-          
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#geting-correct-compiler-flags" class="md-skip">
+          Skip to content
         </a>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
-      </div>
-      <div class="md-flex__cell md-flex__cell--stretch">
-        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
-          
-            <span class="md-header-nav__topic">
-              EasyClangComplete
-            </span>
-            <span class="md-header-nav__topic">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="EasyClangComplete" class="md-header__button md-logo" aria-label="EasyClangComplete" data-md-component="logo">
+      
+  <img src="../img/ecc.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EasyClangComplete
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
               Configure compiler flags
-            </span>
-          
+            
+          </span>
         </div>
       </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        
-          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
-          
-<div class="md-search" data-md-component="search" role="dialog">
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
-      <label class="md-icon md-search__icon" for="__search"></label>
-      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
-        &#xE5CD;
-      </button>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="result">
+        <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            Type to start searching
+            Initializing search
           </div>
           <ol class="md-search-result__list"></ol>
         </div>
@@ -139,31 +135,36 @@
     </div>
   </div>
 </div>
-        
-      </div>
-      
-    </div>
+    
+    
   </nav>
+  
 </header>
     
-    <div class="md-container">
+    <div class="md-container" data-md-component="container">
+      
       
         
+          
+        
       
-      
-      <main class="md-main">
-        <div class="md-main__inner md-grid" data-md-component="container">
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
           
             
-              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
-                    <nav class="md-nav md-nav--primary" data-md-level="0">
-  <label class="md-nav__title md-nav__title--site" for="__drawer">
-    <a href=".." title="EasyClangComplete" class="md-nav__button md-logo">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="EasyClangComplete" class="md-nav__button md-logo" aria-label="EasyClangComplete" data-md-component="logo">
       
-        <img src="../img/ecc.png" width="48" height="48">
-      
+  <img src="../img/ecc.png" alt="logo">
+
     </a>
     EasyClangComplete
   </label>
@@ -174,12 +175,15 @@
       
       
 
-
-  <li class="md-nav__item">
-    <a href=".." title="Getting started" class="md-nav__link">
-      Getting started
-    </a>
-  </li>
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Getting started
+      </a>
+    </li>
+  
 
     
       
@@ -187,71 +191,80 @@
       
 
   
-
-
-  <li class="md-nav__item md-nav__item--active">
+  
     
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
       
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Configure compiler flags
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Configure compiler flags
-      </label>
-    
-    <a href="./" title="Configure compiler flags" class="md-nav__link md-nav__link--active">
-      Configure compiler flags
-    </a>
-    
+      </a>
       
-<nav class="md-nav md-nav--secondary">
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
   
   
     
   
   
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#all-flag-sources-from-settings-and-external" title="All flag sources from settings and external" class="md-nav__link">
+  <a href="#all-flag-sources-from-settings-and-external" class="md-nav__link">
     All flag sources from settings and external
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#flags-defined-in-settings" title="Flags defined in settings" class="md-nav__link">
+  <a href="#flags-defined-in-settings" class="md-nav__link">
     Flags defined in settings
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#flags-defined-in-external-flags-sources" title="Flags defined in external flags sources" class="md-nav__link">
+  <a href="#flags-defined-in-external-flags-sources" class="md-nav__link">
     Flags defined in external flags sources
   </a>
   
-    <nav class="md-nav">
+    <nav class="md-nav" aria-label="Flags defined in external flags sources">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#using-cmake-recommended" title="Using CMake  (recommended) " class="md-nav__link">
+  <a href="#using-cmake-recommended" class="md-nav__link">
     Using CMake  (recommended) 
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#using-a-compilation-database-compile_commandsjson" title="Using a compilation database compile_commands.json" class="md-nav__link">
+  <a href="#using-a-compilation-database-compile_commandsjson" class="md-nav__link">
     Using a compilation database compile_commands.json
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#using-clang_complete-file" title="Using .clang_complete file" class="md-nav__link">
+  <a href="#using-clang_complete-file" class="md-nav__link">
     Using .clang_complete file
   </a>
   
@@ -263,29 +276,29 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#flags-generated-from-the-compiler" title="Flags generated from the compiler" class="md-nav__link">
+  <a href="#flags-generated-from-the-compiler" class="md-nav__link">
     Flags generated from the compiler
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#configurations-that-require-manual-actions" title="Configurations that require manual actions" class="md-nav__link">
+  <a href="#configurations-that-require-manual-actions" class="md-nav__link">
     Configurations that require manual actions
   </a>
   
-    <nav class="md-nav">
+    <nav class="md-nav" aria-label="Configurations that require manual actions">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#catkin-configuration" title="Catkin configuration" class="md-nav__link">
+  <a href="#catkin-configuration" class="md-nav__link">
     Catkin configuration
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#qt-configuration" title="Qt configuration" class="md-nav__link">
+  <a href="#qt-configuration" class="md-nav__link">
     Qt configuration
   </a>
   
@@ -296,87 +309,102 @@
   
 </li>
       
-      
-      
-      
-      
     </ul>
   
 </nav>
-    
-  </li>
+      
+    </li>
+  
 
     
       
       
       
 
-
-  <li class="md-nav__item">
-    <a href="../includes_completion/" title="Complete includes" class="md-nav__link">
-      Complete includes
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../settings/" title="Full settings guide" class="md-nav__link">
-      Full settings guide
-    </a>
-  </li>
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../includes_completion/" class="md-nav__link">
+        Complete includes
+      </a>
+    </li>
+  
 
     
       
       
       
 
-
-  <li class="md-nav__item">
-    <a href="../commands/" title="Available commands" class="md-nav__link">
-      Available commands
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../about/" title="About me" class="md-nav__link">
-      About me
-    </a>
-  </li>
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings/" class="md-nav__link">
+        Full settings guide
+      </a>
+    </li>
+  
 
     
       
       
       
 
-
-  <li class="md-nav__item">
-    <a href="../credits/" title="Credits" class="md-nav__link">
-      Credits
-    </a>
-  </li>
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../commands/" class="md-nav__link">
+        Available commands
+      </a>
+    </li>
+  
 
     
       
       
       
 
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About me
+      </a>
+    </li>
+  
 
-  <li class="md-nav__item">
-    <a href="../support/" title="Support this project" class="md-nav__link">
-      Support this project
-    </a>
-  </li>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../credits/" class="md-nav__link">
+        Credits
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../support/" class="md-nav__link">
+        Support this project
+      </a>
+    </li>
+  
 
     
   </ul>
@@ -386,57 +414,63 @@
               </div>
             
             
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
-<nav class="md-nav md-nav--secondary">
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
   
   
     
   
   
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#all-flag-sources-from-settings-and-external" title="All flag sources from settings and external" class="md-nav__link">
+  <a href="#all-flag-sources-from-settings-and-external" class="md-nav__link">
     All flag sources from settings and external
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#flags-defined-in-settings" title="Flags defined in settings" class="md-nav__link">
+  <a href="#flags-defined-in-settings" class="md-nav__link">
     Flags defined in settings
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#flags-defined-in-external-flags-sources" title="Flags defined in external flags sources" class="md-nav__link">
+  <a href="#flags-defined-in-external-flags-sources" class="md-nav__link">
     Flags defined in external flags sources
   </a>
   
-    <nav class="md-nav">
+    <nav class="md-nav" aria-label="Flags defined in external flags sources">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#using-cmake-recommended" title="Using CMake  (recommended) " class="md-nav__link">
+  <a href="#using-cmake-recommended" class="md-nav__link">
     Using CMake  (recommended) 
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#using-a-compilation-database-compile_commandsjson" title="Using a compilation database compile_commands.json" class="md-nav__link">
+  <a href="#using-a-compilation-database-compile_commandsjson" class="md-nav__link">
     Using a compilation database compile_commands.json
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#using-clang_complete-file" title="Using .clang_complete file" class="md-nav__link">
+  <a href="#using-clang_complete-file" class="md-nav__link">
     Using .clang_complete file
   </a>
   
@@ -448,29 +482,29 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#flags-generated-from-the-compiler" title="Flags generated from the compiler" class="md-nav__link">
+  <a href="#flags-generated-from-the-compiler" class="md-nav__link">
     Flags generated from the compiler
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#configurations-that-require-manual-actions" title="Configurations that require manual actions" class="md-nav__link">
+  <a href="#configurations-that-require-manual-actions" class="md-nav__link">
     Configurations that require manual actions
   </a>
   
-    <nav class="md-nav">
+    <nav class="md-nav" aria-label="Configurations that require manual actions">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#catkin-configuration" title="Catkin configuration" class="md-nav__link">
+  <a href="#catkin-configuration" class="md-nav__link">
     Catkin configuration
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#qt-configuration" title="Qt configuration" class="md-nav__link">
+  <a href="#qt-configuration" class="md-nav__link">
     Qt configuration
   </a>
   
@@ -481,10 +515,6 @@
   
 </li>
       
-      
-      
-      
-      
     </ul>
   
 </nav>
@@ -493,12 +523,12 @@
               </div>
             
           
-          <div class="md-content">
+          <div class="md-content" data-md-component="content">
             <article class="md-content__inner md-typeset">
               
                 
-                
-                <h1 id="geting-correct-compiler-flags">Geting correct compiler flags<a class="headerlink" href="#geting-correct-compiler-flags" title="Permanent link">&para;</a></h1>
+
+<h1 id="geting-correct-compiler-flags">Geting correct compiler flags<a class="headerlink" href="#geting-correct-compiler-flags" title="Permanent link">&para;</a></h1>
 <p>There are multiple options to configure the plugin in such a way that
 everything works without major pain. This document outlines all these ways.</p>
 <div class="admonition tip">
@@ -509,7 +539,7 @@ everything works without major pain. This document outlines all these ways.</p>
 <p>There are three major sources for flags:</p>
 <ol>
 <li>Flags defined in settings of ECC.</li>
-<li>Flags generated from a flag source defined in <code class="codehilite">flags_sources</code>
+<li>Flags generated from a flag source defined in <code>flags_sources</code>
    <a href="../settings/#flags_sources">settings</a>.</li>
 <li>Flags generated from the compiler.</li>
 </ol>
@@ -524,69 +554,65 @@ instead. It will save you enormous amounts of time configuring the needed
 include flags. However, if you know what you're doing, the main sources of
 flags in settings:</p>
 <ul>
-<li>Flags defined in the <code class="codehilite">common_flags</code> <a href="../settings/#common_flags">setting</a> -
+<li>Flags defined in the <code>common_flags</code> <a href="../settings/#common_flags">setting</a> -
   flags added to <strong>each</strong> compilation of every file. See the link for an
   example.</li>
-<li>Flags defined in the <code class="codehilite">lang_flags</code> <a href="../settings/#lang_flags">setting</a> - flags
-  added to each compilation in addition to the <code class="codehilite">common_flags</code> but only for a
+<li>Flags defined in the <code>lang_flags</code> <a href="../settings/#lang_flags">setting</a> - flags
+  added to each compilation in addition to the <code>common_flags</code> but only for a
   specific language.</li>
 </ul>
 <h2 id="flags-defined-in-external-flags-sources">Flags defined in external flags sources<a class="headerlink" href="#flags-defined-in-external-flags-sources" title="Permanent link">&para;</a></h2>
 <h3 id="using-cmake-recommended">Using CMake <small> (recommended) </small><a class="headerlink" href="#using-cmake-recommended" title="Permanent link">&para;</a></h3>
-<p>EasyClangComplete can search for <code class="codehilite">CMakeLists.txt</code> and generate a
-<code class="codehilite">compile_commands.json</code> file from it. See next
+<p>EasyClangComplete can search for <code>CMakeLists.txt</code> and generate a
+<code>compile_commands.json</code> file from it. See next
 <a href="#using-a-compilation-database-compile_commandsjson">section</a> for details on
 how this file is parsed.</p>
-<p>To use <code class="codehilite">CMake</code> way of generating flags, make sure you set the <code class="codehilite">&quot;flags_sources&quot;</code>
+<p>To use <code>CMake</code> way of generating flags, make sure you set the <code>"flags_sources"</code>
 in your settings. See how to set this setting correctly
 <a href="../settings/#flags_sources">here</a>.</p>
-<h3 id="using-a-compilation-database-compile_commandsjson">Using a compilation database <small><code class="codehilite">compile_commands.json</code></small><a class="headerlink" href="#using-a-compilation-database-compile_commandsjson" title="Permanent link">&para;</a></h3>
+<h3 id="using-a-compilation-database-compile_commandsjson">Using a compilation database <small><code>compile_commands.json</code></small><a class="headerlink" href="#using-a-compilation-database-compile_commandsjson" title="Permanent link">&para;</a></h3>
 <p>This file defines the flags per target (read more about it
 <a href="https://clang.llvm.org/docs/JSONCompilationDatabase.html">here</a>). When this
 file is found, EasyClangComplete reads it and finds appropriate target given
 the file which is currently opened by the user.</p>
-<details class="example"><summary>Example <code class="codehilite">compile_commands.json</code> file <small>(click to expand)</small></summary><div class="superfences-tabs">
-<input name="__tabs_1" type="radio" id="__tab_1_0" checked="checked" />
-<label for="__tab_1_0">compile_commands.json</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="p">[</span>
-    <span class="p">{</span>
-      <span class="nt">&quot;directory&quot;</span><span class="p">:</span> <span class="s2">&quot;/main_dir&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;/usr/bin/c++    -I/lib_include_dir    -o CMakeFiles/main_obj.o -c /home/user/dummy_main.cpp&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;/home/user/dummy_main.cpp&quot;</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-      <span class="nt">&quot;directory&quot;</span><span class="p">:</span> <span class="s2">&quot;/lib_dir&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;/usr/bin/c++   -Dlib_EXPORTS  -fPIC   -o CMakeFiles/lib_obj.o -c /home/user/dummy_lib.cpp&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;/home/user/dummy_lib.cpp&quot;</span>
-    <span class="p">}</span>
-<span class="p">]</span>
-</pre></div></div>
-</div>
+<details class="example">
+<summary>Example <code>compile_commands.json</code> file <small>(click to expand)</small></summary>
+<p><code>json tab="compile_commands.json"
+[
+    {
+      "directory": "/main_dir",
+      "command": "c++    -I/lib_include_dir    -o CMakeFiles/main_obj.o -c /home/user/dummy_main.cpp",
+      "file": "/home/user/dummy_main.cpp"
+    },
+    {
+      "directory": "/lib_dir",
+      "command": "c++   -Dlib_EXPORTS  -fPIC   -o CMakeFiles/lib_obj.o -c /home/user/dummy_lib.cpp",
+      "file": "/home/user/dummy_lib.cpp"
+    }
+]</code></p>
 </details>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
-<p>The <code class="codehilite">compile_commands.json</code> does not contain header files. To complete
+<p>The <code>compile_commands.json</code> does not contain header files. To complete
 header files we need to map them to an appropriate source file. By default,
 the plugin will try to search for the source file with matching name in the
 same folder as the header file. If this is not enough, use the setting
-<code class="codehilite">header_to_source_mapping</code>
+<code>header_to_source_mapping</code>
 (<a href="../settings/#header_to_source_mapping">details</a>)
 in order to define a better mapping from header files to source ones.</p>
 </div>
-<h3 id="using-clang_complete-file">Using <code class="codehilite"><span class="na">.clang_complete</span></code> file<a class="headerlink" href="#using-clang_complete-file" title="Permanent link">&para;</a></h3>
-<p>This is a simple text file where each line defines a single flag. Don't forget, that you must specify the flags fully here. The paths that are not absolute will be expanded from the location of the <code class="codehilite"><span class="na">.clang_complete</span></code> file. The same wildcards as in <a href="../settings/#common-path-wildcards">settings</a> can be used here too.</p>
-<details class="example"><summary>Example <code class="codehilite"><span class="na">.clang_complete</span></code> file <small>(click to expand)</small></summary><div class="superfences-tabs">
-<input name="__tabs_2" type="radio" id="__tab_2_0" checked="checked" />
-<label for="__tab_2_0">.clang_complete</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span>-I~.config/sublime-text-3/Packages/EasyClangComplete/src
+<h3 id="using-clang_complete-file">Using <code>.clang_complete</code> file<a class="headerlink" href="#using-clang_complete-file" title="Permanent link">&para;</a></h3>
+<p>This is a simple text file where each line defines a single flag. Don't forget, that you must specify the flags fully here. The paths that are not absolute will be expanded from the location of the <code>.clang_complete</code> file. The same wildcards as in <a href="../settings/#common-path-wildcards">settings</a> can be used here too.</p>
+<details class="example">
+<summary>Example <code>.clang_complete</code> file <small>(click to expand)</small></summary>
+<p><code>tab=".clang_complete"
+-I~.config/sublime-text-3/Packages/EasyClangComplete/src
 -I~.config/sublime-text-3/Packages/EasyClangComplete
 -Ilocal_folder
 -Wabi
--std=c++14
-</pre></div></div>
-</div>
-<p>The first two lines will have <code class="codehilite">~</code> expanded to your home directory,
-<code class="codehilite">local_folder</code> will be appended to the location of the <code class="codehilite"><span class="na">.clang_complete</span></code>
+-std=c++14</code></p>
+<p>The first two lines will have <code>~</code> expanded to your home directory,
+<code>local_folder</code> will be appended to the location of the <code>.clang_complete</code>
 file, other flags will be keps intact.</p>
 </details>
 <h2 id="flags-generated-from-the-compiler">Flags generated from the compiler<a class="headerlink" href="#flags-generated-from-the-compiler" title="Permanent link">&para;</a></h2>
@@ -599,67 +625,66 @@ to read more about them.</p>
 <h2 id="configurations-that-require-manual-actions">Configurations that require manual actions<a class="headerlink" href="#configurations-that-require-manual-actions" title="Permanent link">&para;</a></h2>
 <p>Some configurations cannot be configured without the knowledge that only the end user has. These usually include cases when the code generates files that must be included for proper code completions or when additional paths need to be provided to CMake when it is used as part of some other tool.</p>
 <p>Below we will provide a list of the ones most commonly used.</p>
-<details class="note"><summary>Catkin setup <small>(click to expand)</small></summary><h3 id="catkin-configuration">Catkin configuration<a class="headerlink" href="#catkin-configuration" title="Permanent link">&para;</a></h3>
+<details class="note">
+<summary>Catkin setup <small>(click to expand)</small></summary>
+<h3 id="catkin-configuration">Catkin configuration<a class="headerlink" href="#catkin-configuration" title="Permanent link">&para;</a></h3>
 <p>For those using Catkin (e.g. when developing with
 <a href="http://www.ros.org">ROS</a>) the plugin will configure the needed settings
 automatically if you are using Sublime Text projects. Here is a summary of
 what the plugin does for you. By default when running Sublime Text from GUI
-it knows nothing about the paths set in <code class="codehilite"><span class="na">.bashrc</span></code> of your system and
-therefore it cannot source your <code class="codehilite">devel</code> workspaces for you. Essentially
+it knows nothing about the paths set in <code>.bashrc</code> of your system and
+therefore it cannot source your <code>devel</code> workspaces for you. Essentially
 sourcing the workspaces extends paths that Catkin uses to pass to CMake. So
-the plugin needs to update the <code class="codehilite">CMAKE_PREFIX_PATH</code> manually to be able to
-find <code class="codehilite">catkin</code>. Your <code class="codehilite">*.sublime-project</code> will look something like this after
+the plugin needs to update the <code>CMAKE_PREFIX_PATH</code> manually to be able to
+find <code>catkin</code>. Your <code>*.sublime-project</code> will look something like this after
 the configuration:</p>
-<div class="superfences-tabs">
-<input name="__tabs_3" type="radio" id="__tab_3_0" checked="checked" />
-<label for="__tab_3_0">*.sublime-project</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="s2">&quot;ecc_flags_sources&quot;</span><span class="err">:</span> <span class="p">[</span>
-    <span class="p">{</span>
-      <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;CMakeLists.txt&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;prefix_paths&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;/opt/ros/indigo&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;~/catkin_ws/devel&quot;</span> <span class="p">]</span>
-    <span class="p">},</span>
-<span class="p">]</span>
-</pre></div></div>
-</div>
+<p><code>json tab="*.sublime-project"
+"ecc_flags_sources": [
+    {
+      "file": "CMakeLists.txt",
+      "prefix_paths": [ "/opt/ros/indigo",
+                        "~/catkin_ws/devel" ]
+    },
+]</code></p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>This will only work if you are using Sublime Text projects with your
 code. Otherwise no configuration will take place and the proper
 compiler flags will <strong>NOT</strong> be generated. You can set these settings
-also in yout <strong>User</strong> settings dropping the <code class="codehilite">ecc_</code> prefix, but this is
+also in yout <strong>User</strong> settings dropping the <code>ecc_</code> prefix, but this is
 not a recommended.</p>
 </div>
 </details>
-<details class="note"><summary>Qt setup <small>(click to expand)</small></summary><h3 id="qt-configuration">Qt configuration<a class="headerlink" href="#qt-configuration" title="Permanent link">&para;</a></h3>
+<details class="note">
+<summary>Qt setup <small>(click to expand)</small></summary>
+<h3 id="qt-configuration">Qt configuration<a class="headerlink" href="#qt-configuration" title="Permanent link">&para;</a></h3>
 <p>If you use Sublime Text for your Qt development and you use MOC files, you
 will need some additional setup. MOC generates header and source files from
-your <code class="codehilite">*.ui</code> files. These files are generated in the build folder of your
+your <code>*.ui</code> files. These files are generated in the build folder of your
 project. As ECC uses a custom temporary location for your projects' CMake
 configuration it does not know about the real build location for your code
 (we might change this in the future, but this is the state for now). You
 will need to provide the build folder location in your flags.</p>
-<p>The best way to do this is to modify the <code class="codehilite">ecc_common_flags</code> setting in your
-Sublime Text project file (<code class="codehilite">*.sublime-project</code>). You will need to add a new
+<p>The best way to do this is to modify the <code>ecc_common_flags</code> setting in your
+Sublime Text project file (<code>*.sublime-project</code>). You will need to add a new
 include flag with the path to your build folder.</p>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
-<p>For the sake of example let's consider that your project <code class="codehilite">my_project</code>
-gets built in a folder <code class="codehilite">~/YourBuildFolder/my_project</code>. Also, your code
-lies in <code class="codehilite">src</code> folder within the project. Then you will want to add the
+<p>For the sake of example let's consider that your project <code>my_project</code>
+gets built in a folder <code>~/YourBuildFolder/my_project</code>. Also, your code
+lies in <code>src</code> folder within the project. Then you will want to add the
 following include to your settings:</p>
-<div class="codehilite"><pre><span></span><span class="p">{</span>
-    <span class="nt">&quot;settings&quot;</span><span class="p">:</span>
-    <span class="p">{</span>
-        <span class="nt">&quot;ecc_common_flags&quot;</span><span class="p">:</span>
-        <span class="p">[</span>
-            <span class="err">//</span> <span class="err">Don&#39;t</span> <span class="err">forget</span> <span class="err">your</span> <span class="err">other</span> <span class="err">includes!</span>
-            <span class="s2">&quot;-I~/YourBuildFolder/$project_name/src&quot;</span>
-        <span class="p">],</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;ecc_common_flags&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="err">//</span><span class="w"> </span><span class="err">Do</span><span class="kc">n</span><span class="err">&#39;</span><span class="kc">t</span><span class="w"> </span><span class="kc">f</span><span class="err">orge</span><span class="kc">t</span><span class="w"> </span><span class="err">your</span><span class="w"> </span><span class="err">o</span><span class="kc">t</span><span class="err">her</span><span class="w"> </span><span class="err">i</span><span class="kc">n</span><span class="err">cludes!</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;-I~/YourBuildFolder/$project_name/src&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <p>This way ECC will add this path as an include path when compiling your
 code and will be able to find the header files generated by the MOC
 system.</p>
@@ -667,7 +692,7 @@ system.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip: use wildcards!</p>
 <p>Configuration is much easier if you use the available wildcards such as
-the <code class="codehilite">$project_name</code> seen in the example above. For a full list of
+the <code>$project_name</code> seen in the example above. For a full list of
 available wildcards, see the
 <a href="../settings/#common-path-wildcards">wildcards</a> section on the settings
 page.</p>
@@ -681,98 +706,107 @@ using a cached version of the flags.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>In my experience, the setting
-<code class="codehilite">ecc_use_target_compiler_built_in_flags</code> sometimes interferes with
+<code>ecc_use_target_compiler_built_in_flags</code> sometimes interferes with
 properly building Qt projects. So I recommend setting it to false:</p>
-<div class="codehilite"><pre><span></span><span class="s2">&quot;ecc_use_target_compiler_built_in_flags&quot;</span><span class="err">:</span> <span class="kc">false</span><span class="err">,</span>
-</pre></div>
-
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;ecc_use_target_compiler_built_in_flags&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+</code></pre></div>
 </div>
 </details>
-                
-                  
-                
-              
-              
-                
-
 
               
             </article>
           </div>
         </div>
+        
       </main>
       
-        
-<footer class="md-footer">
+        <footer class="md-footer">
   
-    <div class="md-footer-nav">
-      <nav class="md-footer-nav__inner md-grid">
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
         
-          <a href=".." title="Getting started" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
-            </div>
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
-                <span class="md-footer-nav__direction">
-                  Previous
-                </span>
-                Getting started
+        <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: Getting started" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
               </span>
+              Getting started
             </div>
-          </a>
+          </div>
+        </a>
+      
+      
         
-        
-          <a href="../includes_completion/" title="Complete includes" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
-                <span class="md-footer-nav__direction">
-                  Next
-                </span>
-                Complete includes
+        <a href="../includes_completion/" class="md-footer__link md-footer__link--next" aria-label="Next: Complete includes" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
               </span>
+              Complete includes
             </div>
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
-            </div>
-          </a>
-        
-      </nav>
-    </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
-      <div class="md-footer-copyright">
-        
-          <div class="md-footer-copyright__highlight">
-            Copyright &copy; 2015 - 2019 Igor Bogoslavskyi
-          </div>
-        
-        powered by
-        <a href="https://www.mkdocs.org">MkDocs</a>
-        and
-        <a href="https://squidfunk.github.io/mkdocs-material/">
-          Material for MkDocs</a>
-      </div>
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2015 - 2020 Igor Bogoslavskyi
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
       
-  <div class="md-footer-social">
-    <link rel="stylesheet" href="../assets/fonts/font-awesome.css">
+        <div class="md-social">
+  
     
-      <a href="https://github.com/niosus" class="md-footer-social__link fa fa-github"></a>
     
-      <a href="https://www.linkedin.com/in/igor-bogoslavskyi-72650b43/" class="md-footer-social__link fa fa-linkedin"></a>
+      
+      
     
-  </div>
-
+    <a href="https://github.com/niosus" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/in/igor-bogoslavskyi-72650b43/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
       
     </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.361d90f1.min.js"}</script>
     
-      <script src="../assets/javascripts/application.dc02f8ce.js"></script>
-      
-      <script>app.initialize({version:"1.0.4",url:{base:".."}})</script>
+    
+      <script src="../assets/javascripts/bundle.289a2a4b.min.js"></script>
       
     
   </body>
